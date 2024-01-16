@@ -1,0 +1,288 @@
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame; pygame.init()
+    from pygame.locals import *
+    
+import os
+import json
+from tkinter.filedialog import asksaveasfile, askopenfilename
+
+from scripts.config.SETTINGS import TILE_SIZE, WIDTH, HEIGHT, Z_LAYERS, LOADED_SPRITE_NUMBER
+from scripts.config.CORE_FUNCS import euclidean_distance
+from scripts.world_loading.nature_tiles import Grass
+from scripts.world_loading.light_tiles import Torch
+
+    ##############################################################################################
+
+#collision detection stuff
+NEIGHBOUR_OFFSETS = [
+    (-1, -1),
+    (-1, 0),
+    (0, -1),
+    (1, -1),
+    (1, 0),
+    (0, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1)
+]
+
+#tile groups
+PHYSICS_TILES = {'grass', 'stone'}
+INVISIBLE_TILES = {'spawner'}
+COLLIDEABLE_OFFGRID = {'grass'}
+
+#auto tiling group and settings associating every neighbour hile
+AUTO_TILE_TYPES = {'grass', 'stone'}
+AUTO_TILE_MAP = {
+    tuple(sorted([(1, 0), (0, 1)])): 0,
+    tuple(sorted([(1, 0), (0, 1), (-1, 0)])): 1,
+    tuple(sorted([(-1, 0), (0, 1)])): 2, 
+    tuple(sorted([(-1, 0), (0, -1), (0, 1)])): 3,
+    tuple(sorted([(-1, 0), (0, -1)])): 4,
+    tuple(sorted([(-1, 0), (0, -1), (1, 0)])): 5,
+    tuple(sorted([(1, 0), (0, -1)])): 6,
+    tuple(sorted([(1, 0), (0, -1), (0, 1)])): 7,
+    tuple(sorted([(1, 0), (-1, 0), (0, 1), (0, -1)])): 8,
+}
+
+    ##############################################################################################
+
+class Tilemap:
+    def __init__(self, game, tile_size = TILE_SIZE, editor_flag = False):
+        self.game = game
+
+        self.tile_size = tile_size
+        self.tile_map = {} #all actual block tiles
+        self.offgrid_tiles = [] #all decor tiles
+
+        self.editor_flag = editor_flag
+
+        ######################################################################################
+
+    #auto tiles (idk how it works either just does)
+    def auto_tile(self):
+        for loc in self.tile_map:
+            tile = self.tile_map[loc]
+            neighbours = set()
+            for shift in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                check_loc = str(tile.pos[0] + shift[0]) + ';' + str(tile.pos[1] + shift[1])
+                if check_loc in self.tile_map:
+                    if self.tile_map[check_loc].type == tile.type:
+                        neighbours.add(shift)
+
+            neighbours = tuple(sorted(neighbours))
+            if tile.type in AUTO_TILE_TYPES and neighbours in AUTO_TILE_MAP:
+                tile.variant = AUTO_TILE_MAP[neighbours]
+
+    #save the tilemap as a json file
+    def save(self):
+        f = asksaveasfile(
+            filetypes=[('JSON File', ".json")], 
+            defaultextension=".json",
+            initialdir="level_data"
+        )
+        if f:
+            json.dump({
+                    'tilemap' : {key:item.dict for key, item in self.tile_map.items()}, 
+                    'tile_size' : self.tile_size, 
+                    'offgrid' : [item.dict for item in self.offgrid_tiles]
+                }, 
+                f,
+                indent=4)
+            print("Saved to", f.name)
+
+    #open and load a previously saved tilemap.json
+    def load(self, path: str=None):
+        if path == None:
+            f = askopenfilename(
+                title="Open existing level data...",
+                initialdir="level_data",
+                filetypes=[('JSON File', ".json")]
+            )
+        else:
+            f = path
+
+        try:
+            with open(f, 'r') as file:
+                data = json.load(file)
+        except FileNotFoundError as err:
+            raise FileNotFoundError(err)
+        except:
+            return
+
+        self.tile_map = {}
+        for dic in data['tilemap']:
+            self.tile_map[dic] = Tile(
+                data['tilemap'][dic]['type'],
+                data['tilemap'][dic]['pos'],
+                data['tilemap'][dic]['variant'],
+            )
+
+        self.offgrid_tiles = []
+        for tile in data['offgrid']:
+            to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
+            self.offgrid_tiles.append(to_add)
+        self.tile_size = data['tile_size']
+
+        ######################################################################################
+        
+    #list of tiles currently around the player
+    def tiles_around(self, pos):
+        tiles = []
+        tile_loc = (int(pos[0] // self.tile_size), int(pos[1] // self.tile_size))
+        for offset in NEIGHBOUR_OFFSETS:
+            check_loc = f"{str(tile_loc[0] + offset[0])};{str(tile_loc[1] + offset[1])}"
+            if check_loc in self.tile_map:
+                tiles.append(self.tile_map[check_loc])
+        return tiles
+    
+    #list of tiles currently around the player that are collide-able
+    def physics_rects_around(self, pos):
+        rects = []
+        for tile in self.tiles_around(pos):
+            if tile.type in PHYSICS_TILES:
+                rects.append(pygame.Rect(tile.pos[0] * self.tile_size, tile.pos[1] * self.tile_size, self.tile_size, self.tile_size))
+        return rects
+    
+    def collideable_offgrid_around(self, hitbox: pygame.Rect):
+        tiles = []
+        for tile in self.offgrid_tiles:
+            if tile.type in COLLIDEABLE_OFFGRID:
+                # if tile.type == 'grass':
+                #     pass
+                if pygame.Rect(
+                        hitbox.x - self.game.offset.x, hitbox.y - self.game.offset.y, *hitbox.size
+                    ).colliderect(tile.hitbox(self.game.offset)):
+                    tiles.append(tile)
+        return tiles
+
+        ######################################################################################
+
+    def render_tiles(self, offset):
+        for x in range(int(offset.x // (self.tile_size)), int((offset.x + self.game.screen.get_width()) // self.tile_size) + 1):
+            for y in range(int(offset.y // (self.tile_size)), int((offset.y + self.game.screen.get_height()) // self.tile_size) + 1):
+                loc = f"{x};{y}"
+                if loc in self.tile_map:
+                    tile: Tile = self.tile_map[loc]
+
+                    if tile.type not in INVISIBLE_TILES or self.editor_flag == True:
+                        yield tile
+                    else:
+                        continue
+
+    def render_offgrid(self, offset):
+        for tile in self.offgrid_tiles:
+            if (offset.x - TILE_SIZE < tile.pos[0] < offset.x + WIDTH and
+                offset.y - TILE_SIZE < tile.pos[1] < offset.y + HEIGHT):
+                # tile.draw(screen, offset)
+                yield tile
+
+    ##############################################################################################
+
+class Tile:
+
+    @classmethod
+    def cache_sprites(cls):
+        global LOADED_SPRITE_NUMBER
+        Tile.SPRITES = {}
+        BASE_TILE_PATH = 'assets/tiles/'
+
+        for img_name in os.listdir(BASE_TILE_PATH):
+            images = []
+            for name in sorted(os.listdir(BASE_TILE_PATH + img_name)):
+                img = pygame.transform.scale(
+                    pygame.image.load(BASE_TILE_PATH + img_name + '/' + name).convert_alpha(),
+                    (TILE_SIZE, TILE_SIZE)
+                )
+                img.set_colorkey((0, 0, 0))
+                images.append(img)
+
+            Tile.SPRITES[img_name] = images
+            # for spr in Tile.SPRITES[img_name]:
+            #     spr.set_colorkey((0, 0, 0))
+            yield
+
+        ######################################################################################
+
+    def __init__(self, type, pos, variant=1):
+        self.type = type #tile type e.g. grass
+        self.variant = variant #tile variant e.g. grass_8
+        self.pos = pos
+        self.z = Z_LAYERS["tiles"]
+
+    #dictionary object used for json saving
+    @property
+    def dict(self):
+        return {"type":self.type, "variant":self.variant, "pos":self.pos}
+    
+    #actually draw it onto the screen
+    def update(self, screen, offset):
+        # print(self.pos, "*")
+        img = Tile.SPRITES[self.type][self.variant]
+        screen.blit(img, [
+            (self.pos[0] * TILE_SIZE) - offset.x, 
+            (self.pos[1] * TILE_SIZE) - offset.y
+        ])
+
+
+class Offgrid_Tile:
+
+    MIDGROUND_OFFGRID = {'grass'}
+    FOREGROUND_OFFGRID = {'torch'}
+
+    #same caching system as Tile
+    @classmethod
+    def cache_sprites(cls):
+        Offgrid_Tile.SPRITES = {}
+        BASE_TILE_PATH = 'assets/offgrid_tiles/'
+        
+        for img_name in os.listdir(BASE_TILE_PATH):
+            imgs = []
+            for name in sorted(os.listdir(BASE_TILE_PATH + img_name)):
+                img = pygame.image.load(BASE_TILE_PATH + img_name + '/' + name).convert_alpha()
+                img.set_colorkey((0, 0, 0))
+                imgs.append(img)
+
+            Offgrid_Tile.SPRITES[img_name] = imgs
+            yield 
+
+    #just wanted a fancy match statement rather than if
+    @staticmethod
+    def get_offgrid_tile(type, pos, variant, editor_flag = False):
+        if editor_flag:
+            tile = Offgrid_Tile(type, pos, variant)
+            tile.z = Z_LAYERS["foreground offgrid"]
+            return tile
+        
+        match type:
+            case "grass":
+                return Grass(pos, variant)
+            case "torch":
+                return Torch(pos, variant)
+            case _:
+                return Offgrid_Tile(type, pos, variant)
+
+        ######################################################################################
+    
+    def __init__(self, type, pos, variant):
+        self.type = type
+        self.variant = variant
+        self.pos = pos
+
+        if self.type in self.MIDGROUND_OFFGRID:
+            self.z = Z_LAYERS["midground offgrid"] 
+        elif self.type in self.FOREGROUND_OFFGRID:
+            self.z = Z_LAYERS["foreground offgrid"] 
+        else:
+            self.z = Z_LAYERS["background offgrid"] 
+
+    @property
+    def dict(self):
+        return {'type':self.type, "pos":self.pos, "variant":self.variant}
+    
+    def update(self, screen, offset):
+        img = Offgrid_Tile.SPRITES[self.type][self.variant]
+        screen.blit(img, self.pos - offset)
+
+    ##############################################################################################
