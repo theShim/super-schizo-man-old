@@ -1,0 +1,10 @@
+#startup
+git init
+git add .
+
+#status of commits n stuff
+git status
+git commit -m "msg"
+
+#pushing all the files to github
+git push -u origin master

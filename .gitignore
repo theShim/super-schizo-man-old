@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyx
+
+tokens.txt
+scripts/config/profiler.stats
