@@ -32,7 +32,7 @@ class Stage_Loader:
             ]
         ]
         self.current_stage_index = default_index
-        self.current_stage_index = 1
+        # self.current_stage_index = 1
 
     @property
     def tilemap(self):
@@ -43,7 +43,6 @@ class Stage_Loader:
         return self.stages[self.current_stage_index]
 
     def render(self, player):
-        # current_stage: Stage = self.stages[self.current_stage_index]
         self.current_stage.update(player)
 
     ##############################################################################################
@@ -80,13 +79,12 @@ class Stage:
         self.areas = []
         self.area_index = 0
 
-        self.bg_music = ""
-
-        # game.stage_loader.current_stage_index = 1
+    def current_bg_music(self):
+        return self.areas[self.area_index].bg_music
 
     def update(self, player):
-        if not self.game.music_player.background.get_busy():
-            self.game.music_player.play(self.bg_music, "bg", loop=True)
+        if not self.game.music_player.is_playing("bg"):
+            self.game.music_player.play(self.current_bg_music(), "bg", loop=True)
 
         self.game.calculate_offset()
         self.areas[self.area_index].bg.update()
@@ -121,28 +119,13 @@ class Stage:
 class Area:
     def __init__(self):
         self.bg = None
-        self.rooms = []
+        self.rooms: list[Room] = []
+        self.bg_music: str = ""
 from scripts.world_loading.cutscenes import *
 
 class Room:
     def __init__(self):
         pass
-
-    ##############################################################################################
-
-class Forest_Stage(Stage):
-    def __init__(self, game):
-        super().__init__(game)
-        self.stage_index = 1 #just general utility thing might be useful later on
-        self.areas = [Forest_Area1(game)] #list of Areas
-        self.tilemap.load("data/stage_data/test2.json") #custom for each stage
-        self.particle_manager = Particle_Manager("forest")
-        self.bg_music = "bg_test0"
-
-class Forest_Area1:
-    def __init__(self, game):
-        self.bg = Forest_Background(game)
-        self.bg = Perlin_Background(game)
 
     ##############################################################################################
 
@@ -155,10 +138,13 @@ class Opening_Stage(Stage):
             Opening_Cutscene2(game, self),
             Opening_Cutscene3(game, self)
         ]
-        self.area_index = 1
+        self.area_index = 0
         self.particle_manager = Particle_Manager("opening")
 
     def update(self, *args):
+        if not self.game.music_player.is_playing("bg"):
+            self.game.music_player.play(self.current_bg_music(), "bg", loop=True)
+
         self.areas[self.area_index].bg.update()
         self.render()
 
@@ -180,3 +166,19 @@ class Opening_Stage(Stage):
                 spr.update(self.screen, self.game.offset, self.particle_manager)
             else:
                 spr.update(self.screen, self.game.offset)
+
+    ##############################################################################################
+
+class Forest_Stage(Stage):
+    def __init__(self, game):
+        super().__init__(game)
+        self.stage_index = 1 #just general utility thing might be useful later on
+        self.areas = [Forest_Area1(game)] #list of Areas
+        self.tilemap.load("data/stage_data/test2.json") #custom for each stage
+        self.particle_manager = Particle_Manager("forest")
+
+class Forest_Area1:
+    def __init__(self, game):
+        # self.bg = Forest_Background(game)
+        self.bg = Perlin_Background(game)
+        self.bg_music = "bg_test0"

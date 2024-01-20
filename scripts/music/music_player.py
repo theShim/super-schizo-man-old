@@ -17,7 +17,8 @@ class Music_Player:
 
         #every sound file loaded
         self.sounds = {
-            "bg_test0" : Sound("music/test.wav")
+            "bg_test0" : Sound("music/test.wav"),
+            "memory1" : Sound("music/memory_1.mp3")
         }
 
         #every sound channel to be used, gonna be more later on
@@ -32,6 +33,10 @@ class Music_Player:
                 return self.background
             case _:
                 return None
+            
+    def is_playing(self, channel):
+        channel = self.get_channel(channel)
+        return channel.get_busy()
             
 
     #play a specified sound in a specified channel, with the option to constantly loop it

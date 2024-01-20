@@ -50,6 +50,7 @@ class Opening_Cutscene1(Cutscene_Area): #monster speech
                 Custom_Font.Fluffy),
         ]
         self.text_box = self.text_boxes.pop(0)
+        self.bg_music = "memory1"
 
     def render(self):
         if len(self.text_boxes) > 0 or not self.text_box.finished:
