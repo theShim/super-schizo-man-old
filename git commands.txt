@@ -1,6 +1,9 @@
 #startup
 git init
+
+#adding stuff to be committed
 git add .
+git commit -a
 
 #status of commits n stuff
 git status
@@ -8,3 +11,6 @@ git commit -m "msg"
 
 #pushing all the files to github
 git push -u origin master
+
+#do this before pushing if needed
+gh auth login
