@@ -1,8 +1,9 @@
-__pycache__/
+*/__pycache__/
 
 *.pyc
 *.pyo
 *.pyx
+*.mp4
 
 tokens.txt
 scripts/config/profiler.stats

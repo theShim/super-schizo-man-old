@@ -42,6 +42,8 @@ class Music_Player:
     #play a specified sound in a specified channel, with the option to constantly loop it
     #sound should be a key straight from the self.sounds dict
     def play(self, sound, channel, loop=False):  
+        if sound == "":
+            return
         sound = self.sounds[sound]
         channel = self.get_channel(channel)
         channel.play(sound, loops=-1 if loop else 0)
