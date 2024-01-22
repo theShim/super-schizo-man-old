@@ -1,0 +1,10 @@
+cachetools
+matplotlib
+numpy
+numba
+opencv-python
+perlin-numpy
+Pillow
+pygame-ce
+pyinstaller
+scipy
