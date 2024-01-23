@@ -26,8 +26,10 @@ class Text_Box(pygame.sprite.Sprite):
         self.background_colour = background_colour
 
         self.t = 0
+        self.prev = self.t
         self.speed = 0.4
         self.finished = False
+        self.click = False      #typing sound
 
     def reset(self):
         self.t = 0
@@ -37,6 +39,11 @@ class Text_Box(pygame.sprite.Sprite):
         self.speed = speed
 
     def update(self):
+        self.click = False
+        if abs(self.t - self.prev) >= 1:
+            self.prev = self.t
+            self.click = True
+
         if self.t < len(self.text):
             self.t += self.speed
         else:

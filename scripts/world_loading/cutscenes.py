@@ -53,6 +53,7 @@ class Opening_Cutscene1(Cutscene_Area): #monster speech
         self.bg_music = "memory1"
 
     def render(self):
+        self.game.music_player.set_vol(0.1, "type")
         if len(self.text_boxes) > 0 or not self.text_box.finished:
             self.text_box.update()
             self.text_box.render(self.game.screen, (200, 200, 200))
@@ -63,11 +64,15 @@ class Opening_Cutscene1(Cutscene_Area): #monster speech
                 self.dialogue_timer.reset()
                 self.text_box = self.text_boxes.pop(0)
 
+            if self.text_box.text[min(len(self.text_box.text)-1, int(self.text_box.t))].isalpha() and self.text_box.click:
+                self.game.music_player.play("typing", "type")
+
         else:
             self.text_box.render(self.game.screen, (200, 200, 200))
             self.exit_timer.update()
             if self.exit_timer.finished:
                 self.parent_stage.area_index = 1
+                self.game.music_player.stop(fadeout_ms=500)
         
 class Opening_Cutscene2(Cutscene_Area): #blinking
     def __init__(self, game, parent_stage):

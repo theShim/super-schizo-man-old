@@ -18,19 +18,24 @@ class Music_Player:
         #every sound file loaded
         self.sounds = {
             "bg_test0" : Sound("music/test.wav"),
-            "memory1" : Sound("music/memory_1.mp3")
+            "memory1" : Sound("music/memory_1.mp3"),
+            "typing" : Sound("music/typing.wav")
         }
 
         #every sound channel to be used, gonna be more later on
         self.background = pygame.mixer.Channel(0)
+        self.typing = pygame.mixer.Channel(1)
         self.channels = [
             self.background,
+            self.typing,
         ]
 
     def get_channel(self, channel_name):
         match channel_name:
             case "background" | "bg":
                 return self.background
+            case "typing" | "type":
+                return self.typing
             case _:
                 return None
             
@@ -69,6 +74,7 @@ class Music_Player:
             for c in self.channels:
                 c.set_volume(vol)
             return
+        self.get_channel(channel).set_volume(vol)
 
 #normal pygame sound object just with a name attribute
 class Sound(pygame.mixer.Sound):
