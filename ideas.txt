@@ -1,1 +1,3 @@
--radar graphs for skills
+-radar graphs for skills/stats
+-skill tree in general
+-futuristic HUD?

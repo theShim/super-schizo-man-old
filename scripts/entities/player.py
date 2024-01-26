@@ -59,7 +59,7 @@ class Player(pygame.sprite.Sprite):
         self.hitbox_size = vec(self.image.get_size())
 
         self.vel = vec()
-        self.run_speed = 0.6
+        self.run_speed = 1
         self.jumps = 2
         self.jumpHeld = False
         self.landed = False

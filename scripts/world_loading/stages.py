@@ -32,7 +32,7 @@ class Stage_Loader:
             ]
         ]
         self.current_stage_index = default_index
-        # self.current_stage_index = 1
+        self.current_stage_index = 1
 
     @property
     def tilemap(self):
