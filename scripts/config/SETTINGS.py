@@ -43,16 +43,20 @@ Z_LAYERS = {
     ##############################################################################################
 
 CONTROLS = {
-    "up"      : pygame.K_w,
-    "down"    : pygame.K_s,
-    "left"    : pygame.K_a,
-    "right"   : pygame.K_d,
-    "jump"    : pygame.K_SPACE,
+    "up"        : pygame.K_w,
+    "down"      : pygame.K_s,
+    "left"      : pygame.K_a,
+    "right"     : pygame.K_d,
+    "jump"      : pygame.K_SPACE,
 
-    "heavy"   : pygame.K_h,
-    "light"   : pygame.K_j,
-    "dash"    : pygame.K_l,
-    "switch_l": pygame.K_i,
-    "switch_r": pygame.K_o,
+    "heavy"     : pygame.K_h,
+    "light"     : pygame.K_j,
+    "dash"      : pygame.K_l,
+    "switch_l"  : pygame.K_i,
+    "switch_r"  : pygame.K_o,
+
+    "menu_open" : pygame.K_TAB,
+    "inv_open"  : pygame.K_e,
+    "pause"     : pygame.K_ESCAPE
 }
 # reminder: enable "up key toggle" for jump option in settings later

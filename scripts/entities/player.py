@@ -70,6 +70,8 @@ class Player(pygame.sprite.Sprite):
         self.blink_cooldown = 200
 
         self.weapon = Sword(self)
+
+        self.menu = Menu(self, game)
     
     @property
     def hitbox(self):
@@ -178,6 +180,20 @@ class Player(pygame.sprite.Sprite):
                 # tile.grass_blades.empty()
         
         ###################################################################################### 
+                
+    def handle_menu(self, keys):
+        if self.menu.open:
+            self.menu.update()
+            return True
+        
+        if keys[CONTROLS['menu_open']]:
+            self.menu.loader = "map"
+            self.menu.update()
+        if keys[CONTROLS['inv_open']]:
+            self.menu.loader = "inventory"
+            self.menu.update()
+        
+        ###################################################################################### 
 
     def change_status(self, status):
         if status != self.status:
@@ -234,6 +250,8 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, screen: pygame.Surface, offset: vec, particle_manager):
         keys = pygame.key.get_pressed()
+
+        x = self.handle_menu() # if this returns True, then make everything under not happen except draw a darker filter over
 
         self.move(keys, particle_manager)
         self.tile_collisions(particle_manager)
