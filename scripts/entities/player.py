@@ -13,6 +13,7 @@ from scripts.config.CORE_FUNCS import vec, lerp
 from scripts.config.SETTINGS import WIDTH, HEIGHT, Z_LAYERS, FRIC, GRAV, CONTROLS, DEBUG
 from scripts.entities.sprite_animator import SpriteAnimator
 from scripts.entities.weapons import Sword
+from scripts.gui.menu import Menu
 
     ##############################################################################################
 
@@ -183,15 +184,16 @@ class Player(pygame.sprite.Sprite):
                 
     def handle_menu(self, keys):
         if self.menu.open:
-            self.menu.update()
             return True
         
         if keys[CONTROLS['menu_open']]:
             self.menu.loader = "map"
-            self.menu.update()
+            self.menu.open = True
         if keys[CONTROLS['inv_open']]:
             self.menu.loader = "inventory"
-            self.menu.update()
+            self.menu.open = True
+
+        return False
         
         ###################################################################################### 
 
@@ -251,11 +253,12 @@ class Player(pygame.sprite.Sprite):
     def update(self, screen: pygame.Surface, offset: vec, particle_manager):
         keys = pygame.key.get_pressed()
 
-        x = self.handle_menu() # if this returns True, then make everything under not happen except draw a darker filter over
+        inv_open = self.handle_menu(keys) # if this returns True, then make everything under not happen except draw a darker filter over
 
-        self.move(keys, particle_manager)
-        self.tile_collisions(particle_manager)
-        self.offgrid_collisions()
+        if not inv_open:
+            self.move(keys, particle_manager)
+            self.tile_collisions(particle_manager)
+            self.offgrid_collisions()
 
         #weapom position handling
         x = self.hitbox.right if self.direction == 'right' else self.hitbox.left

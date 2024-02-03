@@ -57,6 +57,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.dt = 1
         self.offset = vec() #screen offset for every object to blit onto, possibly better to just blit an entire window after but whatever
+        self.win_in_focus = True #bool for whether the window is in focus or not
 
         #loading screen with pseudo loading, just increments a counter with every img loaded
         self.startup_loadscreen()
@@ -92,7 +93,7 @@ class Game:
 
         #setting allowed events to reduce lag
         pygame.event.set_blocked(None) 
-        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEWHEEL])
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEWHEEL, pygame.WINDOWFOCUSLOST, pygame.WINDOWFOCUSGAINED])
 
     def startup_loadscreen(self):
         Custom_Font.init() #my own fonts
@@ -157,6 +158,32 @@ class Game:
             self.offset.x = 0
         # if self.offset.x > math.inf:
         #     self.offset.x = math.inf
+            
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+
+            elif event.type == pygame.WINDOWFOCUSGAINED:
+                self.win_in_focus = True
+            elif event.type == pygame.WINDOWFOCUSLOST:
+                self.win_in_focus = False
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    self.running = False
+
+                elif event.key == pygame.K_F7:
+                    self.camera_flag = not self.camera_flag
+
+                    if self.camera_flag:
+                        self.screen_recorder = ScreenRecorder(
+                            WIDTH, 
+                            HEIGHT, 
+                            FPS, 
+                            f"recordings/{time.strftime('%d.%m.%Y_%H.%M_REC', time.localtime())}.mp4")
+                    else:
+                        self.screen_recorder.end_recording()
 
     def run(self):
         if DEBUG:   
@@ -168,32 +195,21 @@ class Game:
             self.dt = time.perf_counter() - last_time
             self.dt *= FPS
             last_time = time.perf_counter()
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        self.running = False
 
-                    elif event.key == pygame.K_F7:
-                        self.camera_flag = not self.camera_flag
-
-                        if self.camera_flag:
-                            self.screen_recorder = ScreenRecorder(
-                                WIDTH, 
-                                HEIGHT, 
-                                FPS, 
-                                f"recordings/{time.strftime('%d.%m.%Y_%H.%M_REC', time.localtime())}.mp4")
-                        else:
-                            self.screen_recorder.end_recording()
-
-            
+            self.handle_events()
             # self.calculate_offset()
             # self.screen.fill((30, 30, 30))
+
+            if not self.win_in_focus:
+                self.clock.tick(FPS)
+                continue
             
             self.stage_loader.render(self.player)
+
+            if self.player.menu.open:
+                self.player.menu.draw()
             self.cursor.update(self.screen)
+
             # self.overlay.update()
 
             #FPS
