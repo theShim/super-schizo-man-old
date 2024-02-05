@@ -25,7 +25,7 @@ pygame.display.set_caption("")
 
 #initalising pygame window
 flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN
-SIZE = WIDTH, HEIGHT = (720, 720)
+SIZE = WIDTH, HEIGHT = (400, 400)
 screen = pygame.display.set_mode(SIZE, flags, 16)
 clock = pygame.time.Clock()
 
@@ -50,12 +50,29 @@ def rotate(origin, point, angle):
 
     ##############################################################################################
 
+class Button(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
 
+        self.pos = pos
+
+        self.base = (pygame.transform.scale2x(pygame.image.load("assets/gui/button1.png"))).convert_alpha()
+        self.base.set_colorkey((0, 0, 0))
+        self.clicked = (pygame.transform.scale2x(pygame.image.load("assets/gui/button2.png"))).convert_alpha()
+        self.clicked.set_colorkey((0, 0, 0))
+
+    def update(self, screen):
+        mousePos = pygame.mouse.get_pos()
+        if self.base.get_rect(topleft=self.pos).collidepoint(mousePos):
+            screen.blit(self.clicked, self.pos)
+        else:
+            screen.blit(self.base, self.pos)
+
+b = Button((200, 200))
 
     ##############################################################################################
 
 last_time = time.time()
-window_not_in_focus = not True
 
 running = True
 while running:
@@ -70,14 +87,9 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 running = False
-        elif event.type == pygame.WINDOWFOCUSGAINED:
-            window_not_in_focus = True
-        elif event.type == pygame.WINDOWFOCUSLOST:
-            window_not_in_focus = False
-
-    print(window_not_in_focus)
 
     screen.fill((30, 30, 30))
+    b.update(screen)
 
     #fps
     font = pygame.font.SysFont('monospace', 30)
