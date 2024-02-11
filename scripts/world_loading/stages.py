@@ -138,6 +138,7 @@ class Opening_Stage(Stage):
             Opening_Cutscene2(game, self),
             Opening_Cutscene3(game, self)
         ]
+        self.areas[2].bg = self.areas[1].bg
         self.area_index = 0
         self.particle_manager = Particle_Manager("opening")
 

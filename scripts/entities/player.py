@@ -260,10 +260,10 @@ class Player(pygame.sprite.Sprite):
             self.tile_collisions(particle_manager)
             self.offgrid_collisions()
 
-        #weapom position handling
-        x = self.hitbox.right if self.direction == 'right' else self.hitbox.left
-        pos = [x, self.hitbox.centery + 4]
-        self.weapon.update(pos, offset, facing=self.direction, game_entities=self.game_entities)
+            #weapom position handling
+            x = self.hitbox.right if self.direction == 'right' else self.hitbox.left
+            pos = [x, self.hitbox.centery + 4]
+            self.weapon.update(pos, offset, facing=self.direction, game_entities=self.game_entities)
         
         self.animate() #current animation based off status
         self.handle_particles(particle_manager) #

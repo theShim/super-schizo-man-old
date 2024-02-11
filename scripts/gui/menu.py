@@ -8,6 +8,7 @@ import numpy as np
 import random
 import math
 
+from scripts.gui.player_menu import Player_Menu
 from scripts.config.SETTINGS import SIZE
 
     ##############################################################################################
@@ -17,10 +18,13 @@ class Menu:
         self.player = player
         self.game = game
 
+        self.dark = pygame.Surface(SIZE, pygame.SRCALPHA)
+        self.dark.fill((0, 0, 0))
+        self.dark.set_alpha(180)
         self.open = False
 
+        self.display = Player_Menu()
+
     def draw(self):
-        dark = pygame.Surface(SIZE, pygame.SRCALPHA)
-        dark.fill((0, 0, 0))
-        dark.set_alpha(180)
-        self.game.screen.blit(dark, (0, 0))
+        self.game.screen.blit(self.dark, (0, 0))
+        self.display.update(self.game.screen)

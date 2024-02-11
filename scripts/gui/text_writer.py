@@ -10,7 +10,7 @@ import random
 import math
 
 from scripts.config.SETTINGS import WIDTH, HEIGHT
-from scripts.config.CORE_FUNCS import gaussian_blur
+from scripts.config.CORE_FUNCS import gaussian_blur, vec
 
     ##############################################################################################
 
@@ -73,7 +73,7 @@ class Text_Box(pygame.sprite.Sprite):
         
 class Rainbow_Text_Box(Text_Box):
 
-    def __init__(self, text, pos, font, box_size, border_radius=3):
+    def __init__(self, text, pos, font, box_size, border_radius=2):
         super().__init__(text, pos, font, box_size)
 
         self.window = pygame.Surface((box_size[0]*3, box_size[1]))
@@ -108,21 +108,37 @@ class Rainbow_Text_Box(Text_Box):
         self.inner = pygame.Surface((self.box_size[0] - self.border_radius*2, self.box_size[1] - self.border_radius*2), pygame.SRCALPHA)
         self.inner.fill((255, 255, 230))
 
+        self.start = True
+        self.zoom = 0
+        self.max_zoom = 15.8977049431
+
+    def apply_zoom(self, screen, surf: pygame.Surface):
+        zoom = min(1, 1 / (1 + (math.e ** -(self.zoom-6))))
+        size = vec(surf.get_size()) * zoom
+
+        if zoom != 1:
+            zoomed = pygame.transform.scale(surf, size).convert_alpha()
+            screen.blit(zoomed, zoomed.get_rect(center=surf.get_rect(topleft=self.pos).center))
+
     def render(self, screen, col=(255, 255, 255)):
         # self.window = pygame.Surface((self.box_size[0]*2, self.box_size[1]))
         try:
             rainbow = gaussian_blur(self.window.subsurface([self.x, 0, *self.box_size]), radius=3)
-            rainbow.set_alpha(230)
-            screen.blit(rainbow, self.pos)
         except:
             self.x = 0
             rainbow = gaussian_blur(self.window.subsurface([self.x, 0, *self.box_size]), radius=3)
-            rainbow.set_alpha(230)
-            screen.blit(rainbow, self.pos)
         self.x += 1
         
-        screen.blit(self.inner, (self.pos[0] + self.border_radius, self.pos[1] + self.border_radius))
-        # pygame.draw.rect(screen, (255, 255, 230), [self.pos[0] + self.border_radius, self.pos[1] + self.border_radius, self.box_size[0] - self.border_radius*2, self.box_size[1] - self.border_radius*2])
+        rainbow.set_alpha(230)
+        rainbow.blit(self.inner, (self.border_radius, self.border_radius))
 
-        text = f"{self.text[:int(self.t)]}"
-        self.font.render(screen, text, col, self.pos)
+        if self.start:
+            self.zoom += 1
+            if self.zoom > self.max_zoom:
+                self.start = False
+            self.apply_zoom(screen, rainbow)
+        else:
+            screen.blit(rainbow, self.pos)
+
+            text = f"{self.text[:int(self.t)]}"
+            self.font.render(screen, text, col, self.pos)
