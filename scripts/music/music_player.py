@@ -19,7 +19,8 @@ class Music_Player:
         self.sounds = {
             "bg_test0" : Sound("music/test.wav"),
             "memory1" : Sound("music/memory_1.mp3"),
-            "typing" : Sound("music/typing.wav")
+            "typing" : Sound("music/typing.wav"),
+            "tutorial_1" : Sound("music/tutorial/tutorial_ambience.mp3")
         }
 
         #every sound channel to be used, gonna be more later on

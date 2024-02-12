@@ -182,4 +182,4 @@ class Forest_Area1:
     def __init__(self, game):
         # self.bg = Forest_Background(game)
         self.bg = Perlin_Background(game)
-        self.bg_music = "bg_test0"
+        self.bg_music = "tutorial_1"

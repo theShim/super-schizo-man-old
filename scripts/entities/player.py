@@ -187,7 +187,7 @@ class Player(pygame.sprite.Sprite):
             return True
         
         if keys[CONTROLS['menu_open']]:
-            self.menu.loader = "map"
+            self.menu.loader = "profile"
             self.menu.open = True
         if keys[CONTROLS['inv_open']]:
             self.menu.loader = "inventory"

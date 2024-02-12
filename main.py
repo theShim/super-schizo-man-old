@@ -88,8 +88,8 @@ class Game:
         self.font = pygame.font.SysFont('Verdana', 10)
 
         #music stuff
-        pygame.mixer.pre_init(44100, -16, 2, 4096*2)
-        pygame.mixer.init(44100, -16, 2, 4096*2)
+        pygame.mixer.pre_init(44100, -16, 2, 4096*4)
+        pygame.mixer.init(44100, -16, 2, 4096*4)
 
         #setting allowed events to reduce lag
         pygame.event.set_blocked(None) 

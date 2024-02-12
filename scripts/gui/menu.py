@@ -21,9 +21,11 @@ class Menu:
         self.dark = pygame.Surface(SIZE, pygame.SRCALPHA)
         self.dark.fill((0, 0, 0))
         self.dark.set_alpha(180)
-        self.open = False
 
-        self.display = Player_Menu()
+        self.open = False
+        self.loader = "profile"
+
+        self.display = Player_Menu(self)
 
     def draw(self):
         self.game.screen.blit(self.dark, (0, 0))

@@ -15,19 +15,26 @@ from scripts.config.CORE_FUNCS import vec, Timer
     ##############################################################################################
 
 class Player_Menu:
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
+
         self.top_row = pygame.sprite.Group()
-        self.top_row.add(x1:=self.Dropdown( self.top_row, (10, 10)))
-        self.top_row.add(x2:=self.Profile(  self.top_row, (x1.base.get_width() - 5, 10), 5))
-        self.top_row.add(x3:=self.Inventory(self.top_row, (x1.base.get_width() + x2.base.get_width() - 18, 10), 10))
+        x = 10
+        for i, button in enumerate([self.Profile, self.Inventory, self.QuestBook, self.Map, self.Settings]):
+            self.top_row.add(e:=button(self, (x, 10), i*2))
+            x += e.base.get_width() - 15
 
     def update(self, screen):
+        for b in self.top_row.sprites():
+            if b.name == self.parent.loader:
+                b.clicked = True
+                break
         self.top_row.update(screen)
 
     class Button(pygame.sprite.Sprite):
         def __init__(self, parent, name, pos, y_transition_offset):
             super().__init__()
-            self.parent: pygame.sprite.Group = parent
+            self.parent = parent
             self.name = name
 
             self.base = pygame.image.load(f"assets/gui/{name}.png")#.convert_alpha()
@@ -50,27 +57,37 @@ class Player_Menu:
             if abs(self.end_pos[1] - self.pos[1]) > 0:
                 self.move_timer.update()
                 if self.move_timer.finished:
-                    self.pos = self.pos.lerp(self.end_pos, 0.25)
+                    self.pos = self.pos.lerp(self.end_pos, 0.15)
 
             mousePos = pygame.mouse.get_pos()
             mousePos_masked = mousePos[0] - self.end_pos[0], mousePos[1] - self.end_pos[1]
             mouse = pygame.mouse.get_pressed()
+            
             if (self.rect.collidepoint(mousePos) and self.mask.get_at(mousePos_masked)) or self.clicked:
                 if mouse[0]:
                     self.clicked = True
-                    [setattr(button, "clicked", False) for button in self.parent if button != self]
-                screen.blit(self.clicked_img, self.pos)
+                    self.parent.parent.loader = self.name
+                    [setattr(button, "clicked", False) for button in self.parent.top_row if button != self]
+                screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2])
             else:
                 screen.blit(self.base, self.pos)
 
-    class Dropdown(Button):
-        def __init__(self, parent, pos, y_transition_offset=0):
-            super().__init__(parent, "dropdown", pos, y_transition_offset)
-
-    class Profile(Button):
+    class Profile(Button): #stats and skill tree
         def __init__(self, parent, pos, y_transition_offset=0):
             super().__init__(parent, "profile", pos, y_transition_offset)
 
     class Inventory(Button):
         def __init__(self, parent, pos, y_transition_offset=0):
             super().__init__(parent, "inventory", pos, y_transition_offset)
+
+    class QuestBook(Button):
+        def __init__(self, parent, pos, y_transition_offset=0):
+            super().__init__(parent, "questbook", pos, y_transition_offset)
+
+    class Map(Button):
+        def __init__(self, parent, pos, y_transition_offset=0):
+            super().__init__(parent, "map", pos, y_transition_offset)
+
+    class Settings(Button):
+        def __init__(self, parent, pos, y_transition_offset=0):
+            super().__init__(parent, "settings", pos, y_transition_offset)

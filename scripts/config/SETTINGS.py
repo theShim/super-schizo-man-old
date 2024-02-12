@@ -55,8 +55,7 @@ CONTROLS = {
     "switch_l"  : pygame.K_i,
     "switch_r"  : pygame.K_o,
 
-    "menu_open" : pygame.K_TAB,
+    "menu_open" : pygame.K_ESCAPE,
     "inv_open"  : pygame.K_e,
-    "pause"     : pygame.K_ESCAPE
 }
 # reminder: enable "up key toggle" for jump option in settings later
