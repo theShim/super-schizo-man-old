@@ -64,8 +64,8 @@ class Game:
 
         #only load other stuff once everything has been cached
         self.entities = pygame.sprite.Group()
-        self.player = Player(self, self.entities, 2)
         self.stage_loader = Stage_Loader(self)
+        self.player = Player(self, self.entities, 2, self.stage_loader.player_spawn_pos)
 
         self.cursor = Cursor()
 
@@ -94,6 +94,9 @@ class Game:
         #setting allowed events to reduce lag
         pygame.event.set_blocked(None) 
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEWHEEL, pygame.WINDOWFOCUSLOST, pygame.WINDOWFOCUSGAINED])
+
+        #other
+        pygame.mouse.set_visible(0) #setting cursor invisible
 
     def startup_loadscreen(self):
         Custom_Font.init() #my own fonts

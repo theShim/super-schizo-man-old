@@ -41,6 +41,10 @@ class Stage_Loader:
     @property
     def current_stage(self):
         return self.stages[self.current_stage_index]
+    
+    @property
+    def player_spawn_pos(self):
+        return self.tilemap.get_player_spawn_pos()
 
     def render(self, player):
         self.current_stage.update(player)

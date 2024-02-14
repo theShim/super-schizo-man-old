@@ -5,6 +5,7 @@ with contextlib.redirect_stdout(None):
     
 import os
 import json
+import random
 from tkinter.filedialog import asksaveasfile, askopenfilename
 
 from scripts.config.SETTINGS import TILE_SIZE, WIDTH, HEIGHT, Z_LAYERS, LOADED_SPRITE_NUMBER
@@ -124,6 +125,17 @@ class Tilemap:
             to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
             self.offgrid_tiles.append(to_add)
         self.tile_size = data['tile_size']
+
+        ######################################################################################
+
+    #try to get a random player spawning location from the level data otherwise just put it at the centre
+    def get_player_spawn_pos(self):
+        locs = []
+        for loc in self.tile_map:
+            tile = self.tile_map[loc]
+            if tile.type == "spawner" and tile.variant == 0:
+                locs.append([tile.pos[0] * TILE_SIZE + TILE_SIZE/2, tile.pos[1] * TILE_SIZE + TILE_SIZE/2])
+        return random.choice(locs) if locs else (WIDTH/2, 0)
 
         ######################################################################################
         

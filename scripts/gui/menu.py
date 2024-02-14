@@ -9,6 +9,7 @@ import random
 import math
 
 from scripts.gui.player_menu import Player_Menu
+from scripts.items.inventory import Inventory
 from scripts.config.SETTINGS import SIZE
 
     ##############################################################################################
@@ -26,6 +27,7 @@ class Menu:
         self.loader = "profile"
 
         self.display = Player_Menu(self)
+        self.inventory = Inventory(self)
 
     def draw(self):
         self.game.screen.blit(self.dark, (0, 0))
