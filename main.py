@@ -21,6 +21,8 @@ from scripts.gui.cursor import Cursor
 from scripts.gui.overlay import CRT_Overlay
 from scripts.gui.custom_fonts import Custom_Font
 
+from scripts.items.item import Item
+
 from scripts.music.music_player import Music_Player
 
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
@@ -28,6 +30,7 @@ from scripts.world_loading.stages import Stage_Loader
 from scripts.world_loading.backgrounds import Forest_Background
 from scripts.world_loading.nature_tiles import Grass, Grass_Blade
 from scripts.world_loading.light_tiles import Torch
+
 
 from screen_recorder import ScreenRecorder
 
@@ -64,6 +67,9 @@ class Game:
 
         #only load other stuff once everything has been cached
         self.entities = pygame.sprite.Group()
+
+        self.entities.add(Item.get_item(self, "grains", (WIDTH/2, -100)))
+
         self.stage_loader = Stage_Loader(self)
         self.player = Player(self, self.entities, 2, self.stage_loader.player_spawn_pos)
 
@@ -110,7 +116,7 @@ class Game:
         #every object to cache sprites of at the beginning of the game, tiles, offgrid_tiles and backgrounds mostly
         objects = [t.cache_sprites() for t in [Tile, Offgrid_Tile, 
                                                Forest_Background,
-                                               Player, Butterfly,
+                                               Player, Butterfly, Item,
                                                Grass_Blade,
                                                Torch,]]
 
@@ -120,7 +126,8 @@ class Game:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        self.running = False
+                        pygame.quit()
+                        sys.exit()
 
             self.screen.fill((0, 0, 0))
 

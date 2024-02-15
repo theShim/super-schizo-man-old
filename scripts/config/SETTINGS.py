@@ -5,7 +5,7 @@ import pygame
 DEBUG = not True
 WINDOW_TITLE = "Super Schizo Man"
 LOADED_SPRITE_NUMBER = 0
-MAX_LOADED_SPRITES = 180
+MAX_LOADED_SPRITES = 181
 
     ##############################################################################################
 
@@ -34,11 +34,12 @@ Z_LAYERS = {
     "background particle" : 5,
     "player" : 6,
     "partner" : 6.5,
-    "midground offgrid" : 7,
-    "tiles" : 8,
-    "attacks": 9, 
-    "foreground offgrid" : 10,
-    "foreground particle" : 11
+    "items" : 7,
+    "midground offgrid" : 8,
+    "tiles" : 9,
+    "attacks": 10, 
+    "foreground offgrid" : 11,
+    "foreground particle" : 12
 }
     ##############################################################################################
 

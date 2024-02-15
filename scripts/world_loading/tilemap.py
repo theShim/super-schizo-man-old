@@ -139,7 +139,7 @@ class Tilemap:
 
         ######################################################################################
         
-    #list of tiles currently around the player
+    #list of tiles currently around the (player) pos
     def tiles_around(self, pos):
         tiles = []
         tile_loc = (int(pos[0] // self.tile_size), int(pos[1] // self.tile_size))
@@ -149,7 +149,7 @@ class Tilemap:
                 tiles.append(self.tile_map[check_loc])
         return tiles
     
-    #list of tiles currently around the player that are collide-able
+    #list of tiles currently around the (player) pos that are collide-able
     def physics_rects_around(self, pos):
         rects = []
         for tile in self.tiles_around(pos):
@@ -211,8 +211,6 @@ class Tile:
                 images.append(img)
 
             Tile.SPRITES[img_name] = images
-            # for spr in Tile.SPRITES[img_name]:
-            #     spr.set_colorkey((0, 0, 0))
             yield
 
         ######################################################################################

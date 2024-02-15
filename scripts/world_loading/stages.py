@@ -8,6 +8,8 @@ import random
 from scripts.entities.player import Player
 from scripts.entities.butterfly import Butterfly
 
+from scripts.items.item import Item
+
 from scripts.world_loading.tilemap import Tilemap
 from scripts.world_loading.backgrounds import *
 from scripts.world_loading.nature_tiles import Grass
@@ -96,6 +98,7 @@ class Stage:
         self.render(player)
 
     def render(self, player):
+        items = pygame.sprite.Group()
         for spr in sorted(
                 (
                     [player] + 
@@ -117,8 +120,14 @@ class Stage:
                 spr.update(self.screen, self.game.offset, self.particle_manager)
             elif isinstance(spr, Rain_Particle):
                 spr.update(self.screen, self.game.offset, self.tilemap.render_tiles(self.game.offset))
+            elif isinstance(spr, Item):
+                spr.update(self.screen, self.game.offset)
+                items.add(spr)
             else:
                 spr.update(self.screen, self.game.offset)
+
+        [item.player_collisions(self.screen, self.game.offset) for item in items]
+        items.empty()
 
 class Area:
     def __init__(self):
