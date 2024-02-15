@@ -68,7 +68,8 @@ class Game:
         #only load other stuff once everything has been cached
         self.entities = pygame.sprite.Group()
 
-        self.entities.add(Item.get_item(self, "grains", (WIDTH/2, -100)))
+        for i in range(10):
+            self.entities.add(Item.get_item(self, "grains", (WIDTH/2, -100)))
 
         self.stage_loader = Stage_Loader(self)
         self.player = Player(self, self.entities, 2, self.stage_loader.player_spawn_pos)

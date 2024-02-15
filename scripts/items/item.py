@@ -9,7 +9,7 @@ import random
 import math
 
 from scripts.gui.custom_fonts import Custom_Font
-from scripts.config.SETTINGS import SIZE, GRAV, Z_LAYERS, FRIC, FPS
+from scripts.config.SETTINGS import SIZE, GRAV, Z_LAYERS, FRIC, FPS, TILE_SIZE, CONTROLS
 from scripts.config.CORE_FUNCS import vec, Timer
 
     ##############################################################################################
@@ -91,6 +91,8 @@ class Item(pygame.sprite.Sprite):
         Custom_Font.FluffySmall.render(self.tag, self.name, (255, 255, 255), (28, 0))
         pygame.draw.line(self.tag, (255, 255, 255), (0, self.tag.get_height()), (10, self.tag.get_height()-10))
         pygame.draw.line(self.tag, (255, 255, 255), (10, self.tag.get_height()-10), (self.tag.get_width(), self.tag.get_height()-10))
+        pickup_item = pygame.image.load("assets/gui/pickup_item.png").convert_alpha()
+        self.tag.blit(pickup_item, (12, 0))
 
         ##########################################################################################
 
@@ -102,12 +104,11 @@ class Item(pygame.sprite.Sprite):
         self.rect.topleft = self.pos
 
     def tile_collisions(self):
-        collision_tolerance = 10
+        collision_tolerance = TILE_SIZE / 1.5
         for rect in self.game.stage_loader.tilemap.physics_rects_around(self.rect.center):
             if self.rect.colliderect(rect):
 
                 if abs(self.rect.bottom - rect.top) < collision_tolerance:
-                    print(abs(self.rect.bottom - rect.top))
                     for i in range(abs(self.rect.bottom - rect.top)):
                         self.pos.y -= 1
                         self.rect.y = self.pos.y
@@ -135,14 +136,25 @@ class Item(pygame.sprite.Sprite):
     def player_collisions(self, screen, offset):
         if self.rect.colliderect(self.game.player.hitbox):
             img = clip(self.tag, 0, 0, self.touched, self.tag.get_height()) if self.touched < self.tag.get_width() else self.tag
-            screen.blit(img, self.tag.get_rect(midbottom=self.rect.topleft).topleft - offset)
+            screen.blit(img, self.tag.get_rect(bottomleft=self.rect.topleft).topleft - offset)
             self.touched = min(self.touched + 5, self.tag.get_width())
+
+            self.pickup_item()
+
         else:
             self.touched = max(self.touched - 10, 0)
             if self.touched:
                 img = clip(self.tag, 0, 0, self.touched, self.tag.get_height())
-                screen.blit(img, self.tag.get_rect(midbottom=self.rect.topleft).topleft - offset)
+                screen.blit(img, self.tag.get_rect(bottomleft=self.rect.topleft).topleft - offset)
 
+    def pickup_item(self):
+        keys = pygame.key.get_pressed()
+        if keys[CONTROLS["pickup_item"]]:
+            self.angle = 0
+            self.vel = self.acc = vec(0, 0)
+            self.despawn_timer.reset()
+            self.game.entities.remove(self)
+            self.game.player.menu.inventory.data.append(self)
 
         ##########################################################################################
 
@@ -150,7 +162,7 @@ class Item(pygame.sprite.Sprite):
         img = pygame.transform.rotate(self.image, self.angle)
         img.set_colorkey((0, 0, 0))
 
-        rect = img.get_rect(center=self.image.get_rect(bottomleft=self.rect.bottomleft-offset).center)
+        rect = img.get_rect(center=self.image.get_rect(bottomleft=self.rect.bottomleft-offset+vec(0, 2)).center)
         return (img, rect)
 
     def update(self, screen, offset):
@@ -163,7 +175,10 @@ class Item(pygame.sprite.Sprite):
 
         self.angle += self.angleMod
         self.angleMod *= 0.95
-        
+
+        self.draw(screen, offset)
+
+    def draw(self, screen, offset):
         img, rect = self.get_image_rect(offset)
         screen.blit(img, rect)
 

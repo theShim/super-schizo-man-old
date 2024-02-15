@@ -40,6 +40,10 @@ class Player_Menu:
             if b.clicked:
                 if b.name == "profile":
                     self.profile_buttons.update(screen)
+                elif b.name == "inventory":
+                    for i, item in enumerate(self.parent.inventory.data):
+                        pygame.draw.rect(screen, (200, 200, 200), [50-10, ((i+2)*50) - 5, item.rect.width+20, item.rect.height+10])
+                        screen.blit(item.image, (50, (i+2)*50))
                 break
             else:
                 if b.name == "profile":
