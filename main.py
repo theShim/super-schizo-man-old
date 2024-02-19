@@ -34,6 +34,8 @@ from scripts.world_loading.light_tiles import Torch
 
 from screen_recorder import ScreenRecorder
 
+import asyncio
+
     ##############################################################################################
 
 if DEBUG:
@@ -165,13 +167,15 @@ class Game:
 
         #restricting the offsets
         #MAKE THIS DIFFERENT ACCORDING TO CUSTOM STAGE SIZES LATER
+        #e.g. if self.offset.x < self.stage.offset.bounds[0]: x = self.stage.offset.bounds[0]
         if self.offset.x < 0:
             self.offset.x = 0
         # if self.offset.x > math.inf:
         #     self.offset.x = math.inf
             
     def handle_events(self):
-        for event in pygame.event.get():
+        self.events = pygame.event.get()
+        for event in self.events:
             if event.type == pygame.QUIT:
                 self.running = False
 
@@ -196,7 +200,7 @@ class Game:
                     else:
                         self.screen_recorder.end_recording()
 
-    def run(self):
+    async def run(self):
         if DEBUG:   
             PROFILER.enable()
 
@@ -256,16 +260,16 @@ Landed: {self.player.landed}"""
 
 if __name__ == "__main__":
     g = Game()
-    g.run()
+    asyncio.run(g.run())
 
 
-if DEBUG:
-    PROFILER.disable()
-    PROFILER.dump_stats("scripts/config/profiler.stats")
-    pstats.Stats("scripts/config/profiler.stats", stream=(s:=io.StringIO())).sort_stats((sortby:=pstats.SortKey.CUMULATIVE)).print_stats()
-    print(s.getvalue())
+# if DEBUG:
+#     PROFILER.disable()
+#     PROFILER.dump_stats("scripts/config/profiler.stats")
+#     pstats.Stats("scripts/config/profiler.stats", stream=(s:=io.StringIO())).sort_stats((sortby:=pstats.SortKey.CUMULATIVE)).print_stats()
+#     print(s.getvalue())
 
-    print(LOADED_SPRITE_NUMBER, 'total sprites initially cached.')
+#     print(LOADED_SPRITE_NUMBER, 'total sprites initially cached.')
 
-pygame.quit()
-sys.exit()
+# pygame.quit()
+# sys.exit()

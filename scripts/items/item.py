@@ -29,7 +29,7 @@ item_info = {
 
     "grains" : {
         "name" : "grains",
-        "type" : "collectible"
+        "type" : "consumables"
     }
 }
 
@@ -51,9 +51,11 @@ class Item(pygame.sprite.Sprite):
         if (item_data := item_info.get(name, None)) != None:
             if item_data["type"] == "weapon":
                 return Weapon(game, item_data, pos)
-            elif item_data["type"] == "healing":
-                return Healing(game, item_data, pos)
-            elif item_data["type"] == "collectible":
+            elif item_data["type"] == "armour":
+                return Armour(game, item_data, pos)
+            elif item_data["type"] == "consumables":
+                return Consumable(game, item_data, pos)
+            elif item_data["type"] == "key":
                 return Collectible(game, item_data, pos)
 
     @classmethod
@@ -87,12 +89,13 @@ class Item(pygame.sprite.Sprite):
 
         name_width = Custom_Font.FluffySmall.calc_surf_width(self.name)
         name_height = Custom_Font.FluffySmall.space_height
-        self.tag = pygame.Surface((name_width + 30, name_height + 11), pygame.SRCALPHA)
-        Custom_Font.FluffySmall.render(self.tag, self.name, (255, 255, 255), (28, 0))
+        sin_offset = 5
+        self.tag = pygame.Surface((name_width + 30, name_height + 11 + sin_offset), pygame.SRCALPHA)
+        # Custom_Font.FluffySmall.render(self.tag, self.name, (255, 255, 255), (28, sin_offset))
         pygame.draw.line(self.tag, (255, 255, 255), (0, self.tag.get_height()), (10, self.tag.get_height()-10))
         pygame.draw.line(self.tag, (255, 255, 255), (10, self.tag.get_height()-10), (self.tag.get_width(), self.tag.get_height()-10))
         pickup_item = pygame.image.load("assets/gui/pickup_item.png").convert_alpha()
-        self.tag.blit(pickup_item, (12, 0))
+        self.tag.blit(pickup_item, (12, sin_offset))
 
         ##########################################################################################
 
@@ -136,7 +139,13 @@ class Item(pygame.sprite.Sprite):
     def player_collisions(self, screen, offset):
         if self.rect.colliderect(self.game.player.hitbox):
             img = clip(self.tag, 0, 0, self.touched, self.tag.get_height()) if self.touched < self.tag.get_width() else self.tag
-            screen.blit(img, self.tag.get_rect(bottomleft=self.rect.topleft).topleft - offset)
+            tag_pos = self.tag.get_rect(bottomleft=self.rect.topleft).topleft - offset
+            screen.blit(img, tag_pos)
+            
+            a = (self.touched / self.tag.get_width()) * (2*math.pi)
+            y = int(3 * math.sin(0.5 * a))
+            Custom_Font.FluffySmall.render(screen, self.name, (255, 255, 255), (tag_pos[0] + 28, tag_pos[1] + 3 - y))
+
             self.touched = min(self.touched + 5, self.tag.get_width())
 
             self.pickup_item()
@@ -187,12 +196,19 @@ class Item(pygame.sprite.Sprite):
 class Weapon(Item):
     def __init__(self, game, data, pos):
         super().__init__(game, data["name"], pos)
-        
-class Healing(Item):
+        self.type = "weapons"
+
+class Armour(Item):
     def __init__(self, game, data, pos):
         super().__init__(game, data["name"], pos)
+        self.type = "armour"
+        
+class Consumable(Item):
+    def __init__(self, game, data, pos):
+        super().__init__(game, data["name"], pos)
+        self.type = "consumables"
         
 class Collectible(Item):
     def __init__(self, game, data, pos):
         super().__init__(game, data["name"], pos)
-        
+        self.type = "key"
