@@ -34,6 +34,7 @@ class Player_Menu:
             self.item_buttons.add(e:=button(self, (x, HEIGHT-86+28), i*2))
             if i == 0:e.clicked = True; e.switch_end_pos(1)
             x += e.base.get_width() + 10
+        self.item_card_display = self.Item_Card_Display(self, (0, 0))
 
     def update(self, screen):
         self.top_row.update(screen)
@@ -56,11 +57,12 @@ class Player_Menu:
                                 to_check = item_button.name
                                 break
 
-                    item_cards = pygame.sprite.Group()
-                    items = list(filter(lambda i: i.type == to_check, self.parent.inventory.data))
-                    for i, item in enumerate(items):
-                        item_cards.add(x:=self.Item_Card(self, (20, 30+(i*50)), i if i < 4 else 0))
-                        x.update(screen)
+                    self.item_card_display.update(screen, to_check)
+                    # item_cards = pygame.sprite.Group()
+                    # items = list(filter(lambda i: i.type == to_check, self.parent.inventory.data))
+                    # for i, item in enumerate(items):
+                    #     item_cards.add(x:=self.Item_Card(self, (20, 30+((i+1)*50)), i if i < 4 else 0))
+                    #     x.update(screen)
                         # pygame.draw.rect(screen, (200, 200, 200), [50-12, ((i+2)*50) - 5, item.rect.width+24, item.rect.height+10])
                         # screen.blit(item.image, (50, (i+2)*50))
 
@@ -273,6 +275,37 @@ class Player_Menu:
                 screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2])
             else:
                 screen.blit(self.base, self.pos)
+
+    class Item_Card_Display(pygame.sprite.Sprite):
+        def __init__(self, parent, pos):
+            super().__init__()
+            self.parent = parent
+            self.inventory = self.parent.parent.inventory
+
+            self.pos = pos
+            self.item_cards = {key: pygame.sprite.Group() for key in ["weapons", "armour", "consumables", "key"]}
+            self.added_items = set()
+
+            # items = list(filter(lambda i:i.type == to_check, self.parent.inventory.data ))
+            #         item_cards = pygame.sprite.Group()
+            #         items = list(filter(lambda i: i.type == to_check, self.parent.inventory.data))
+            #         for i, item in enumerate(items):
+            #             item_cards.add(x:=self.Item_Card(self, (20, 30+((i+1)*50)), i if i < 4 else 0))
+            #             x.update(screen)
+            #             # pygame.draw.rect(screen, (200, 200, 200), [50-12, ((i+2)*50) - 5, item.rect.width+24, item.rect.height+10])
+            #             # screen.blit(item.image, (50, (i+2)*50))
+            #             item_cards.add(x:=self.Item_Card(self, (20, 30+((i+1)*50)), i if i < 4 else 0))
+
+        def update_cards(self):
+            for i, item in enumerate(self.inventory.data):
+                if item not in self.added_items:
+                    card = Player_Menu.Item_Card(self.item_cards, (20, 30+((i+1)*50)), (i+1)*2)
+                    self.item_cards[item.type].add(card)
+                    self.added_items.add(item)
+
+        def update(self, screen, to_check):
+            self.update_cards()
+            self.item_cards[to_check].update(screen)
 
         ##########################################################################################
 

@@ -26,8 +26,8 @@ class Menu:
         self.open = False
         self.loader = "profile"
 
-        self.display = Player_Menu(self)
         self.inventory = Inventory(self)
+        self.display = Player_Menu(self)
 
     def draw(self):
         self.game.screen.blit(self.dark, (0, 0))

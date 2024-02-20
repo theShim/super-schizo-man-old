@@ -85,8 +85,7 @@ class Game:
 
         self.music_player = Music_Player(channel_num=20)
 
-        self.overlay = CRT_Overlay(self)
-
+ 
         ######################################################################################
 
     def initialise(self):
