@@ -34,7 +34,7 @@ class Player_Menu:
             self.item_buttons.add(e:=button(self, (x, HEIGHT-86+28), i*2))
             if i == 0:e.clicked = True; e.switch_end_pos(1)
             x += e.base.get_width() + 10
-        self.item_card_display = self.Item_Card_Display(self, (0, 0))
+        self.item_card_display = self.Item_Card_Display(self, (20, 80))
 
     def update(self, screen):
         self.top_row.update(screen)
@@ -249,7 +249,7 @@ class Player_Menu:
             self.clicked_img = pygame.transform.scale(self.clicked_img, vec(self.clicked_img.get_size())*2)
             self.clicked_img.set_colorkey((0, 0, 0))
 
-            self.pos = vec(pos[0]-self.base.get_height()*1.5, pos[1])
+            self.pos = vec(pos[0]-self.base.get_height()*2.5, pos[1])
             self.end_pos = pos
             self.move_timer = Timer(x_transition_offset, 1)
 
@@ -258,7 +258,7 @@ class Player_Menu:
             self.clicked = False
             self.held = False
 
-        def update(self, screen):
+        def update(self, screen, y_scroll=0):
             if abs(self.end_pos[0] - self.pos[0]) > 0:
                 self.move_timer.update()
                 if self.move_timer.finished:
@@ -268,13 +268,14 @@ class Player_Menu:
             mousePos_masked = mousePos[0] - self.end_pos[0], mousePos[1] - self.end_pos[1]
             mouse = pygame.mouse.get_pressed()
 
+            update collision rect with y offset
             if (self.rect.collidepoint(mousePos) and self.mask.get_at(mousePos_masked)) or self.clicked:
                 if mouse[0]:
                     self.clicked = True
                     # [setattr(button, "clicked", False) for button in self.parent.top_row if button != self]
-                screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2])
+                screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2 + y_scroll])
             else:
-                screen.blit(self.base, self.pos)
+                screen.blit(self.base, self.pos + vec(0, y_scroll))
 
     class Item_Card_Display(pygame.sprite.Sprite):
         def __init__(self, parent, pos):
@@ -283,29 +284,27 @@ class Player_Menu:
             self.inventory = self.parent.parent.inventory
 
             self.pos = pos
+            self.y_scroll = 0
             self.item_cards = {key: pygame.sprite.Group() for key in ["weapons", "armour", "consumables", "key"]}
             self.added_items = set()
-
-            # items = list(filter(lambda i:i.type == to_check, self.parent.inventory.data ))
-            #         item_cards = pygame.sprite.Group()
-            #         items = list(filter(lambda i: i.type == to_check, self.parent.inventory.data))
-            #         for i, item in enumerate(items):
-            #             item_cards.add(x:=self.Item_Card(self, (20, 30+((i+1)*50)), i if i < 4 else 0))
-            #             x.update(screen)
-            #             # pygame.draw.rect(screen, (200, 200, 200), [50-12, ((i+2)*50) - 5, item.rect.width+24, item.rect.height+10])
-            #             # screen.blit(item.image, (50, (i+2)*50))
-            #             item_cards.add(x:=self.Item_Card(self, (20, 30+((i+1)*50)), i if i < 4 else 0))
 
         def update_cards(self):
             for i, item in enumerate(self.inventory.data):
                 if item not in self.added_items:
-                    card = Player_Menu.Item_Card(self.item_cards, (20, 30+((i+1)*50)), (i+1)*2)
+                    card = Player_Menu.Item_Card(self.item_cards, (self.pos[0], self.pos[1]+(i*50)), (i+1)*2)
                     self.item_cards[item.type].add(card)
                     self.added_items.add(item)
 
+        def scroll(self):
+            mousewhl_events = list(filter(lambda e:e.type == pygame.MOUSEWHEEL, self.parent.parent.game.events))
+            if len(mousewhl_events) == 0: return
+
+            self.y_scroll += mousewhl_events[0].y
+
         def update(self, screen, to_check):
             self.update_cards()
-            self.item_cards[to_check].update(screen)
+            self.scroll()
+            self.item_cards[to_check].update(screen, self.y_scroll)
 
         ##########################################################################################
 
