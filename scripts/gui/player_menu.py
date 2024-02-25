@@ -40,6 +40,11 @@ class Player_Menu:
             x += e.base.get_width() + 10
         self.item_card_display = self.Item_Card_Display(self, (20, 80))
 
+        self.settings_case = self.Settings_Case(self, (36, e.base.get_height() - 12))
+
+    def reset(self):
+        pass
+
     def update(self, screen):
         self.top_row.update(screen)
 
@@ -63,6 +68,10 @@ class Player_Menu:
 
                     self.item_card_display.update(screen, to_check)
                     self.item_buttons.update(screen)
+                    
+                elif b.name == "settings":
+                    self.settings_case.update(screen)
+
                 break
             
             else:
@@ -176,6 +185,26 @@ class Player_Menu:
                 screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2])
             else:
                 screen.blit(self.base, self.pos)
+                
+        ##########################################################################################
+
+    class Profile(Top_Button): #stats and skill tree
+        def __init__(self, parent, pos, y_transition_offset=0):
+            super().__init__(parent, "profile", pos, y_transition_offset)
+
+    class Stats_Select(Long_Button):
+        def __init__(self, parent, pos, x_transition_offset=0):
+            super().__init__(parent, "stats_select", pos, x_transition_offset)
+
+    class SkillTree_Select(Long_Button):
+        def __init__(self, parent, pos, x_transition_offset=0):
+            super().__init__(parent, "skilltree_select", pos, x_transition_offset)
+
+        ##########################################################################################
+
+    class Inventory(Top_Button):
+        def __init__(self, parent, pos, y_transition_offset=0):
+            super().__init__(parent, "inventory", pos, y_transition_offset)
 
     class Item_Bottom_Button(pygame.sprite.Sprite):
         def __init__(self, parent, name, pos, y_transition_offset):
@@ -392,27 +421,6 @@ class Player_Menu:
                     dist = max(card.base.get_height() / 2 - abs(card.pos.y + self.y_scroll - (self.pos[1] + 225)), 0)
                     alpha = (dist / (card.base.get_height() / 2)) * 255
                 card.update(screen, alpha, self.y_scroll)
-            # print('*')
-
-        ##########################################################################################
-
-    class Profile(Top_Button): #stats and skill tree
-        def __init__(self, parent, pos, y_transition_offset=0):
-            super().__init__(parent, "profile", pos, y_transition_offset)
-
-    class Stats_Select(Long_Button):
-        def __init__(self, parent, pos, x_transition_offset=0):
-            super().__init__(parent, "stats_select", pos, x_transition_offset)
-
-    class SkillTree_Select(Long_Button):
-        def __init__(self, parent, pos, x_transition_offset=0):
-            super().__init__(parent, "skilltree_select", pos, x_transition_offset)
-
-        ##########################################################################################
-
-    class Inventory(Top_Button):
-        def __init__(self, parent, pos, y_transition_offset=0):
-            super().__init__(parent, "inventory", pos, y_transition_offset)
 
     class Weapons(Item_Bottom_Button):
         def __init__(self, parent, pos, y_transition_offset=0):
@@ -440,10 +448,55 @@ class Player_Menu:
         def __init__(self, parent, pos, y_transition_offset=0):
             super().__init__(parent, "questbook", pos, y_transition_offset)
 
+        ##########################################################################################
+
     class Map(Top_Button):
         def __init__(self, parent, pos, y_transition_offset=0):
             super().__init__(parent, "map", pos, y_transition_offset)
 
+        ##########################################################################################
+
     class Settings(Top_Button):
         def __init__(self, parent, pos, y_transition_offset=0):
             super().__init__(parent, "settings", pos, y_transition_offset)
+
+    class Settings_Case(pygame.sprite.Sprite):
+        def __init__(self, parent, pos):
+            super().__init__()
+            self.parent = parent
+            self.pos = pos
+
+            self.base = pygame.image.load("assets/gui/settings_case.png").convert_alpha()
+            self.base = pygame.transform.scale(self.base, vec(self.base.get_size())*3)
+            self.base.set_colorkey((0, 0, 0))
+
+            self.pos = vec(pos[0]+self.base.get_width()*2.5, pos[1])
+            self.end_pos = pos
+
+            self.buttons = pygame.sprite.Group()
+            self.buttons.add(Player_Menu.Volume_Slider(self.buttons, [
+                self.end_pos[0] + self.base.get_width() - 80*3, 
+                self.end_pos[1] + self.base.get_height() - 16*3
+            ]))
+
+        def update(self, screen):
+            if abs(self.end_pos[0] - self.pos[0]) > 0:
+                self.pos = self.pos.lerp(self.end_pos, 0.15)
+
+            screen.blit(self.base, self.pos)
+            self.buttons.update(screen)
+
+    class Volume_Slider(pygame.sprite.Sprite):
+        def __init__(self, parent, pos):
+            super().__init__()
+            self.parent = parent
+            self.pos = pos
+
+            self.base = pygame.Surface((60, 7), pygame.SRCALPHA)
+            self.base.fill((20, 16, 32))
+            self.base.fill((39, 37, 60), [0, 0, 60, 2])
+            pygame.draw.rect(self.base, (1, 0, 0), [0, 0, 60, 7], 1)
+            self.base = pygame.transform.scale(self.base, vec(self.base.get_size()) * 3)
+
+        def update(self, screen):
+            screen.blit(self.base, self.pos)

@@ -10,7 +10,8 @@ import math
 
 from scripts.gui.player_menu import Player_Menu
 from scripts.items.inventory import Inventory
-from scripts.config.SETTINGS import SIZE
+from scripts.config.SETTINGS import SIZE, CONTROLS, FPS
+from scripts.config.CORE_FUNCS import Timer
 
     ##############################################################################################
 
@@ -26,6 +27,7 @@ class Menu:
 
         self.open = False
         self.loader = "profile"
+        self.open_cooldown = Timer(FPS//2, 1)
 
         self.inventory = Inventory(self) #actual data store
         self.display = Player_Menu(self) #actual display
@@ -33,3 +35,12 @@ class Menu:
     def draw(self):
         self.game.screen.blit(self.dark, (0, 0))
         self.display.update(self.game.screen)
+
+        if self.open_cooldown.finished:
+            for event in self.game.events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == CONTROLS["menu_open"]:
+                        self.open = False
+                        break
+        else:
+            self.open_cooldown.update()

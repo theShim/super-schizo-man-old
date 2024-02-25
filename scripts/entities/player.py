@@ -185,13 +185,20 @@ class Player(pygame.sprite.Sprite):
     def handle_menu(self, keys):
         if self.menu.open:
             return True
+
+        for event in self.game.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == CONTROLS["menu_open"]:
+                    self.menu.loader = "profile"
+                    self.menu.open = True
+                    self.menu.open_cooldown.reset()
+                    break
         
-        if keys[CONTROLS['menu_open']]:
-            self.menu.loader = "profile"
-            self.menu.open = True
-        if keys[CONTROLS['inv_open']]:
-            self.menu.loader = "inventory"
-            self.menu.open = True
+                if keys[CONTROLS['inv_open']]:
+                    self.menu.loader = "inventory"
+                    self.menu.open = True
+                    self.menu.open_cooldown.reset()
+                    break
 
         return False
         

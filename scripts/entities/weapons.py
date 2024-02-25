@@ -24,6 +24,7 @@ class Sword(pygame.sprite.Sprite):
 
         self.image = pygame.image.load("assets/weapons/sword/0.png").convert_alpha()
         self.image.set_colorkey((0, 0, 0))
+        self.image = pygame.transform.flip(self.image, False, True)
         self.rect = self.image.get_rect()
         self.pos = vec()
         self.angle = 0
