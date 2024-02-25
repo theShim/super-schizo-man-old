@@ -12,6 +12,10 @@ import math
 from scripts.config.SETTINGS import WIDTH, HEIGHT, FPS
 from scripts.config.CORE_FUNCS import vec, Timer
 
+from scripts.gui.custom_fonts import Custom_Font
+
+from scripts.particles.lightning import Lightning
+
     ##############################################################################################
 
 class Player_Menu:
@@ -58,14 +62,6 @@ class Player_Menu:
                                 break
 
                     self.item_card_display.update(screen, to_check)
-                    # item_cards = pygame.sprite.Group()
-                    # items = list(filter(lambda i: i.type == to_check, self.parent.inventory.data))
-                    # for i, item in enumerate(items):
-                    #     item_cards.add(x:=self.Item_Card(self, (20, 30+((i+1)*50)), i if i < 4 else 0))
-                    #     x.update(screen)
-                        # pygame.draw.rect(screen, (200, 200, 200), [50-12, ((i+2)*50) - 5, item.rect.width+24, item.rect.height+10])
-                        # screen.blit(item.image, (50, (i+2)*50))
-
                     self.item_buttons.update(screen)
                 break
             
@@ -238,15 +234,33 @@ class Player_Menu:
                 screen.blit(self.base, self.pos)
 
     class Item_Card(pygame.sprite.Sprite):
-        def __init__(self, parent, pos, x_transition_offset):
+        def __init__(self, parent, item, pos, x_transition_offset):
             super().__init__()
             self.parent = parent
+            self.item = item
+            self.item_mask = pygame.Surface((self.item.image.get_size()), pygame.SRCALPHA)
+            pygame.draw.polygon(self.item_mask, (41, 39, 62), pygame.mask.from_surface(self.item.image).outline())
+
+            self.font = Custom_Font.Fluffy
+            width = self.font.calc_surf_width(self.item.name.capitalize())
+            height = self.font.space_height
+
+            self.name_surf = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.font.render(self.name_surf, self.item.name.capitalize(), (210, 210, 210), (0, 0))
+            self.name_surf_clicked = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.font.render(self.name_surf_clicked, self.item.name.capitalize(), (65, 243, 252), (0, 0))
+
+            self.name_surf_hidden = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.font.render(self.name_surf_hidden, self.item.name.capitalize(), (41, 39, 62), (0, 0))
+            self.name_surf_clicked_hidden = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.font.render(self.name_surf_clicked_hidden, self.item.name.capitalize(), (19, 178, 242), (0, 0))
+
             
             self.base = pygame.image.load("assets/gui/item_card.png").convert_alpha()
-            self.base = pygame.transform.scale(self.base, vec(self.base.get_size())*2)
+            self.base = pygame.transform.scale(self.base, vec(self.base.get_size())*2.2)
             self.base.set_colorkey((0, 0, 0))
-            self.clicked_img = pygame.image.load("assets/gui/item_card.png").convert_alpha()
-            self.clicked_img = pygame.transform.scale(self.clicked_img, vec(self.clicked_img.get_size())*2)
+            self.clicked_img = pygame.image.load("assets/gui/item_card_clicked.png").convert_alpha()
+            self.clicked_img = pygame.transform.scale(self.clicked_img, vec(self.clicked_img.get_size())*2.2)
             self.clicked_img.set_colorkey((0, 0, 0))
 
             self.pos = vec(pos[0]-self.base.get_height()*2.5, pos[1])
@@ -258,24 +272,78 @@ class Player_Menu:
             self.clicked = False
             self.held = False
 
-        def update(self, screen, y_scroll=0):
+            self.bolt = Lightning.GUI_Spinner([
+                (self.rect.topleft[0] + 24, self.rect.topleft[1] + 2), 
+                (self.rect.topright[0] - 11, self.rect.topright[1] + 2), 
+                (self.rect.bottomright[0] - 26, self.rect.bottomright[1] - 10),
+                (self.rect.bottomleft[0] + 7, self.rect.bottomleft[1] - 10), 
+            ], colours=[(65, 243, 252), (19, 178, 242)], line_width=3)
+
+        def reset(self):
+            self.pos = vec(self.end_pos[0]-self.base.get_height()*2.5, self.end_pos[1])
+            self.move_timer.reset()
+            self.clicked = False
+
+        def info_card(self):
+            pass
+
+        def update(self, screen, alpha, y_scroll=0):
             if abs(self.end_pos[0] - self.pos[0]) > 0:
                 self.move_timer.update()
                 if self.move_timer.finished:
                     self.pos = self.pos.lerp(self.end_pos, 0.15)
 
             mousePos = pygame.mouse.get_pos()
-            mousePos_masked = mousePos[0] - self.end_pos[0], mousePos[1] - self.end_pos[1]
+            mousePos_masked = mousePos[0] - self.end_pos[0], mousePos[1] - self.end_pos[1] - y_scroll
             mouse = pygame.mouse.get_pressed()
 
-            update collision rect with y offset
-            if (self.rect.collidepoint(mousePos) and self.mask.get_at(mousePos_masked)) or self.clicked:
+            # update collision rect with y offset
+            collision_rect = self.rect.copy()
+            collision_rect.y += y_scroll
+            
+            def mask_collide(pos):
+                try: return self.mask.get_at(pos)
+                except IndexError: False
+                
+            if ((collision_rect.collidepoint(mousePos) and mask_collide(mousePos_masked)) or self.clicked) and alpha == 255:
                 if mouse[0]:
+                    for key in ["weapons", "armour", "consumables", "key"]:
+                        for button in self.parent[key].sprites():
+                            button.clicked = False
                     self.clicked = True
-                    # [setattr(button, "clicked", False) for button in self.parent.top_row if button != self]
                 screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2 + y_scroll])
+                
+                item_img = self.item.image.copy()
+                rect = item_img.get_rect(midtop=(self.pos.x + 36, self.pos.y - 2 + y_scroll + 8))
+                screen.blit(self.item_mask, rect.topleft + vec(1,1))
+                screen.blit(item_img, rect)
+
+                screen.blit(self.name_surf_clicked_hidden, (self.pos.x+56+1, self.pos.y - 2 + y_scroll + 12+1))
+                screen.blit(self.name_surf_clicked, (self.pos.x+56, self.pos.y - 2 + y_scroll + 12))
+
+                self.bolt.update(screen, y_scroll)
+                self.info_card()
+
             else:
-                screen.blit(self.base, self.pos + vec(0, y_scroll))
+                item_img = self.item.image.copy()
+                item_mask = self.item_mask.copy()
+                base = self.base.copy()
+                name_surf = self.name_surf.copy()
+                name_surf_hidden = self.name_surf_hidden.copy()
+                if alpha < 255:
+                    item_img.set_alpha(alpha)
+                    item_mask.set_alpha(alpha)
+                    base.set_alpha(alpha)
+                    name_surf.set_alpha(alpha)
+                    name_surf_hidden.set_alpha(alpha)
+                screen.blit(base, self.pos + vec(0, y_scroll))
+                
+                rect = item_img.get_rect(midtop=(self.pos.x + 36, self.pos.y + y_scroll + 8))
+                screen.blit(item_mask, rect.topleft + vec(1,1))
+                screen.blit(item_img, rect)
+
+                screen.blit(name_surf_hidden, (self.pos.x+56+1, self.pos.y+ y_scroll + 12+1))
+                screen.blit(name_surf, (self.pos.x+56, self.pos.y+ y_scroll + 12))
 
     class Item_Card_Display(pygame.sprite.Sprite):
         def __init__(self, parent, pos):
@@ -285,13 +353,16 @@ class Player_Menu:
 
             self.pos = pos
             self.y_scroll = 0
+            self.scroll_speed = 5
             self.item_cards = {key: pygame.sprite.Group() for key in ["weapons", "armour", "consumables", "key"]}
             self.added_items = set()
+
+            self.last_check = "weapons"
 
         def update_cards(self):
             for i, item in enumerate(self.inventory.data):
                 if item not in self.added_items:
-                    card = Player_Menu.Item_Card(self.item_cards, (self.pos[0], self.pos[1]+(i*50)), (i+1)*2)
+                    card = Player_Menu.Item_Card(self.item_cards, item, (self.pos[0], self.pos[1]+(i*50)), (i+1)*2)
                     self.item_cards[item.type].add(card)
                     self.added_items.add(item)
 
@@ -299,12 +370,29 @@ class Player_Menu:
             mousewhl_events = list(filter(lambda e:e.type == pygame.MOUSEWHEEL, self.parent.parent.game.events))
             if len(mousewhl_events) == 0: return
 
-            self.y_scroll += mousewhl_events[0].y
+            self.y_scroll += mousewhl_events[0].y * self.scroll_speed
+            if self.y_scroll > 0:
+                self.y_scroll = 0
 
         def update(self, screen, to_check):
+            if self.last_check != to_check:
+                for card in self.item_cards[self.last_check]:
+                    card.reset()
+                self.y_scroll = 0
+                self.last_check = to_check
+
             self.update_cards()
             self.scroll()
-            self.item_cards[to_check].update(screen, self.y_scroll)
+            for card in self.item_cards[to_check]:
+                alpha = 255
+                if (card.pos.y + self.y_scroll) < self.pos[1]:
+                    dist = max(card.base.get_height()/2 - abs(card.pos.y + self.y_scroll - self.pos[1]), 0)
+                    alpha = (dist / card.base.get_height()/2) * 255
+                elif (card.pos.y + self.y_scroll) > (self.pos[1] + 225):
+                    dist = max(card.base.get_height() / 2 - abs(card.pos.y + self.y_scroll - (self.pos[1] + 225)), 0)
+                    alpha = (dist / (card.base.get_height() / 2)) * 255
+                card.update(screen, alpha, self.y_scroll)
+            # print('*')
 
         ##########################################################################################
 

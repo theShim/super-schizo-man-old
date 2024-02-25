@@ -14,6 +14,7 @@ from scripts.config.SETTINGS import SIZE
 
     ##############################################################################################
 
+#general menu handler for everything
 class Menu:
     def __init__(self, player, game):
         self.player = player
@@ -26,8 +27,8 @@ class Menu:
         self.open = False
         self.loader = "profile"
 
-        self.inventory = Inventory(self)
-        self.display = Player_Menu(self)
+        self.inventory = Inventory(self) #actual data store
+        self.display = Player_Menu(self) #actual display
 
     def draw(self):
         self.game.screen.blit(self.dark, (0, 0))

@@ -91,6 +91,7 @@ class Timer:
 
         self.run = True
 
+    #turn on/off
     def switch(self, flag:bool=None):
         if flag != None: 
             self.run = flag
@@ -110,3 +111,21 @@ class Timer:
                 self.t += self.speed
             else:
                 self.finished = True
+
+    ##############################################################################################
+
+#counting total number of lines written in the directory
+import os                
+def countLinesIn(directory):
+    total_lines = 0
+    uncommented_total = 0
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.py'):
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r') as f:
+                    lines = f.readlines()
+                    total_lines += len(lines)
+
+                    uncommented_total += len(list(filter(lambda l:l[0] != "#", filter(lambda l: len(l), map(lambda l: l.strip(), lines)))))
+    print(f"Total Lines: {total_lines} | Uncommented: {uncommented_total}")

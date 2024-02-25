@@ -50,7 +50,7 @@ CONTROLS = {
     "right"     : pygame.K_d,
     "jump"      : pygame.K_SPACE,
 
-    "heavy"     : pygame.K_h,
+    "heavy"     : pygame.K_h, #might not use these + replace with mouse
     "light"     : pygame.K_j,
     "dash"      : pygame.K_l,
     "switch_l"  : pygame.K_i,

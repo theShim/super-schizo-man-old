@@ -90,12 +90,11 @@ class Item(pygame.sprite.Sprite):
         name_width = Custom_Font.FluffySmall.calc_surf_width(self.name)
         name_height = Custom_Font.FluffySmall.space_height
         sin_offset = 5
-        self.tag = pygame.Surface((name_width + 30, name_height + 11 + sin_offset), pygame.SRCALPHA)
+        self.tag = pygame.Surface((name_width + 34, name_height + 11 + sin_offset), pygame.SRCALPHA)
         # Custom_Font.FluffySmall.render(self.tag, self.name, (255, 255, 255), (28, sin_offset))
-        pygame.draw.line(self.tag, (255, 255, 255), (0, self.tag.get_height()), (10, self.tag.get_height()-10))
-        pygame.draw.line(self.tag, (255, 255, 255), (10, self.tag.get_height()-10), (self.tag.get_width(), self.tag.get_height()-10))
-        pickup_item = pygame.image.load("assets/gui/pickup_item.png").convert_alpha()
-        self.tag.blit(pickup_item, (12, sin_offset))
+        pygame.draw.line(self.tag, (255, 255, 255), (0, self.tag.get_height()), (10, self.tag.get_height()-10), 2)
+        pygame.draw.line(self.tag, (255, 255, 255), (10, self.tag.get_height()-10), (self.tag.get_width(), self.tag.get_height()-10), 2)
+        self.pickup_button = pygame.image.load("assets/gui/pickup_item.png").convert_alpha()
 
         ##########################################################################################
 
@@ -112,7 +111,7 @@ class Item(pygame.sprite.Sprite):
             if self.rect.colliderect(rect):
 
                 if abs(self.rect.bottom - rect.top) < collision_tolerance:
-                    for i in range(abs(self.rect.bottom - rect.top)):
+                    for i in range(int(abs(self.rect.bottom - rect.top))):
                         self.pos.y -= 1
                         self.rect.y = self.pos.y
                     self.landed = True
@@ -144,6 +143,7 @@ class Item(pygame.sprite.Sprite):
             
             a = (self.touched / self.tag.get_width()) * (2*math.pi)
             y = int(3 * math.sin(0.5 * a))
+            screen.blit(self.pickup_button, (tag_pos[0] + 12, tag_pos[1] + 3 - y))
             Custom_Font.FluffySmall.render(screen, self.name, (255, 255, 255), (tag_pos[0] + 28, tag_pos[1] + 3 - y))
 
             self.touched = min(self.touched + 5, self.tag.get_width())

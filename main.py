@@ -36,6 +36,10 @@ from screen_recorder import ScreenRecorder
 
 import asyncio
 
+pygame.Rect = pygame.FRect
+# from scripts.config.CORE_FUNCS import countLinesIn
+# countLinesIn(os.getcwd()) #counts number of lines of code in directory (just for progress counting)
+
     ##############################################################################################
 
 if DEBUG:
