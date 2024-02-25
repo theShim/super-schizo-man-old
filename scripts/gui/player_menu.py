@@ -500,3 +500,7 @@ class Player_Menu:
 
         def update(self, screen):
             screen.blit(self.base, self.pos)
+
+    class Volume_Knob(pygame.sprite.Sprite):
+        def __init__(self, parent, pos):
+            super().__init__()
