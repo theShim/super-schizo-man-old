@@ -474,8 +474,8 @@ class Player_Menu:
             self.end_pos = pos
 
             self.buttons = pygame.sprite.Group()
-            self.buttons.add(Player_Menu.Volume_Slider(self.buttons, [
-                self.end_pos[0] + self.base.get_width() - 80*3, 
+            self.buttons.add(Player_Menu.Volume_Slider(self.buttons, self.parent.parent.game.music_player, [
+                self.end_pos[0] + self.base.get_width() - 80*3 - 24, 
                 self.end_pos[1] + self.base.get_height() - 16*3
             ]))
 
@@ -487,20 +487,90 @@ class Player_Menu:
             self.buttons.update(screen)
 
     class Volume_Slider(pygame.sprite.Sprite):
-        def __init__(self, parent, pos):
+        def __init__(self, parent, mixer, pos):
             super().__init__()
             self.parent = parent
+            self.mixer = mixer
             self.pos = pos
 
-            self.base = pygame.Surface((60, 7), pygame.SRCALPHA)
+            self.base = pygame.Surface((72, 7), pygame.SRCALPHA)
             self.base.fill((20, 16, 32))
-            self.base.fill((39, 37, 60), [0, 0, 60, 2])
-            pygame.draw.rect(self.base, (1, 0, 0), [0, 0, 60, 7], 1)
+            self.base.fill((39, 37, 60), [0, 0, 72, 2])
             self.base = pygame.transform.scale(self.base, vec(self.base.get_size()) * 3)
+            pygame.draw.rect(self.base, (1, 0, 0), self.base.get_rect(), 3)
+
+            self.knob = Player_Menu.Volume_Knob(self, self.mixer, 
+                                                [self.pos[0] + 3, self.pos[1] - 6], 
+                                                [self.pos[0] + self.base.get_width() - 33 - 3, self.pos[1] - 6])
 
         def update(self, screen):
             screen.blit(self.base, self.pos)
 
+            pygame.draw.rect(screen, [17, 158, 214], [self.pos[0] + 3, self.pos[1] + 3, int(self.knob.pos.x - self.knob.start.x), 3])
+            pygame.draw.rect(screen, [65, 243, 252], [self.pos[0] + 3, self.pos[1] + 6, int(self.knob.pos.x - self.knob.start.x), 12])
+
+            vol = str(int(self.mixer.volumes[0] * 100))
+            Custom_Font.Fluffy.render(screen, str(vol), (41, 39, 62), [self.pos[0] + self.base.get_width() + 11, self.pos[1] + 5])
+            Custom_Font.Fluffy.render(screen, str(vol), (210, 210, 210), [self.pos[0] + self.base.get_width() + 10, self.pos[1] + 4])
+
+            Custom_Font.Fluffy.render(screen, "Music:", (41, 39, 62), [self.pos[0] - Custom_Font.Fluffy.calc_surf_width("Music:") - 4, self.pos[1] + 5])
+            Custom_Font.Fluffy.render(screen, "Music:", (210, 210, 210), [self.pos[0] - Custom_Font.Fluffy.calc_surf_width("Music:") - 5, self.pos[1] + 4])
+
+            self.knob.update(screen)
+
     class Volume_Knob(pygame.sprite.Sprite):
-        def __init__(self, parent, pos):
+        def __init__(self, parent, mixer, start, end):
             super().__init__()
+            self.parent = parent
+            self.mixer = mixer
+
+            self.start = vec(start)
+            self.end = vec(end)
+            self.pos = vec(end)
+
+            self.base = pygame.Surface((14-3, 14-3), pygame.SRCALPHA)
+            self.base.fill((57, 58, 74))
+            pygame.draw.rect(self.base, (1, 0, 0), self.base.get_rect(), 1)
+            pygame.draw.line(self.base, (20, 16, 32), [2, 2], [2, 11-3])
+            pygame.draw.line(self.base, (20, 16, 32), [11-3, 2], [11-3, 11-3])
+            pygame.draw.line(self.base, (30, 23, 48), [3, 2], [10-3, 2])
+            pygame.draw.line(self.base, (30, 23, 48), [3, 11-3], [10-3, 11-3])
+            self.base = pygame.transform.scale(self.base, vec(self.base.get_size())*3)
+
+            self.held = False
+
+        def clamp_pos(self):
+            if self.pos.x < self.start.x:
+                self.pos.x = self.start.x
+            if self.pos.x > self.end.x:
+                self.pos.x = self.end.x
+
+        def change_volume(self):
+            dist = abs(self.start.x - self.pos.x)
+            vol = dist / (self.end.x - self.start.x)
+            self.mixer.set_vol(vol, "bg")
+
+        def move(self):
+            mouse = pygame.mouse.get_pressed()
+            mousePos = pygame.mouse.get_pos()
+
+            if mouse[0]:
+                if self.held == False:
+                    if self.base.get_rect(topleft=self.pos).collidepoint(mousePos):
+                        self.held = True
+                else:
+                    self.pos.x = mousePos[0] - self.base.get_width()/2
+                    self.clamp_pos()
+                    self.change_volume()
+            else:
+                self.held = False
+
+        def update(self, screen):
+            self.move()
+
+            screen.blit(self.base, self.pos)
+            if self.base.get_rect(topleft=self.pos).collidepoint(pygame.mouse.get_pos()) or self.held:
+                pygame.draw.rect(screen, [65, 243, 252], [self.pos.x + 6, self.pos.y + 6, 3, 21])
+                pygame.draw.rect(screen, [65, 243, 252], [self.pos.x + self.base.get_width() - 9, self.pos.y + 6, 3, 21])
+                pygame.draw.rect(screen, [17, 158, 214], [self.pos.x + 6, self.pos.y + 6, 21, 3])
+                pygame.draw.rect(screen, [17, 158, 214], [self.pos.x + 6, self.pos.y + self.base.get_height() - 9, 21, 3])

@@ -11,6 +11,7 @@ from tkinter.filedialog import asksaveasfile, askopenfilename
 from scripts.config.SETTINGS import TILE_SIZE, WIDTH, HEIGHT, Z_LAYERS, LOADED_SPRITE_NUMBER
 from scripts.config.CORE_FUNCS import euclidean_distance
 from scripts.world_loading.nature_tiles import Grass
+from scripts.world_loading.nature_stuff import Nature_Manager
 from scripts.world_loading.light_tiles import Torch
 
     ##############################################################################################
@@ -33,7 +34,7 @@ PHYSICS_TILES = {'grass', 'stone'}
 INVISIBLE_TILES = {'spawner'}
 COLLIDEABLE_OFFGRID = {'grass'}
 
-#auto tiling group and settings associating every neighbour hile
+#auto tiling group and settings associating every neighbour tile
 AUTO_TILE_TYPES = {'grass', 'stone'}
 AUTO_TILE_MAP = {
     tuple(sorted([(1, 0), (0, 1)])): 0,
@@ -56,6 +57,8 @@ class Tilemap:
         self.tile_size = tile_size
         self.tile_map = {} #all actual block tiles
         self.offgrid_tiles = [] #all decor tiles
+
+        self.nature_manager = Nature_Manager(game)
 
         self.editor_flag = editor_flag
 
@@ -240,6 +243,7 @@ class Offgrid_Tile:
 
     MIDGROUND_OFFGRID = {'grass'}
     FOREGROUND_OFFGRID = {'torch'}
+    NATURE_GRID = {'grass'}
 
     #same caching system as Tile
     @classmethod

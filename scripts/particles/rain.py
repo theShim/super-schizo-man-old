@@ -40,20 +40,20 @@ class Rain_Particle(pygame.sprite.Sprite):
         self.pos.x += self.top_x
         self.end_pos.x += self.bottom_x
 
-    def tile_collisions(self, offset, tiles):
-        for t in tiles:
-            if (t.pos[0] * TILE_SIZE) - offset.x < self.end_pos[0] - offset.x < (t.pos[0] * TILE_SIZE) - offset.x + TILE_SIZE:
-                if (t.pos[1] * TILE_SIZE) - offset.y < self.end_pos[1] - offset.y < (t.pos[1] * TILE_SIZE) - offset.y + TILE_SIZE:
-                    self.parent.remove(self)
-                    for i in range(random.randint(1, 4)):
-                        self.parent.add(Rain_Splash(self.parent, self.end_pos, random.uniform(1.5, 2.5)))
-                    break
+    def tile_collisions(self, tiles):
+        if len(tiles):
+            probability = int(2000 / len(tiles)) + 1
+            if random.randint(1, probability) == 1:
+                t = random.choice(list(tiles))
+                pos = [random.uniform((t.pos[0] * TILE_SIZE), (t.pos[0] * TILE_SIZE) + TILE_SIZE), (t.pos[1] * TILE_SIZE) + random.uniform(0, TILE_SIZE/2)]
+                for i in range(1, 3):
+                    self.parent.add(Rain_Splash(self.parent, pos, random.uniform(1.5, 2.5)))
         
         
     def update(self, screen, offset, tiles):
         self.move()
         if self.collision:
-            self.tile_collisions(offset, tiles)
+            self.tile_collisions(list(tiles))
         self.draw(screen, offset)
 
     def draw(self, screen, offset):
@@ -64,7 +64,7 @@ class Rain_Splash(pygame.sprite.Sprite):
     def __init__(self, parent, pos, scale):
         super().__init__()
         self.parent = parent
-        self.z = Z_LAYERS["background particle"]
+        self.z = Z_LAYERS["foreground particle"]
 
         self.pos = vec(pos)
         self.scale = scale

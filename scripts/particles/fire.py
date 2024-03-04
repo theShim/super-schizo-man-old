@@ -38,7 +38,7 @@ class Fire_Particle(pygame.sprite.Sprite):
         self.radius -= self.burn_rate
         if self.radius < 0:
             self.parent.remove(self)
-            self.parent.add(Fire_Particle(self.parent, (self.master_pos + vec(random.uniform(-1, 1), random.uniform(-1, 1))), random.uniform(1, 3)))
+            self.parent.add(Fire_Particle(self.parent, (self.master_pos + vec(random.uniform(-1, 1), random.uniform(-1, 1))), random.uniform(1, 3), self.master_pos))
             return True
         
         self.pos.x += random.uniform(-self.radius, self.radius) / 2
@@ -64,4 +64,5 @@ class Fire_Particle(pygame.sprite.Sprite):
 
             radius = self.radius * self.alpha_glow * i**2
             pygame.draw.circle(surf, (255, self.yellow, 0, alpha), list(map(lambda x: x/2, surf.get_size())), radius)
+            # pygame.draw.circle(surf, (255, min(255, self.yellow + 20), 0, alpha), list(map(lambda x: x/2, surf.get_size())), radius*0.6)
         screen.blit(surf, surf.get_rect(center=self.pos-offset))

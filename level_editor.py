@@ -405,7 +405,7 @@ class Editor:
                         else:
                             i = -1 if event.y < 0 else 1
                             self.tile_group = (self.tile_group + i) % len(self.tile_list)
-                            if self.tile_group == len(self.tile_list)-1:
+                            if self.tile_group == len(self.tile_list):
                                 if i > 0: self.tile_group = 0
                                 else: self.tile_group = len(self.tile_list)-1
                             self.tile_variant = 0

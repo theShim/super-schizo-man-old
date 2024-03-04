@@ -77,6 +77,8 @@ class Game:
         for i in range(10):
             self.entities.add(Item.get_item(self, "grains", (WIDTH/2, -100)))
 
+        self.music_player = Music_Player(channel_num=20)        
+
         self.stage_loader = Stage_Loader(self)
         self.player = Player(self, self.entities, 2, self.stage_loader.player_spawn_pos)
 
@@ -86,8 +88,6 @@ class Game:
         self.screen_recorder = None
         self.record_label = self.font.render("REC", False, (255, 255, 255))
         self.record_label_pos = self.record_label.get_rect(topright=(WIDTH-10, 8))
-
-        self.music_player = Music_Player(channel_num=20)
 
  
         ######################################################################################
@@ -242,7 +242,7 @@ Landed: {self.player.landed}"""
                 label = self.font.render(debug_info, False, (255, 255, 255))
                 self.screen.blit(label, (0, 0))
 
-                music_info = f"Music Playing: {self.music_player.background.get_sound().name}"
+                music_info = f"BG Music Playing: {self.music_player.background.get_sound().name} | Vol : {self.music_player.volumes[0] * 100}%"
                 music_label = self.font.render(music_info, False, (255, 255, 255))
                 self.screen.blit(music_label, (0, HEIGHT-music_label.get_height()))
                 
@@ -266,13 +266,13 @@ if __name__ == "__main__":
     asyncio.run(g.run())
 
 
-# if DEBUG:
-#     PROFILER.disable()
-#     PROFILER.dump_stats("scripts/config/profiler.stats")
-#     pstats.Stats("scripts/config/profiler.stats", stream=(s:=io.StringIO())).sort_stats((sortby:=pstats.SortKey.CUMULATIVE)).print_stats()
-#     print(s.getvalue())
+if DEBUG:
+    PROFILER.disable()
+    PROFILER.dump_stats("scripts/config/profiler.stats")
+    pstats.Stats("scripts/config/profiler.stats", stream=(s:=io.StringIO())).sort_stats((sortby:=pstats.SortKey.CUMULATIVE)).print_stats()
+    print(s.getvalue())
 
-#     print(LOADED_SPRITE_NUMBER, 'total sprites initially cached.')
+    print(LOADED_SPRITE_NUMBER, 'total sprites initially cached.')
 
-# pygame.quit()
-# sys.exit()
+pygame.quit()
+sys.exit()

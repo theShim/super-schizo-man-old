@@ -20,7 +20,8 @@ class Music_Player:
             "bg_test0" : Sound("music/test.wav"),
             "memory1" : Sound("music/memory_1.mp3"),
             "typing" : Sound("music/typing.wav"),
-            "tutorial_1" : Sound("music/tutorial/tutorial_ambience.mp3")
+            "tutorial_1" : Sound("music/tutorial/tutorial_ambience1.mp3"),
+            "tutorial_2" : Sound("music/tutorial/tutorial_ambience2.mp3"),
         }
 
         #every sound channel to be used, gonna be more later on
@@ -29,6 +30,10 @@ class Music_Player:
         self.channels = [
             self.background,
             self.typing,
+        ]
+        self.volumes = [ #needs to be the same order as self.channels
+            1.,
+            1.,
         ]
 
     def get_channel(self, channel_name):
@@ -72,10 +77,13 @@ class Music_Player:
     #change vol with float between 0 and 1 for specified channels
     def set_vol(self, vol: float, channel="all"):
         if channel == "all":
-            for c in self.channels:
+            for i, c in enumerate(self.channels):
                 c.set_volume(vol)
+                self.volumes[i] = vol
             return
+        
         self.get_channel(channel).set_volume(vol)
+        self.volumes[self.channels.index(self.get_channel(channel))] = vol #updates volume data store
 
 #normal pygame sound object just with a name attribute
 class Sound(pygame.mixer.Sound):

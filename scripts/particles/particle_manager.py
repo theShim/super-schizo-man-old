@@ -13,7 +13,7 @@ from scripts.config.SETTINGS import Z_LAYERS, WIDTH, HEIGHT, ENVIRONMENT_SETTING
 from scripts.particles.floating_lights import Floating_Light
 from scripts.particles.movement import Run_Particle, Land_Particle
 from scripts.particles.fire import Fire_Particle
-from scripts.particles.rain import Rain_Particle
+from scripts.particles.rain import Rain_Particle, Rain_Splash
 from scripts.particles.rainbow import Rainbow_Particle
 
     ##############################################################################################
@@ -63,10 +63,10 @@ class Particle_Manager:
 
         if ENVIRONMENT_SETTINGS["rain"]:
             # if random.randint(1, 2) == 1: 
-            #     for i in range(random.randint(1, 6)):
-            #         self.add_particle('foreground', 'rain', pos=[random.uniform(offset.x - WIDTH * 0.25, WIDTH * 1.25 + offset.x), offset.y])
+            for i in range(random.randint(1, 6)):
+                self.add_particle('foreground', 'rain', pos=[random.uniform(offset.x - WIDTH * 0.1, WIDTH * 1.1 + offset.x), offset.y - 20])
             for rain in set(filter(lambda spr: isinstance(spr, Rain_Particle), self.foreground_particles)):
                 screen_pos = rain.pos - offset
-                if not (-WIDTH * 0.25 < screen_pos.x < WIDTH * 1.25) and (-HEIGHT * 0.25 < screen_pos.y < HEIGHT * 1.25):
+                if screen_pos.y > HEIGHT:
                     self.foreground_particles.remove(rain)
                 
