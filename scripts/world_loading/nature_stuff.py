@@ -19,3 +19,7 @@ class Nature_Manager:
         self.game = game
         
         self.grass_manager = Grass_Manager(game)
+
+    def render_tiles(self, offset):
+        grass_tiles = [t for t in self.grass_manager.tiles_to_render(offset)]
+        for tile in grass_tiles: yield tile
