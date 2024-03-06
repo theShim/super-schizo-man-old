@@ -17,7 +17,7 @@ from scripts.config.CORE_FUNCS import vec
 
 from scripts.world_loading.tilemap import Tilemap, Tile, Offgrid_Tile
 from scripts.world_loading.backgrounds import Editor_Background
-from scripts.world_loading.nature_tiles import Grass_Blade
+from scripts.world_loading.nature_stuff import Grass_Manager
 
     ##############################################################################################
 
@@ -160,7 +160,7 @@ class Editor:
         self.screen = pygame.display.set_mode(SIZE, flags)
         pygame.display.toggle_fullscreen()
 
-        for tile_gen in [Tile.cache_sprites(), Offgrid_Tile.cache_sprites(), Grass_Blade.cache_sprites()]:
+        for tile_gen in [Tile.cache_sprites(), Offgrid_Tile.cache_sprites(), Grass_Manager.cache_sprites()]:
             while True:
                 try:
                     next(tile_gen)

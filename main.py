@@ -24,11 +24,11 @@ from scripts.gui.custom_fonts import Custom_Font
 from scripts.items.item import Item
 
 from scripts.music.music_player import Music_Player
-
+    
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
 from scripts.world_loading.stages import Stage_Loader
 from scripts.world_loading.backgrounds import Forest_Background
-from scripts.world_loading.nature_tiles import Grass, Grass_Blade
+from scripts.world_loading.nature_stuff import Grass_Manager
 from scripts.world_loading.light_tiles import Torch
 
 
@@ -123,7 +123,7 @@ class Game:
         objects = [t.cache_sprites() for t in [Tile, Offgrid_Tile, 
                                                Forest_Background,
                                                Player, Butterfly, Item,
-                                               Grass_Blade,
+                                               Grass_Manager,
                                                Torch,]]
 
         while self.running:

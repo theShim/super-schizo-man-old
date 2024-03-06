@@ -20,6 +20,12 @@ class Nature_Manager:
         
         self.grass_manager = Grass_Manager(game)
 
+    def add_tile(self, type, pos, variant):
+        if type == "grass":
+            loc = f"{int(pos[0]//TILE_SIZE)};{int(pos[1]//TILE_SIZE)}"
+            self.grass_manager.add_tile(loc, pos, variant)
+
     def render_tiles(self, offset):
+        self.grass_manager.t += 5
         grass_tiles = [t for t in self.grass_manager.tiles_to_render(offset)]
         for tile in grass_tiles: yield tile

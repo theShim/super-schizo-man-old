@@ -32,6 +32,7 @@ NEIGHBOUR_OFFSETS = [
 #tile groups
 PHYSICS_TILES = {'grass', 'stone'}
 INVISIBLE_TILES = {'spawner'}
+NATURE_TILES = {'grass'}
 COLLIDEABLE_OFFGRID = {'grass'}
 
 #auto tiling group and settings associating every neighbour tile
@@ -125,8 +126,11 @@ class Tilemap:
 
         self.offgrid_tiles = []
         for tile in data['offgrid']:
-            to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
-            self.offgrid_tiles.append(to_add)
+            if tile["type"] in NATURE_TILES and self.editor_flag == False:
+                self.nature_manager.add_tile(tile["type"], tile["pos"], tile["variant"])
+            else:
+                to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
+                self.offgrid_tiles.append(to_add)
         self.tile_size = data['tile_size']
 
         ######################################################################################
@@ -243,7 +247,6 @@ class Offgrid_Tile:
 
     MIDGROUND_OFFGRID = {'grass'}
     FOREGROUND_OFFGRID = {'torch'}
-    NATURE_GRID = {'grass'}
 
     #same caching system as Tile
     @classmethod
