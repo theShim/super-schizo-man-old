@@ -12,7 +12,6 @@ from scripts.items.item import Item
 
 from scripts.world_loading.tilemap import Tilemap
 from scripts.world_loading.backgrounds import *
-from scripts.world_loading.nature_tiles import Grass
 from scripts.world_loading.light_tiles import Torch
 
 from scripts.particles.floating_lights import Floating_Light
@@ -111,9 +110,7 @@ class Stage:
                 key=lambda spr:spr.z
             ):
 
-            if isinstance(spr, Grass):
-                spr.update(self.screen, self.game.offset, player)
-            elif isinstance(spr, Torch):
+            if isinstance(spr, Torch):
                 spr.update(self.screen, self.game.offset, self.particle_manager)
             elif isinstance(spr, Player):
                 spr.update(self.screen, self.game.offset, self.particle_manager)

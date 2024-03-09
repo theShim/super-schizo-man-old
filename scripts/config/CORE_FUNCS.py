@@ -38,6 +38,15 @@ def gaussian_blur(surf, radius=6):
     blurred_surface = pygame.image.fromstring(pil_blurred.tobytes(), pil_blurred.size, "RGBA")
     return blurred_surface
 
+def normalize(val, amt, target):
+    if val > target + amt:
+        val -= amt
+    elif val < target - amt:
+        val += amt
+    else:
+        val = target
+    return val
+
 #bezier stuff
 def ptOnCurve(b, t):
     q = b.copy()

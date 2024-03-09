@@ -6,6 +6,7 @@ import contextlib
 with contextlib.redirect_stdout(None):
     import pygame
     from pygame.locals import *
+    pygame.Rect = pygame.FRect #supports decimals x and y values
     
 import sys
 import time
@@ -28,7 +29,7 @@ from scripts.music.music_player import Music_Player
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
 from scripts.world_loading.stages import Stage_Loader
 from scripts.world_loading.backgrounds import Forest_Background
-from scripts.world_loading.nature_stuff import Grass_Manager
+from scripts.world_loading.nature import Grass_Manager
 from scripts.world_loading.light_tiles import Torch
 
 
@@ -36,7 +37,6 @@ from screen_recorder import ScreenRecorder
 
 import asyncio
 
-pygame.Rect = pygame.FRect
 # from scripts.config.CORE_FUNCS import countLinesIn
 # countLinesIn(os.getcwd()) #counts number of lines of code in directory (just for progress counting)
 

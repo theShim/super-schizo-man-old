@@ -10,8 +10,7 @@ from tkinter.filedialog import asksaveasfile, askopenfilename
 
 from scripts.config.SETTINGS import TILE_SIZE, WIDTH, HEIGHT, Z_LAYERS, LOADED_SPRITE_NUMBER
 from scripts.config.CORE_FUNCS import euclidean_distance
-from scripts.world_loading.nature_tiles import Grass
-from scripts.world_loading.nature_stuff import Nature_Manager
+from scripts.world_loading.nature import Nature_Manager
 from scripts.world_loading.light_tiles import Torch
 
     ##############################################################################################
@@ -273,8 +272,6 @@ class Offgrid_Tile:
             return tile
         
         match type:
-            case "grass":
-                return Grass(pos, variant)
             case "torch":
                 return Torch(pos, variant)
             case _:

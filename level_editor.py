@@ -17,7 +17,7 @@ from scripts.config.CORE_FUNCS import vec
 
 from scripts.world_loading.tilemap import Tilemap, Tile, Offgrid_Tile
 from scripts.world_loading.backgrounds import Editor_Background
-from scripts.world_loading.nature_stuff import Grass_Manager
+from scripts.world_loading.nature import Grass_Manager
 
     ##############################################################################################
 

@@ -1,3 +1,4 @@
 -radar graphs for skills/stats
 -skill tree in general
--futuristic HUD? (lighting up lines, )
+-grabbable vines
+-verlet bridges
