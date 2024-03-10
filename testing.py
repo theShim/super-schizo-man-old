@@ -50,11 +50,9 @@ def euclidean_distance(point1, point2):
 WIND = 0
 
 class Vine:
-    def __init__(self, pos, variant, scale=4):
+    def __init__(self, pos, variant, scale=2):
         self.pos = pos
         self.variant = variant
-
-        self.wind_offset = math.radians(self.pos[0] // 4)
 
         self.points = np.array([(0, 0), (2, 0), (4, 0), (6, 0),
                        (3, 2),
@@ -90,13 +88,16 @@ class Vine:
                       (12, 10, 13, 15), (12, 11, 14, 16),
                       (12, 15, 17), (12, 16, 17)]
 
+        self.wind_offset = math.radians(self.pos[0] // 4)
+        self.max_size = [np.max((self.points - pos)[:, 0]), np.max((self.points - pos)[:, 1])]
+
     def move(self):
         temp = self.points.copy()
 
         delta = (self.points - self.old_points)
         delta *= (FRIC:=0.9)
         delta[:, 1] += (GRAV:=9.81/4)
-        # delta[:, 0] += math.sin(WIND + self.wind_offset) #+ random.random() / 2
+        # delta[:, 0] += math.sin(WIND + self.wind_offset + random.random() / 6)
         immovable_mask = np.zeros_like(self.points, dtype=bool)
         immovable_mask[self.pinned] = True
         delta[immovable_mask] = 0

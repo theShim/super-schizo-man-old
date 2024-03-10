@@ -2,3 +2,8 @@
 -skill tree in general
 -grabbable vines
 -verlet bridges
+-day-night cycle on certain stages (background)
+-other weather conditions e.g. snow
+-seasonal changes
+-temperature
+-water

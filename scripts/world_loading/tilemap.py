@@ -31,7 +31,7 @@ NEIGHBOUR_OFFSETS = [
 #tile groups
 PHYSICS_TILES = {'grass', 'stone'}
 INVISIBLE_TILES = {'spawner'}
-NATURE_TILES = {'grass'}
+NATURE_TILES = {'grass', 'swaying_vine'}
 COLLIDEABLE_OFFGRID = {'grass'}
 
 #auto tiling group and settings associating every neighbour tile
@@ -117,11 +117,14 @@ class Tilemap:
 
         self.tile_map = {}
         for dic in data['tilemap']:
-            self.tile_map[dic] = Tile(
-                data['tilemap'][dic]['type'],
-                data['tilemap'][dic]['pos'],
-                data['tilemap'][dic]['variant'],
-            )
+            if data['tilemap'][dic]['type'] == "water":
+                self.nature_manager.add_tile("water", data['tilemap'][dic]['pos'], data['tilemap'][dic]['variant'])
+            else:
+                self.tile_map[dic] = Tile(
+                    data['tilemap'][dic]['type'],
+                    data['tilemap'][dic]['pos'],
+                    data['tilemap'][dic]['variant'],
+                )
 
         self.offgrid_tiles = []
         for tile in data['offgrid']:

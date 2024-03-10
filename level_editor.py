@@ -106,6 +106,7 @@ class Editor:
             "grass" : load_tiles('grass'),
             "stone" : load_tiles('stone'),
             "spawner" : load_tiles('spawner'),
+            "water" : load_tiles('water')
         }
         self.tile_list = list(self.assets)
         self.tile_group = 0
@@ -114,7 +115,8 @@ class Editor:
         self.offgrid_assets = {
             "boxes" : load_offgrid('boxes'),
             "grass" : load_offgrid('grass'),
-            "torch" : load_offgrid('torch')
+            "torch" : load_offgrid('torch'),
+            "swaying_vine" : load_offgrid("swaying_vine")
         }
         self.offgrid_list = list(self.offgrid_assets)
         self.offgrid_group = 0

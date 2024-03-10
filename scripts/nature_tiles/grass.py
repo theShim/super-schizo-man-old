@@ -169,7 +169,7 @@ class Grass_Tile:
         if self.pushed_blade_data:
             matching = True
             for i, blade in enumerate(self.pushed_blade_data):
-                stiffness = 36
+                stiffness = 15
                 blade[2] = normalize(blade[2], stiffness, self.grass_blades[i]["angle"])
                 if blade[2] != self.grass_blades[i]["angle"]:
                     matching = False
