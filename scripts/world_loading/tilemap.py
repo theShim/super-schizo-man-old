@@ -125,6 +125,7 @@ class Tilemap:
                     data['tilemap'][dic]['pos'],
                     data['tilemap'][dic]['variant'],
                 )
+        self.nature_manager.clump_water()
 
         self.offgrid_tiles = []
         for tile in data['offgrid']:

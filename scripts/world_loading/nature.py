@@ -10,6 +10,7 @@ import numpy as np
 
 from scripts.nature_tiles.grass import Grass_Manager
 from scripts.nature_tiles.vines import Swaying_Vine
+from scripts.nature_tiles.water import Water, segment_water
 
 from scripts.config.SETTINGS import TILE_SIZE, Z_LAYERS
 from scripts.config.CORE_FUNCS import euclidean_distance
@@ -21,19 +22,35 @@ class Nature_Manager:
         self.game = game
         
         self.grass_manager = Grass_Manager(game)
+        self.water_tiles = {}
         self.others = []
 
     def add_tile(self, type, pos, variant):
         if type == "grass":
             loc = f"{int(pos[0]//TILE_SIZE)};{int(pos[1]//TILE_SIZE)}"
             self.grass_manager.add_tile(loc, pos, variant)
+
+        elif type == "water":
+            self.water_tiles[tuple(pos)] = variant
+
         else:
             match type:
                 case "swaying_vine":
                     tile = Swaying_Vine(pos, variant)
-                case "water":
-                    tile = Swaying_Vine([pos[0]*TILE_SIZE, pos[1]*TILE_SIZE], variant)
             self.others.append(tile)
+
+    def clump_water(self):
+        groups = segment_water(self.water_tiles)
+        for g in groups:
+            positions = list(map(lambda t:t[0], g))
+            xs, ys = list(zip(*positions))
+
+            x = min(xs)
+            y = min(ys)
+            width = max(xs) - min(xs) + 1
+            height = max(ys) - min(ys) + 1
+            variant = g[0][1]
+            self.others.append(Water([x, y], [width, height], variant))
 
     def render_tiles(self, offset):
         self.grass_manager.t += 5
