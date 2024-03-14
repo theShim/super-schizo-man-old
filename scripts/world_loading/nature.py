@@ -41,6 +41,7 @@ class Nature_Manager:
 
     def clump_water(self):
         groups = segment_water(self.water_tiles)
+        self.water_tiles = []
         for g in groups:
             positions = list(map(lambda t:t[0], g))
             xs, ys = list(zip(*positions))
@@ -50,12 +51,14 @@ class Nature_Manager:
             width = max(xs) - min(xs) + 1
             height = max(ys) - min(ys) + 1
             variant = g[0][1]
-            self.others.append(Water([x, y], [width, height], variant))
+            self.water_tiles.append(Water([x, y], [width, height], variant))
 
     def render_tiles(self, offset):
         self.grass_manager.t += 5
         self.grass_manager.player_force()
         grass_tiles = [t for t in self.grass_manager.tiles_to_render(offset)]
         for tile in grass_tiles: yield tile
+        
+        for tile in self.water_tiles: tile.player_collision(self.game.player); yield tile
 
         for tile in self.others: yield tile

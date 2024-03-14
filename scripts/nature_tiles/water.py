@@ -14,10 +14,10 @@ from scripts.config.CORE_FUNCS import vec, euclidean_distance
 
     ##############################################################################################
 
-def get_curve(points):
-    x_new = np.arange(points[0].x, points[-1].x, 1)
-    x = np.array([i.x for i in points[:-1]])
-    y = np.array([i.y for i in points[:-1]])
+def get_curve(points, interval=1):
+    x_new = np.arange(points[0].x, points[-1].x, interval)
+    x = np.array([i.x for i in points])
+    y = np.array([i.y for i in points])
     f = interp1d(x, y, kind='cubic', fill_value='extrapolate')
     y_new = f(x_new)
     x1 = list(x_new)
@@ -105,6 +105,15 @@ class Water:
             except IndexError:
                 pass
 
+    def player_collision(self, player):
+        if player.vel.y <= 0:
+            return
+        
+        for spring in self.springs.sprites():
+            if spring.pinned: continue
+            if player.hitbox.collidepoint(spring.pos):
+                spring.pos.y += 1.1 ** player.vel.y
+
     def update(self, screen, offset):
         self.springs.update(screen, offset)
         self.spread_wave()
@@ -114,6 +123,7 @@ class Water:
     def draw(self, screen, offset):
         springs = self.springs.sprites().copy()
         points = get_curve(list(map(lambda s: s.pos, springs)))
+        # pygame.draw.circle(screen, (255, 0, 255), points[-1] - offset, 4)
 
         # surf = pygame.Surface(self.size, pygame.SRCALPHA)
         # surf.fill(self.col)
@@ -131,7 +141,6 @@ class Water:
         screen.blit(surf, (0, 0))
 
         for i in range(2, len(points)):
-            # pygame.gfxdraw.bezier(screen, [springs[i-2].pos, springs[i-1].pos, springs[i].pos], 2, (255, 255, 255))
             pygame.draw.line(screen, (255, 255, 255), points[i-1] - offset, points[i] - offset)
 
     ##############################################################################################

@@ -117,7 +117,7 @@ class Tilemap:
 
         self.tile_map = {}
         for dic in data['tilemap']:
-            if data['tilemap'][dic]['type'] == "water":
+            if data['tilemap'][dic]['type'] == "water" and self.editor_flag == False:
                 self.nature_manager.add_tile("water", data['tilemap'][dic]['pos'], data['tilemap'][dic]['variant'])
             else:
                 self.tile_map[dic] = Tile(
