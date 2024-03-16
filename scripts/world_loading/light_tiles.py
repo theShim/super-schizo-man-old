@@ -13,7 +13,7 @@ from scripts.config.CORE_FUNCS import vec
 
     ##############################################################################################
 
-class Torch:
+class Torch(pygame.sprite.Sprite):
 
     @classmethod
     def cache_sprites(cls):
@@ -25,6 +25,7 @@ class Torch:
             yield
 
     def __init__(self, pos, variant):
+        super().__init__()
         self.type = 'torch'
         self.variant = variant
         self.pos = pos

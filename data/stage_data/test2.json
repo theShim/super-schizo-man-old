@@ -10575,6 +10575,30 @@
                 31,
                 -7
             ]
+        },
+        "46;-8": {
+            "type": "spawner",
+            "variant": 0,
+            "pos": [
+                46,
+                -8
+            ]
+        },
+        "70;-18": {
+            "type": "spawner",
+            "variant": 0,
+            "pos": [
+                70,
+                -18
+            ]
+        },
+        "19;-33": {
+            "type": "spawner",
+            "variant": 0,
+            "pos": [
+                19,
+                -33
+            ]
         }
     },
     "tile_size": 24,

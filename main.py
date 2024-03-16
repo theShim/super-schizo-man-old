@@ -206,6 +206,7 @@ class Game:
     async def run(self):
         if DEBUG:   
             PROFILER.enable()
+            timer = 0
 
         last_time = time.perf_counter()
         while self.running:  
@@ -232,24 +233,26 @@ class Game:
 
             #FPS
             if DEBUG:
-                debug_info = (
+                # timer += 1
+                if timer % 1 == 0:
+                    debug_info = (
 f"""FPS: {int(self.clock.get_fps())}
 Pos: {[int(self.player.rect.x), int(self.player.rect.y)*-1]}
 Vel: {list(map(lambda x: round(x, 1), self.player.vel))}
 Jumps: {self.player.jumps}
 Landed: {self.player.landed}"""
-                )
-                label = self.font.render(debug_info, False, (255, 255, 255))
-                self.screen.blit(label, (0, 0))
+                    )
+                    label = self.font.render(debug_info, False, (255, 255, 255))
+                    self.screen.blit(label, (0, 0))
 
-                music_info = f"BG Music Playing: {self.music_player.background.get_sound().name} | Vol : {self.music_player.volumes[0] * 100}%"
-                music_label = self.font.render(music_info, False, (255, 255, 255))
-                self.screen.blit(music_label, (0, HEIGHT-music_label.get_height()))
-                
+                    music_info = f"BG Music Playing: {self.music_player.background.get_sound().name} | Vol : {self.music_player.volumes[0] * 100}%"
+                    music_label = self.font.render(music_info, False, (255, 255, 255))
+                    self.screen.blit(music_label, (0, HEIGHT-music_label.get_height()))
+                    
 
-                #rects around the player
-                for rect in self.stage_loader.tilemap.physics_rects_around(self.player.hitbox.center):
-                    pygame.draw.rect(self.screen, (255, 0, 255), [rect.x - self.offset.x, rect.y - self.offset.y, *rect.size], 2)
+                    #rects around the player
+                    for rect in self.stage_loader.tilemap.physics_rects_around(self.player.hitbox.center):
+                        pygame.draw.rect(self.screen, (255, 0, 255), [rect.x - self.offset.x, rect.y - self.offset.y, *rect.size], 2)
 
             if self.camera_flag:
                 self.screen.blit(self.record_label, self.record_label_pos)

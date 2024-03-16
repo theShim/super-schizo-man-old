@@ -23,7 +23,7 @@ def get_curve(points, interval=1):
     x1 = list(x_new)
     y1 = list(y_new)
     points = [vec(x1[i], y1[i]) for i in range(len(x1))]
-    return points
+    return points, (minmax:=[min(x1), max(x1), min(y1), max(y1)])
 
     ##############################################################################################
 
@@ -53,20 +53,22 @@ class Water_Spring(pygame.sprite.Sprite):
         if self.held:
             self.pos.y = vec(mousePos).y + offset.y
 
-    def move(self):
+    def move(self, flag):
         if self.pinned:
             return 
         
         dh = self.target_height - self.pos.y
         if abs(dh) < 0.01:
             self.pos.y = self.target_height
+        else:
+            flag[0] = True
         
         self.vel += self.tension * dh - self.vel * self.dampening
         self.pos.y += self.vel
 
-    def update(self, screen, offset):
+    def update(self, screen, offset, flag:list[bool]):
         self.mouse_collide(offset)
-        self.move()
+        self.move(flag)
         # self.draw(screen, offset)
 
     def draw(self, screen, offset):
@@ -77,14 +79,20 @@ class Water_Spring(pygame.sprite.Sprite):
 
             pygame.draw.circle(screen, (255, 255, 255), self.pos - offset, self.radius)
 
-class Water:
+class Water(pygame.sprite.Sprite):
     def __init__(self, pos, size, variant):
+        super().__init__()
         self.pos = vec(pos) * TILE_SIZE
         self.variant = variant
         self.size = vec(size) * TILE_SIZE
         self.z = Z_LAYERS["midground offgrid"]
         
         self.col = [(0, 134, 191, 64), ][variant]
+        self.moving = False
+        self.idle = pygame.Surface((self.size.x, self.size.y - TILE_SIZE//8), pygame.SRCALPHA)
+        self.idle.fill(self.col)
+        self.idle.set_alpha(192)
+        pygame.draw.line(self.idle, (255, 255, 255), (0,0), (self.size.x, 0))
         # self.image.set_alpha((65))
 
         self.springs = pygame.sprite.Group()
@@ -115,33 +123,41 @@ class Water:
                 spring.pos.y += 1.1 ** player.vel.y
 
     def update(self, screen, offset):
-        self.springs.update(screen, offset)
         self.spread_wave()
+        flag = [False]
+        self.springs.update(screen, offset, flag)
+        
+        if flag[0]:
+            self.moving = True
+        else:
+            self.moving = False
 
         self.draw(screen, offset)
 
     def draw(self, screen, offset):
-        springs = self.springs.sprites().copy()
-        points = get_curve(list(map(lambda s: s.pos, springs)))
-        # pygame.draw.circle(screen, (255, 0, 255), points[-1] - offset, 4)
+        if self.moving:
+            springs = self.springs.sprites().copy()
+            points, minmax = get_curve(list(map(lambda s: s.pos, springs)))
 
-        # surf = pygame.Surface(self.size, pygame.SRCALPHA)
-        # surf.fill(self.col)
-        # screen.blit(surf, self.pos - offset + vec(0, TILE_SIZE//8))
+            buffer_width = minmax[1] - minmax[0]
+            buffer_height = minmax[3] - minmax[2]
+            if buffer_height < 0.01: buffer_height = 0
+            surf = pygame.Surface((buffer_width + self.size[0], buffer_height + self.size[1]), pygame.SRCALPHA)
+            pygame.draw.polygon(
+                surf,
+                self.col,
+                [vec(self.pos[0]-minmax[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8), 
+                *list(map(lambda p:p-vec(minmax[0], minmax[2]-TILE_SIZE//8), points)), 
+                vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8)]
+            )
+            surf.set_alpha(192)
+            screen.blit(surf, self.pos - offset)
 
-        surf = pygame.Surface(SIZE, pygame.SRCALPHA)
-        pygame.draw.polygon(
-            surf,
-            self.col,
-            [vec(self.pos[0], self.pos[1]+self.size[1]) - offset, 
-             *list(map(lambda p:p-offset, points)), 
-             vec(self.pos[0]+self.size[0], self.pos[1]+self.size[1]) - offset]
-        )
-        surf.set_alpha(192)
-        screen.blit(surf, (0, 0))
-
-        for i in range(2, len(points)):
-            pygame.draw.line(screen, (255, 255, 255), points[i-1] - offset, points[i] - offset)
+            for i in range(1, len(points)):
+                pygame.draw.line(screen, (255, 255, 255), points[i-1] - offset, points[i] - offset)
+        else:
+            springs = self.springs.sprites().copy()
+            screen.blit(self.idle, self.pos-offset+vec(0, TILE_SIZE//8))
 
     ##############################################################################################
 

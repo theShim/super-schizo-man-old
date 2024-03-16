@@ -27,6 +27,7 @@ class Particle_Manager:
         # for i in range(20):
         #     self.add_particle('foreground', 'float_light', pos=[random.uniform(0, WIDTH*2), random.uniform(-HEIGHT, HEIGHT)])
 
+        self.start = True
         self.to_cull = {'rain', 'float_light'}
 
     def reset(self):
@@ -54,12 +55,14 @@ class Particle_Manager:
             self.background_particles.add(particle)
     
     def update(self, offset):
-        #float lights
-        if self.stage == "forest":
-            if random.randint(1, 500) == 1:
-                for i in range(random.randint(1, 4)):
-                    self.add_particle('foreground', 'float_light', pos=[random.uniform(0, WIDTH*2), random.uniform(-HEIGHT, HEIGHT)])
-        # REMEMBER TO ADD OFFSCREEN CULLING
+        if self.start:
+            #float lights
+            if self.stage == "forest":
+                for i in range((n:=random.randint(10, 15))):
+                    self.add_particle('foreground', 'float_light', pos=[((i+1)/n)*WIDTH + random.uniform(-50, 50), random.uniform(0, HEIGHT)])
+
+            self.start = False
+            # REMEMBER TO ADD OFFSCREEN CULLING
 
         if ENVIRONMENT_SETTINGS["rain"]:
             # if random.randint(1, 2) == 1: 

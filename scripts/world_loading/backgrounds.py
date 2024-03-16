@@ -112,12 +112,12 @@ class Perlin_Background:
         self.og_offset = int((self.game.offset.x + self.game.offset.y)/1000)
     
     def update(self):
-        current_offset = round((self.game.offset.x + self.game.offset.y)/1000, 2)
-        self.NOISE -= max(-0.01, self.og_offset - current_offset)
-        self.og_offset = current_offset
+        target_offset = ((self.game.offset.x + self.game.offset.y)/1000) % 4.1
+        self.NOISE -= min(max(-0.01, self.og_offset - target_offset), 0.01)
+        self.og_offset += (target_offset - self.og_offset) * .1
 
         try:
-            surf = self.CACHE[self.og_offset]
+            surf = self.CACHE[round(self.og_offset, 2)]
         except:
             surf = pygame.surfarray.make_surface(self.add_colour(self.NOISE))
             surf = pygame.transform.scale(surf, pygame.math.Vector2(surf.get_size())*4)

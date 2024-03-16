@@ -202,7 +202,7 @@ class Tilemap:
 
     ##############################################################################################
 
-class Tile:
+class Tile(pygame.sprite.Sprite):
 
     @classmethod
     def cache_sprites(cls):
@@ -226,6 +226,7 @@ class Tile:
         ######################################################################################
 
     def __init__(self, type, pos, variant=1):
+        super().__init__()
         self.type = type #tile type e.g. grass
         self.variant = variant #tile variant e.g. grass_8
         self.pos = pos
@@ -246,7 +247,7 @@ class Tile:
         ])
 
 
-class Offgrid_Tile:
+class Offgrid_Tile(pygame.sprite.Sprite):
 
     MIDGROUND_OFFGRID = {'grass'}
     FOREGROUND_OFFGRID = {'torch'}
@@ -284,6 +285,7 @@ class Offgrid_Tile:
         ######################################################################################
     
     def __init__(self, type, pos, variant):
+        super().__init__()
         self.type = type
         self.variant = variant
         self.pos = pos

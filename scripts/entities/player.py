@@ -54,6 +54,7 @@ class Player(pygame.sprite.Sprite):
         self.z = Z_LAYERS['player']
 
         self.image = self.sprites[self.status].get_sprite()
+        self.spawn_pos = spawn_pos
         self.rect = self.image.get_rect(topleft=spawn_pos)
         self.size = self.image.get_size()
         self.direction = 'left'
@@ -123,7 +124,11 @@ class Player(pygame.sprite.Sprite):
         if -0.5 < self.vel.x < 0.5:
             self.vel.x = 0
 
-        self.rect.topleft += self.vel * self.game.dt
+        self.rect.topleft += self.vel# * self.game.dt
+
+        if self.rect.bottom > HEIGHT*3:
+            self.rect.topleft = self.spawn_pos
+            self.vel.y = 0
 
     def move(self, keys, particle_manager):
         self.acc = vec(0, GRAV)

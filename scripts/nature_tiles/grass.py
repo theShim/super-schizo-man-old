@@ -79,8 +79,9 @@ class Grass_Manager:
 
         surf.blit(rot_img, (pos[0] - rot_img.get_width() // 2, pos[1] - rot_img.get_height() // 2))
 
-class Grass_Tile:
+class Grass_Tile(pygame.sprite.Sprite):
     def __init__(self, manager, pos, variant, id, grass_config:list[int] = [0, 1, 2, 3]):
+        super().__init__()
         self.manager: Grass_Manager = manager
 
         self.type = 'grass'

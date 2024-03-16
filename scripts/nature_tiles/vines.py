@@ -13,8 +13,9 @@ from scripts.config.CORE_FUNCS import vec, euclidean_distance
 
     ##############################################################################################
 
-class Swaying_Vine:
+class Swaying_Vine(pygame.sprite.Sprite):
     def __init__(self, pos, variant, scale=2):
+        super().__init__()
         self.pos = pos
         self.variant = variant
         self.z = Z_LAYERS["midground offgrid"]
