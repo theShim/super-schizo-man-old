@@ -13,6 +13,7 @@ from scripts.config.SETTINGS import WIDTH, HEIGHT, FPS
 from scripts.config.CORE_FUNCS import vec, Timer
 
 from scripts.gui.custom_fonts import Custom_Font
+from scripts.gui.star_waypoint_thing import Starry_Background
 
 from scripts.particles.lightning import Lightning
 
@@ -40,18 +41,14 @@ class Player_Menu:
             x += e.base.get_width() + 10
         self.item_card_display = self.Item_Card_Display(self, (20, 80))
 
+        self.waypoint_map = self.Waypoint_Map()
+
         self.settings_case = self.Settings_Case(self, (36, e.base.get_height() - 12))
 
     def reset(self):
         pass
 
     def update(self, screen):
-        self.top_row.update(screen)
-
-        for b in self.top_row.sprites():
-            if b.name == self.parent.loader:
-                b.clicked = True
-                break
 
         for b in self.top_row.sprites():
             if b.clicked:
@@ -68,6 +65,9 @@ class Player_Menu:
 
                     self.item_card_display.update(screen, to_check)
                     self.item_buttons.update(screen)
+
+                elif b.name == "map":
+                    self.waypoint_map.update(screen)
                     
                 elif b.name == "settings":
                     self.settings_case.update(screen)
@@ -87,6 +87,11 @@ class Player_Menu:
                                 item_button.clicked = True
                                 item_button.switch_end_pos(1)
 
+        self.top_row.update(screen)
+        for b in self.top_row.sprites():
+            if b.name == self.parent.loader:
+                b.clicked = True
+                break
 
         ##########################################################################################
 
@@ -453,6 +458,13 @@ class Player_Menu:
     class Map(Top_Button):
         def __init__(self, parent, pos, y_transition_offset=0):
             super().__init__(parent, "map", pos, y_transition_offset)
+
+    class Waypoint_Map:
+        def __init__(self):
+            self.bg = Starry_Background()
+
+        def update(self, screen):
+            self.bg.update(screen)
 
         ##########################################################################################
 

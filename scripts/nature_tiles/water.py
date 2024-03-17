@@ -120,7 +120,7 @@ class Water(pygame.sprite.Sprite):
         for spring in self.springs.sprites():
             if spring.pinned: continue
             if player.hitbox.collidepoint(spring.pos):
-                spring.pos.y += 1.1 ** player.vel.y
+                spring.pos.y += min(10, 1.2 ** player.vel.y)
 
     def update(self, screen, offset):
         self.spread_wave()

@@ -131,6 +131,7 @@ def countLinesIn(directory):
     for root, _, files in os.walk(directory):
         for file in files:
             if file.endswith('.py'):
+                print(file)
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r') as f:
                     lines = f.readlines()
