@@ -13,7 +13,7 @@ from scipy.spatial import KDTree, delaunay_plot_2d
 from scripts.gui.custom_fonts import Custom_Font
 
 from scripts.config.SETTINGS import WIDTH, HEIGHT, FPS
-from scripts.config.CORE_FUNCS import vec, Timer
+from scripts.config.CORE_FUNCS import vec, vec3, Timer
 from scripts.config.MATRIX_FUNCS import MatrixFunctions as mf
 
     ##############################################################################################
@@ -114,7 +114,7 @@ class Star:
     def __init__(self, z=None):
         self.pos_3d = self.get_pos_3d()
         self.pos_3d.z = z if z != None else self.pos_3d.z
-        c = random.uniform(160, 255)
+        c = random.uniform(160, 255) - 40
         self.color = (c, c, c)
         self.size = 10
 
@@ -156,18 +156,37 @@ class Star:
 class Sphere:
     def __init__(self):
         self.colour = (200, 0, 200)
-        self.radius = 128
+        self.radius = 64
         self.vel = 0.125
         self.rots = [0, 0, 0]
         self.scale = 100
 
-        self.points = []
+        self.camera = vec3(0, 0, -500)
+        self.projection_plane = 500
+        self.points = [Sphere_Point(self) for i in range(12)]
+    
+    def camera_move(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            self.camera.z -= 0.5
+        if keys[pygame.K_s]:
+            self.camera.z += 0.5
 
     def update(self, screen):
+        self.rots[1] += math.radians(0.5)
+
+        self.camera_move()
         self.draw(screen)
 
     def draw(self, screen):
-        pass
+        for point in self.points:
+            point.update(screen)
+
+        for i in range(len(self.points)):
+            start = self.points[i-1].get_pos_2d()
+            end = self.points[i].get_pos_2d()
+
+            pygame.draw.line(screen, (200, 0, 255), start, end, 1)
 
 class Sphere_Point:
     def __init__(self, parent):
@@ -177,24 +196,45 @@ class Sphere_Point:
         self.colour = [200, 0, 200]
         self.radius = 10
 
+        self.angle_offset = math.radians(random.uniform(0, 1))
+        self.angle_mod = math.radians(random.uniform(0, 1)) / 10
+
     def get_rand_pos(self):
-        return None
+        r = self.parent.radius
+        point = [random.uniform(-r, r), random.uniform(-r, r), random.uniform(-r, r)]
+        return point
     
-    def move(self):
-        pass
+    def rotate_3d(self, point3D):
+        rotated_point = np.dot(mf.rotate_y(self.parent.rots[1] + self.angle_offset), point3D)
+        return rotated_point
+    
+    def get_pos_2d(self):
+        point3D = self.pos.copy()
+        camera = self.parent.camera
+        projection_plane = self.parent.projection_plane
+
+        point3D = self.rotate_3d(point3D)
+
+        x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + WIDTH / 2
+        y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + HEIGHT / 2
+        return (x, y)
+    
+    def get_z_distance(self):
+        point3D = self.pos.copy()
+        camera = self.parent.camera
+
+        z_distance = math.sqrt((point3D[0] - camera[0]) ** 2 + (point3D[1] - camera[1]) ** 2 + (point3D[2] - camera[2]) ** 2)
+        return z_distance
     
     def update(self, screen):
-        self.move()
+        self.angle_offset += self.angle_mod
         self.draw(screen)
 
     def draw(self, screen):
+        x, y = self.get_pos_2d()
+        
+        z_distance = self.get_z_distance()
+        radius = max(1, int(1000 / z_distance))
 
-        pos = self.pos
-        pos = mf.multiply_matrix(mf.rotate_x(self.parent.rots[0]), pos)
-        pos = mf.multiply_matrix(mf.rotate_y(self.parent.rots[1]), pos)
-        pos = mf.multiply_matrix(mf.rotate_z(self.parent.rots[2]), pos)
-        point_2d = mf.multiply_matrix(mf.PROJECTION_MATRIX, pos)
-
-        x = point_2d[0] * self.parent.scale + (WIDTH//2)
-        y = point_2d[1] * self.parent.scale + (HEIGHT//2)
-        self.pos_2d = (x, y)
+        # Draw the projected point
+        pygame.draw.circle(screen, (255, 0, 255), (int(x), int(y)), radius)

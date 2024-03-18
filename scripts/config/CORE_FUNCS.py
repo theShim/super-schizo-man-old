@@ -9,6 +9,7 @@ from PIL import Image, ImageFilter
 
 #   RENAMING COMMON FUNCTIONS
 vec = pygame.math.Vector2
+vec3 = pygame.math.Vector3
 
     ##############################################################################################
 

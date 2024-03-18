@@ -1,64 +1,85 @@
 import pygame
 import sys
 import math
-import pygame.gfxdraw
+import numpy as np
 
 # Initialize Pygame
 pygame.init()
 
-# Screen dimensions
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Smooth Transition Line")
+# Set screen dimensions
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 
-# Colors
+# Set colors
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
-# Circle center points
-x1, y1 = 200, 300  # Center of circle with radius 10
-x2, y2 = 600, 300  # Center of circle with radius 2
-y2o = y2
-x2o = x2
-# Calculate distance between centers and angle
-dx = x2 - x1
-dy = y2 - y1
-distance = math.sqrt(dx ** 2 + dy ** 2)
-angle = math.atan2(dy, dx)
+# Set up the screen
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("3D Projection with Point Rotation in Pygame")
 
-# Control point distance
-control_point_distance = distance / 2
+# Define the 3D points
+points3D = [
+    (100, 100, 100),
+    (100, -100, 100),
+    (-100, -100, 100),
+    (-100, 100, 100),
+    (100, 100, -100),
+    (100, -100, -100),
+    (-100, -100, -100),
+    (-100, 100, -100)
+]
 
-# Control point
-control_x = (x1 + x2) / 2
-control_y = (y1 + y2) / 2
+# Define the camera position
+camera = (0, 0, -500)
 
-# Thickness variables
-start_thickness = 10
-end_thickness = 2
+# Define the projection plane distance
+projection_plane = 500
 
-# Calculate intermediate points along the Bézier curve
-num_points = 100
-a = 0
+# Rotation angle around the y-axis (in radians)
+angle_y = math.radians(30)  # Adjust this angle as needed
+
+# Rotation matrix around the y-axis
+rotation_matrix_y = lambda angle: np.array([
+    [math.cos(angle), 0, math.sin(angle)],
+    [0, 1, 0],
+    [-math.sin(angle), 0, math.cos(angle)]
+])
 
 # Main loop
-while True:
+running = True
+while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-    screen.fill((0, 0, 0))
-    a += math.radians(.1)
+            running = False
 
-    for i in range(num_points + 1):
-        t = i / num_points
-        inv_t = 1 - t
+    # Clear the screen
+    screen.fill(WHITE)
+    angle_y += math.radians(0.1)
 
-        x = inv_t ** 2 * x1 + 2 * inv_t * t * control_x + t ** 2 * x2
-        y = inv_t ** 2 * y1 + 2 * inv_t * t * control_y + t ** 2 * y2
+    # Rotate each point about the y-axis
+    rotated_points = []
+    for point3D in points3D:
+        # Apply rotation matrix
+        rotated_point = np.dot(rotation_matrix_y(angle_y), point3D)
+        rotated_points.append(rotated_point)
 
-        # Interpolate thickness
-        thickness = int(start_thickness * inv_t + end_thickness * t)
+    # Project and draw each rotated point
+    for point3D in rotated_points:
+        # Perform perspective projection
+        x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + SCREEN_WIDTH / 2
+        y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + SCREEN_HEIGHT / 2
+        
+        # Calculate the radius based on the distance
+        distance = math.sqrt((point3D[0] - camera[0]) ** 2 + (point3D[1] - camera[1]) ** 2 + (point3D[2] - camera[2]) ** 2)
+        radius = 10 / distance
+        
+        # Draw the projected point with adjusted radius
+        pygame.draw.circle(screen, BLACK, (int(x), int(y)), max(1, int(radius)))
 
-        # Draw a circle at each point with calculated thickness
-        pygame.gfxdraw.filled_circle(screen, int(x), int(y), thickness, WHITE)
+    # Update the display
     pygame.display.flip()
+
+# Quit Pygame
+pygame.quit()
+sys.exit()
