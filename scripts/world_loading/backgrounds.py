@@ -112,7 +112,7 @@ class Perlin_Background:
         self.og_offset = int((self.game.offset.x + self.game.offset.y)/1000)
     
     def update(self):
-        target_offset = ((self.game.offset.x + self.game.offset.y)/1000) % 4.1
+        target_offset = ((self.game.offset.x)/1000) % 4.1 # + self.game.offset.y
         self.NOISE -= min(max(-0.01, self.og_offset - target_offset), 0.01)
         self.og_offset += (target_offset - self.og_offset) * .1
 

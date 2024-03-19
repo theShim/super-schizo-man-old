@@ -20,7 +20,7 @@ class Swaying_Vine(pygame.sprite.Sprite):
         self.variant = variant
         self.z = Z_LAYERS["midground offgrid"]
 
-        self.points = np.array([
+        self.points = np.array([                    #verlet points
             (-1, 0), (2, 0), (4, 0), (7, 0),
             (3, 2),
             (0.5, 2.5), (5.5, 2.5),
@@ -34,9 +34,9 @@ class Swaying_Vine(pygame.sprite.Sprite):
         ])
         self.points = self.points * scale + pos
         self.old_points = self.points.copy()
-        self.pinned = [0, 1, 2, 3,]
+        self.pinned = [0, 1, 2, 3,]             #points on the vine that don't move at all
         
-        self.joints = [
+        self.joints = [                 #connections between points
             (0, 1), (1, 2), (2, 3),
             (0, 4), (1, 4), (2, 4), (3, 4),
             (0, 5), (3, 6), (4, 7),
@@ -49,18 +49,21 @@ class Swaying_Vine(pygame.sprite.Sprite):
             (10, 13), (11, 14),
             (13, 15), (14, 16)
         ]
-        self.lengths = [euclidean_distance(self.points[self.joints[i][0]], self.points[self.joints[i][1]]) for i in range(len(self.joints))]
+        #the maximum joint lengths
+        self.lengths = [euclidean_distance(self.points[self.joints[i][0]], self.points[self.joints[i][1]]) 
+                        for i in range(len(self.joints))]
 
-        self.fill = True
+        #the polygon indices to draw
         self.polys = [(0, 1, 4), (1, 2, 4), (2, 3, 4), 
                       (0, 4, 7, 5), (3, 4, 7, 6),
                       (5, 7, 8), (6, 7, 9), (7, 8, 11, 9), (7, 9, 10, 8), (9, 10, 12, 11),
                       (12, 10, 13, 15), (12, 11, 14, 16),
                       (12, 15, 17), (12, 16, 17)]
 
-        self.wind_offset = math.radians(self.pos[0] // 4)
+        self.wind_offset = math.radians(self.pos[0] // 4) #wind sim
         self.wind_clock = 0
 
+    #verlet integration
     def move(self):
         temp = self.points.copy()
 
@@ -75,6 +78,7 @@ class Swaying_Vine(pygame.sprite.Sprite):
         self.points += delta
         self.old_points = temp
 
+    #after moving, constrain the joints to the initialised self.lengths
     def constrain(self):
         for joint, length in zip(self.joints, self.lengths):
             p1, p2 = self.points[joint[0]], self.points[joint[1]]

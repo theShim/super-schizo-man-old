@@ -12,7 +12,7 @@ MAX_LOADED_SPRITES = 183
 SIZE = (WIDTH, HEIGHT) = 1280//2, 800//2
 SCREEN_CENTER = (WIDTH/2, HEIGHT/2)
 
-FPS = 50
+FPS = 30
 CAMERA_FOLLOW_SPEED = 12
 
     ##############################################################################################

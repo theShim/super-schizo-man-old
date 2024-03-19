@@ -53,34 +53,37 @@ class Player(pygame.sprite.Sprite):
         self.status = "idle"
         self.z = Z_LAYERS['player']
 
-        self.image = self.sprites[self.status].get_sprite()
-        self.spawn_pos = spawn_pos
-        self.rect = self.image.get_rect(topleft=spawn_pos)
+        self.image = self.sprites[self.status].get_sprite() #current sprite
+        self.spawn_pos = spawn_pos #depends on where the spawning tile is
+        self.rect = self.image.get_rect(topleft=spawn_pos) #rect for movement and stuff
         self.size = self.image.get_size()
-        self.direction = 'left'
-        self.hitbox_size = vec(self.image.get_size())
+        self.direction = 'left' #which way the player is facing
+        self.hitbox_size = vec(self.image.get_size()) #actual hitbox
 
-        self.vel = vec()
-        self.run_speed = 1
-        self.jumps = 2
-        self.jumpHeld = False
-        self.landed = False
+        self.vel = vec() #x and y velocity
+        self.run_speed = 1 #scalar
+        self.jumps = 2 #total number of jumps left
+        self.jumpHeld = False #ensures player only jumps once
+        self.landed = False #checks if the player is currently on the floor
 
+        #blink stuff, don't remember how it works but it does
         self.blinking = 0
         self.blinker = 0
         self.blink_timer = 1
         self.blink_cooldown = 200
 
-        self.weapon = Sword(self)
+        self.weapon = Sword(self) #implement a weapon handler at some point
 
-        self.menu = Menu(self, game)
+        self.menu = Menu(self, game) #menu manager
     
+    #actual colliding rect
     @property
     def hitbox(self):
         return pygame.Rect(self.rect.centerx - self.hitbox_size.x / 2, self.rect.y + 4, self.hitbox_size.x, self.hitbox_size.y - 4)
         
         ###################################################################################### 
 
+    #handles x-directional movements, changing their acceleration
     def horizontal_move(self, keys, particle_manager):
         old = self.direction
         if keys[CONTROLS["left"]]:
@@ -90,16 +93,19 @@ class Player(pygame.sprite.Sprite):
             self.acc.x = 1
             self.direction = 'right'
 
+        #if the player is on the floor and changes directions, add some run particles
         if self.landed:
             if self.direction != old:
                 for i in range(random.randint(1, 3)):
                     particle_manager.add_particle("background", "run", pos=self.hitbox.midbottom, facing=self.direction)
 
+        #change the current animation depending on if the player is moving/holding the buttons
         if not (keys[CONTROLS['left']] or keys[CONTROLS['right']]):
             self.change_status('idle')
         else:
             self.change_status('run')
 
+    #handles jump inputs
     def jump(self, keys):
         if keys[CONTROLS["jump"]] or keys[CONTROLS['up']]:
             if self.jumps > 0 and self.jumpHeld == False:
@@ -108,25 +114,27 @@ class Player(pygame.sprite.Sprite):
                 self.jumpHeld = True
         else:
             if self.vel.y < 0:
-                self.vel.y = lerp(0, self.vel.y, 0.1)
+                self.vel.y = lerp(0, self.vel.y, 0.1) #allows for short hops and high jumps by interpolation
             self.jumpHeld = False
 
+        #change the current animation depending on if the player is moving up or down
         if self.vel.y > 0:
             self.change_status('fall')
         if self.vel.y < 0:
             self.change_status('jump')
 
+    #accelerating and moving the player
     def apply_forces(self):
-        self.vel.x += self.acc.x * self.run_speed * self.game.dt
-        self.vel.y += self.acc.y * self.game.dt
+        self.vel.x += self.acc.x * self.run_speed * self.game.dt #horizontal acceleration
+        self.vel.y += self.acc.y * self.game.dt #vertical acceleration (gravity)
 
-        self.vel.x *= FRIC
-        if -0.5 < self.vel.x < 0.5:
+        self.vel.x *= FRIC #applying friction
+        if -0.5 < self.vel.x < 0.5: #bounds to prevent sliding bug
             self.vel.x = 0
 
-        self.rect.topleft += self.vel# * self.game.dt
+        self.rect.topleft += self.vel# * self.game.dt #actually applying the velocity
 
-        if self.rect.bottom > HEIGHT*3:
+        if self.rect.bottom > HEIGHT*3: #failsafe if they fall into the void
             self.rect.topleft = self.spawn_pos
             self.vel.y = 0
 
@@ -139,14 +147,16 @@ class Player(pygame.sprite.Sprite):
 
         ######################################################################################
 
+    #checks collisions from all 4 sides of the player with tiles
     def tile_collisions(self, particle_manager):
         collision_tolerance = 10
         for rect in self.game.stage_loader.tilemap.physics_rects_around(self.hitbox.center):
             if self.hitbox.colliderect(rect):
                 
+                #if the player lands
                 if abs(self.hitbox.bottom - rect.top) < collision_tolerance + 5 and self.vel.y > 0:
                     if self.landed == False:
-                        for i in range(max(2, int(self.vel.y/3))):
+                        for i in range(max(2, int(self.vel.y/3))): #add landing particles
                             c = random.uniform(150, 200)
                             particle_manager.add_particle(
                                 "background", 
@@ -157,15 +167,17 @@ class Player(pygame.sprite.Sprite):
                             )
 
                     self.rect.bottom = rect.top + 1
-                    self.vel.y = 0
-                    self.jumps = 2
+                    self.vel.y = 0 #reset y velocity
+                    self.jumps = 2 #reset jumps
                     self.landed = True
                     break
                 
+                #ceiling
                 if abs(self.hitbox.top - rect.bottom) < collision_tolerance and self.vel.y < 0:
                     self.rect.top = rect.bottom 
                     self.vel.y = 0
                 
+                #walls
                 if abs(self.hitbox.right - rect.left) < collision_tolerance and self.vel.x > 0:
                     self.rect.right = rect.left
                     self.vel.x = 0
@@ -173,17 +185,15 @@ class Player(pygame.sprite.Sprite):
                     self.rect.left =  rect.right
                     self.vel.x = 0
         else:
+            #if the player hasn't collided with the floor then they're midair
             self.landed = False
 
+        #if they're on the floor, reset y velocity
         if self.landed:
             self.vel.y = 0
 
-    def offgrid_collisions(self):
+    def offgrid_collisions(self): #mostly handled on tile end
         return
-        for tile in self.game.stage_loader.tilemap.collideable_offgrid_around(self.hitbox):
-            if tile.type == 'grass':
-                tile.player_collision(self.hitbox.midbottom)
-                # tile.grass_blades.empty()
         
         ###################################################################################### 
                 
@@ -222,7 +232,6 @@ class Player(pygame.sprite.Sprite):
         # if self.status == 'idle':
         #     return spr     
             
-        # if self.blinking != 16:
         self.blink_timer += 1
 
         if self.blink_timer % self.blink_cooldown == 0 and self.blinking == 16:
@@ -239,7 +248,6 @@ class Player(pygame.sprite.Sprite):
             Y, X = np.where(np.all(img==colour,axis=2))
             zipped = np.column_stack((X,Y))
             
-            # print(zipped, self.blinker, zipped[:2 * round(int(self.blinker % 8)/2)])
             for coord in zipped[:2 * round(int(self.blinker % 8)/2)]:
                 spr.set_at(coord, Player.SPRITES[self.char_num]['face_colour'])
 
@@ -272,27 +280,27 @@ class Player(pygame.sprite.Sprite):
             self.tile_collisions(particle_manager)
             self.offgrid_collisions()
 
-            #weapom position handling
+            #weapon position handling
             x = self.hitbox.right if self.direction == 'right' else self.hitbox.left
             pos = [x, self.hitbox.centery + 4]
             self.weapon.update(pos, offset, facing=self.direction, game_entities=self.game_entities)
         
         self.animate() #current animation based off status
-        self.handle_particles(particle_manager) #
+        self.handle_particles(particle_manager)
         self.draw(screen, offset)
 
     def draw(self, screen, offset):
-        spr = self.sprites[self.status].get_sprite()
+        spr = self.sprites[self.status].get_sprite() #get sprite and flip if needed
         if self.direction == 'left':
             spr = pygame.transform.flip(spr, True, False)
             spr.set_colorkey((0, 0, 0))
 
-        spr = self.blink(spr)
+        spr = self.blink(spr) #get the blinking sprite
         rect = spr.get_rect(center=self.hitbox.center - offset)
         screen.blit(spr, rect)
 
         weapon_img, weapon_rect = self.weapon.get_image_rect(offset)
         screen.blit(weapon_img, weapon_rect)
 
-        if DEBUG:
+        if DEBUG: #hitbox
             pygame.draw.rect(screen, (200, 0, 0), [self.hitbox.x - offset.x, self.hitbox.y - offset.y, *self.hitbox.size], 1)
