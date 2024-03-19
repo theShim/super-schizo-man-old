@@ -190,8 +190,6 @@ class Tilemap:
 
                     if tile.type not in INVISIBLE_TILES or self.editor_flag == True:
                         yield tile
-                    else:
-                        continue
 
     def render_offgrid(self, offset):
         for tile in self.offgrid_tiles:

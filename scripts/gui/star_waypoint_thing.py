@@ -74,37 +74,11 @@ class Starry_Background:
                 pygame.gfxdraw.filled_circle(screen, int(x), int(y), thickness, star1.color)
 
     def update(self, screen):
-        pos_2ds = []
         for s in sorted(self.stars, key=lambda x:x.pos_3d.z, reverse=True):
-            pos_2ds.append(s.get_pos_2d())
             s.update(screen)
 
         for p in self.planets:
             p.update(screen)
-        
-
-        # points = [[p[0]/p[2] + WIDTH/2, p[1]/p[2] + HEIGHT/2] for p in sphere(100) if p[2] != 0]
-        # for p in points:
-        #     pygame.draw.circle(screen, (255, 0, 0), p, 1)
-
-        # vertices = Delaunay(pos_2ds)
-        # for triangle in vertices.simplices:
-        #     for i in range(len(triangle)):
-        #         start_index = i
-        #         end_index = (i + 1) % len(triangle)
-
-        #         start_point = pos_2ds[triangle[start_index]]
-        #         end_point = pos_2ds[triangle[end_index]]
-
-        #         # Interpolate thickness based on radii
-        #         start_radius = self.stars[triangle[start_index]].size
-        #         end_radius = self.stars[triangle[end_index]].size
-
-        #         thickness = (start_radius + end_radius) / 2  # Take average thickness
-        #         pygame.draw.line(screen, (255, 255, 255), start_point, end_point, int(thickness))
-            
-        # self.draw_lines_between_neighbors(screen, self.stars, distance_threshold=500)
-        # self.draw_polygons_between_neighbors(screen, self.stars, distance_threshold=2000)
 
         ##########################################################################################
 
@@ -141,7 +115,7 @@ class Star:
 
     
     def update(self, screen):
-        self.move()# / (0.1 * self.pos_3d.z)
+        self.move()
         self.size = (Star.Z_DISTANCE / self.pos_3d.z)
         if self.size >= 1:
             self.draw(screen)
@@ -160,6 +134,7 @@ class Sphere:
         self.vel = 0.125
         self.rots = [0, 0, 0]
         self.scale = 100
+        self.rot_speed = 100
 
         self.camera = vec3(0, 0, -500)
         self.projection_plane = 500
@@ -173,20 +148,22 @@ class Sphere:
             self.camera.z += 0.5
 
     def update(self, screen):
-        self.rots[1] += math.radians(0.5)
+        self.rots[0] -= math.radians(0.6)# * self.rot_speed
+        self.rots[1] += math.radians(0.5)# * self.rot_speed
 
         self.camera_move()
         self.draw(screen)
 
     def draw(self, screen):
-        for point in self.points:
-            point.update(screen)
+        # for point in self.points:
+        #     point.update(screen)
 
         for i in range(len(self.points)):
-            start = self.points[i-1].get_pos_2d()
-            end = self.points[i].get_pos_2d()
+            start = self.points[i-1]
+            end = self.points[i]
 
-            pygame.draw.line(screen, (200, 0, 255), start, end, 1)
+            pygame.draw.line(screen, (200, 0, 255), start.get_pos_2d(), end.get_pos_2d(), 1)
+            end.update(screen)
 
 class Sphere_Point:
     def __init__(self, parent):
@@ -205,7 +182,9 @@ class Sphere_Point:
         return point
     
     def rotate_3d(self, point3D):
-        rotated_point = np.dot(mf.rotate_y(self.parent.rots[1] + self.angle_offset), point3D)
+        rotated_point = np.dot(mf.rotate_x(self.parent.rots[0] + self.angle_offset), point3D)
+        rotated_point = np.dot(mf.rotate_y(self.parent.rots[1] + self.angle_offset), rotated_point)
+        rotated_point = np.dot(mf.rotate_z(self.parent.rots[2] + self.angle_offset), rotated_point)
         return rotated_point
     
     def get_pos_2d(self):
@@ -232,9 +211,7 @@ class Sphere_Point:
 
     def draw(self, screen):
         x, y = self.get_pos_2d()
-        
         z_distance = self.get_z_distance()
         radius = max(1, int(1000 / z_distance))
 
-        # Draw the projected point
         pygame.draw.circle(screen, (255, 0, 255), (int(x), int(y)), radius)

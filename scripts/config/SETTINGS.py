@@ -2,7 +2,7 @@ import pygame
 
     ##############################################################################################
 
-DEBUG = not True
+DEBUG = not not True
 WINDOW_TITLE = "Super Schizo Man"
 LOADED_SPRITE_NUMBER = 0
 MAX_LOADED_SPRITES = 183

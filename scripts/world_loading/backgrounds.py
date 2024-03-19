@@ -121,7 +121,7 @@ class Perlin_Background:
         except:
             surf = pygame.surfarray.make_surface(self.add_colour(self.NOISE))
             surf = pygame.transform.scale(surf, pygame.math.Vector2(surf.get_size())*4)
-            self.CACHE[self.og_offset] = surf
+            self.CACHE[round(self.og_offset, 2)] = surf
         self.screen.blit(surf, (0, 0))
 
 
