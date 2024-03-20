@@ -88,9 +88,11 @@ class Star:
     def __init__(self, z=None):
         self.pos_3d = self.get_pos_3d()
         self.pos_3d.z = z if z != None else self.pos_3d.z
+
         c = random.uniform(160, 255) - 40
         self.color = (c, c, c)
         self.size = 10
+        self.radius = 1.5
 
         self.vel = random.uniform(0.05, 0.25)
         self.rot_speed = random.uniform(0.1, 0.3)
@@ -116,14 +118,19 @@ class Star:
     
     def update(self, screen):
         self.move()
-        self.size = (Star.Z_DISTANCE / self.pos_3d.z)
+        self.size = max(1, (Star.Z_DISTANCE / (self.pos_3d.z * self.radius)))
         if self.size >= 1:
             self.draw(screen)
+        else:
+            self.draw(screen, True)
 
-    def draw(self, screen):
+    def draw(self, screen, pixel=False):
         pos_2d = self.get_pos_2d()
         if pygame.Rect(0, 0, WIDTH, HEIGHT).collidepoint(pos_2d):
-            pygame.draw.circle(screen, self.color, pos_2d, self.size)
+            if pixel:
+                screen.set_at(pos_2d, self.color)
+            else:
+                pygame.draw.circle(screen, self.color, pos_2d, self.size)
 
         ##########################################################################################
 
@@ -134,11 +141,11 @@ class Sphere:
         self.vel = 0.125
         self.rots = [0, 0, 0]
         self.scale = 100
-        self.rot_speed = 100
 
-        self.camera = vec3(0, 0, -500)
+        self.camera = vec3(0, 0, -312.5)
         self.projection_plane = 500
         self.points = [Sphere_Point(self) for i in range(12)]
+        self.centre = (WIDTH/2, HEIGHT/2 + 12)
     
     def camera_move(self):
         keys = pygame.key.get_pressed()
@@ -148,8 +155,8 @@ class Sphere:
             self.camera.z += 0.5
 
     def update(self, screen):
-        self.rots[0] -= math.radians(0.6)# * self.rot_speed
-        self.rots[1] += math.radians(0.5)# * self.rot_speed
+        self.rots[0] -= math.radians(0.6)
+        self.rots[1] += math.radians(0.5)
 
         self.camera_move()
         self.draw(screen)
@@ -194,8 +201,8 @@ class Sphere_Point:
 
         point3D = self.rotate_3d(point3D)
 
-        x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + WIDTH / 2
-        y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + HEIGHT / 2
+        x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + self.parent.centre[0]
+        y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + self.parent.centre[1]
         return (x, y)
     
     def get_z_distance(self):
@@ -212,6 +219,6 @@ class Sphere_Point:
     def draw(self, screen):
         x, y = self.get_pos_2d()
         z_distance = self.get_z_distance()
-        radius = max(1, int(1000 / z_distance))
+        radius = max(1, int(2000 / z_distance))
 
         pygame.draw.circle(screen, (255, 0, 255), (int(x), int(y)), radius)

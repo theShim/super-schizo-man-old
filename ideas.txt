@@ -6,3 +6,4 @@
 -other weather conditions e.g. snow
 -seasonal changes
 -temperature
+-reflections
