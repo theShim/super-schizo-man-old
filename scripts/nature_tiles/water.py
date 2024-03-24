@@ -147,14 +147,15 @@ class Water(pygame.sprite.Sprite):
                 surf,
                 self.col,
                 [vec(self.pos[0]-minmax[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8), 
-                *list(map(lambda p:p-vec(minmax[0], minmax[2]-TILE_SIZE//8), points)), 
+                *(points2 := list(map(lambda p:p-vec(minmax[0], minmax[2]-TILE_SIZE//8), points))), 
                 vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8)]
             )
             surf.set_alpha(192)
+            pygame.draw.lines(surf, (255, 255, 255), False, points2)
             screen.blit(surf, self.pos - offset)
 
-            for i in range(1, len(points)):
-                pygame.draw.line(screen, (255, 255, 255), points[i-1] - offset, points[i] - offset)
+            # for i in range(1, len(points)):
+            #     pygame.draw.lines(screen, (255, 255, 255), points[i-1] - offset + vec(0, TILE_SIZE//8), points[i] - offset + vec(0, TILE_SIZE//8))
         else:
             springs = self.springs.sprites().copy()
             screen.blit(self.idle, self.pos-offset+vec(0, TILE_SIZE//8))

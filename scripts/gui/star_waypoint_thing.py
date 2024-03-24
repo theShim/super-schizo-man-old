@@ -21,7 +21,7 @@ from scripts.config.MATRIX_FUNCS import MatrixFunctions as mf
 class Starry_Background:
     def __init__(self):
         self.stars = [Star(z=random.uniform(1, Star.Z_DISTANCE)) for i in range(180)]
-        self.planets = [Sphere()]
+        self.planets = [Constellation()]
 
     @staticmethod
     def find_nearest_neighbors(stars, distance_threshold):
@@ -134,7 +134,7 @@ class Star:
 
         ##########################################################################################
 
-class Sphere:
+class Constellation:
     def __init__(self):
         self.colour = (200, 0, 200)
         self.radius = 64
@@ -144,7 +144,12 @@ class Sphere:
 
         self.camera = vec3(0, 0, -312.5)
         self.projection_plane = 500
-        self.points = [Sphere_Point(self) for i in range(12)]
+        self.points = [Constellation_Point(self) for i in range(12)]
+        self.joints = {(i-1, i) : Orbiting_Constellation_Point(
+            self, 
+            (point_set:=[self.points[i-1], self.points[i]]),
+            sorted([random.random(), 0.1, 0.9])[1]
+        )for i in range(len(self.points))}
         self.centre = (WIDTH/2, HEIGHT/2 + 12)
     
     def camera_move(self):
@@ -155,24 +160,25 @@ class Sphere:
             self.camera.z += 0.5
 
     def update(self, screen):
-        self.rots[0] -= math.radians(0.6)
+        # self.rots[0] -= math.radians(0.6)
         self.rots[1] += math.radians(0.5)
 
         self.camera_move()
         self.draw(screen)
 
     def draw(self, screen):
-        # for point in self.points:
-        #     point.update(screen)
-
-        for i in range(len(self.points)):
-            start = self.points[i-1]
-            end = self.points[i]
+        for joint in self.joints.keys():
+            start = self.points[joint[0]]
+            end = self.points[joint[1]]
 
             pygame.draw.line(screen, (200, 0, 255), start.get_pos_2d(), end.get_pos_2d(), 1)
-            end.update(screen)
+            start.update(screen)
 
-class Sphere_Point:
+            self.joints[joint].update(screen)
+
+        end.draw(screen)
+
+class Constellation_Point:
     def __init__(self, parent):
         self.parent = parent
         self.pos = self.get_rand_pos()
@@ -188,10 +194,11 @@ class Sphere_Point:
         point = [random.uniform(-r, r), random.uniform(-r, r), random.uniform(-r, r)]
         return point
     
-    def rotate_3d(self, point3D):
-        rotated_point = np.dot(mf.rotate_x(self.parent.rots[0] + self.angle_offset), point3D)
-        rotated_point = np.dot(mf.rotate_y(self.parent.rots[1] + self.angle_offset), rotated_point)
-        rotated_point = np.dot(mf.rotate_z(self.parent.rots[2] + self.angle_offset), rotated_point)
+    @staticmethod
+    def rotate_3d(point3D, rots, angle_offset=0):
+        rotated_point = np.dot(mf.rotate_x(rots[0] + angle_offset), point3D)
+        rotated_point = np.dot(mf.rotate_y(rots[1] + angle_offset), rotated_point)
+        rotated_point = np.dot(mf.rotate_z(rots[2] + angle_offset), rotated_point)
         return rotated_point
     
     def get_pos_2d(self):
@@ -199,7 +206,7 @@ class Sphere_Point:
         camera = self.parent.camera
         projection_plane = self.parent.projection_plane
 
-        point3D = self.rotate_3d(point3D)
+        point3D = self.rotate_3d(point3D, self.parent.rots, self.angle_offset)
 
         x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + self.parent.centre[0]
         y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + self.parent.centre[1]
@@ -219,6 +226,70 @@ class Sphere_Point:
     def draw(self, screen):
         x, y = self.get_pos_2d()
         z_distance = self.get_z_distance()
-        radius = max(1, int(2000 / z_distance))
+        radius = max(1, int(200*self.radius / z_distance))
 
         pygame.draw.circle(screen, (255, 0, 255), (int(x), int(y)), radius)
+        pygame.draw.circle(screen, (200, 0, 200), (int(x), int(y)), radius, 2)
+
+class Orbiting_Constellation_Point:
+    def __init__(self, parent, points, start_t=0):
+        self.parent = parent
+        self.start = points[0]
+        self.end = points[1]
+        self.t = start_t
+        self.radius = 5
+        self.orbit_radius = 6
+        self.a = 0
+
+    def update(self, screen):
+        self.a += 5
+
+        start_3D = Constellation_Point.rotate_3d(self.start.pos, self.parent.rots, self.start.angle_offset)
+        end_3D =   Constellation_Point.rotate_3d(self.end.pos,   self.parent.rots, self.end.angle_offset)
+        pos = vec3(start_3D.tolist()).lerp(vec3(end_3D.tolist()), self.t)
+
+        v = end_3D - start_3D
+        normal_vectors = [
+            (0, v[2], -v[1]),  # (0, z, -y)
+            (v[2], 0, -v[0]),  # (z, 0, -x)
+            (v[1], -v[0], 0)   # (y, -x, 0)
+        ]
+        
+        # Selecting the first non-zero vector as the normal vector
+        for v_norm in normal_vectors:
+            if any(v_norm):
+                break
+        
+        angle = np.radians(self.a%360)
+        axis = v / np.linalg.norm(v)
+        cos_theta = np.cos(angle)
+        sin_theta = np.sin(angle)
+        cross = np.cross(axis, v_norm)
+        dot = np.dot(axis, v_norm)
+        v_rotted = np.array(v_norm) * cos_theta + cross * sin_theta + axis * dot * (1 - cos_theta)
+        pos += vec3(v_rotted.tolist()).normalize() * self.orbit_radius
+
+        self.draw(screen, pos)
+    
+    def get_z_distance(self, pos):
+        point3D = pos
+        camera = self.parent.camera
+
+        z_distance = math.sqrt((point3D[0] - camera[0]) ** 2 + (point3D[1] - camera[1]) ** 2 + (point3D[2] - camera[2]) ** 2)
+        return z_distance
+    
+    def get_pos_2d(self, pos):
+        point3D = pos
+        camera = self.parent.camera
+        projection_plane = self.parent.projection_plane
+
+        x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + self.parent.centre[0]
+        y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + self.parent.centre[1]
+        return (x, y)
+
+    def draw(self, screen, pos):
+        x, y, = self.get_pos_2d(pos)
+        z_distance = self.get_z_distance(pos)
+        radius = max(1, int(200*self.radius / z_distance))
+
+        pygame.draw.circle(screen, (255, 0, 155), (int(x), int(y)), radius)

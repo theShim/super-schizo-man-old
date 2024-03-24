@@ -1,85 +1,164 @@
-import pygame
-import sys
-import math
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.animation import FuncAnimation
 
-# Initialize Pygame
-pygame.init()
+# Define the circle equation
+def circle_equation(x):
+    return np.sqrt(4 - x**2)
 
-# Set screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+# Rotation function
+def rotate_circle_around_x_axis(angle):
+    # Define the rotation matrix around x-axis
+    Rx = np.array([[1, 0, 0],
+                   [0, np.cos(angle), -np.sin(angle)],
+                   [0, np.sin(angle), np.cos(angle)]])
+    
+    # Generate points on the circle
+    x = np.linspace(-2, 2, 20)
+    y = circle_equation(x)
+    
+    # Rotate each point
+    rotated_points = np.dot(Rx, np.vstack([x, y, np.zeros_like(x)]))
+    
+    return rotated_points[0], rotated_points[1], rotated_points[2]
 
-# Set colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+# Function to update plot for each frame of the animation
+def update_plot(frame):
+    ax.clear()
 
-# Set up the screen
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("3D Projection with Point Rotation in Pygame")
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
+    ax.set_zlim(-2, 2)
+    
+    # Original circle
+    x_original = np.linspace(-2, 2, 100)
+    y_original = circle_equation(x_original)
+    ax.plot(x_original, y_original, np.zeros_like(x_original), label='Original Circle', color='b')
+    
+    # Rotated circle
+    angle = (frame / frames) * (2 * np.pi)
+    x_rotated, y_rotated, z_rotated = rotate_circle_around_x_axis(angle)
+    ax.plot(x_rotated, y_rotated, z_rotated, label='Rotated Circle', color='r')
 
-# Define the 3D points
-points3D = [
-    (100, 100, 100),
-    (100, -100, 100),
-    (-100, -100, 100),
-    (-100, 100, 100),
-    (100, 100, -100),
-    (100, -100, -100),
-    (-100, -100, -100),
-    (-100, 100, -100)
-]
+    angle = ((frame + (frames/2)) / frames) * (2 * np.pi)
+    x_rotated, y_rotated, z_rotated = rotate_circle_around_x_axis(angle)
+    ax.plot(x_rotated, y_rotated, z_rotated, label='Rotated Circle', color='r')
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title(f'Rotation around X-axis by {angle:.2f} radians')
+    ax.legend()
 
-# Define the camera position
-camera = (0, 0, -500)
+# Create a figure and axes
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 
-# Define the projection plane distance
-projection_plane = 500
+# Number of frames for the animation
+frames = 360//4
 
-# Rotation angle around the y-axis (in radians)
-angle_y = math.radians(30)  # Adjust this angle as needed
+# Animate the rotation
+ani = FuncAnimation(fig, update_plot, frames=frames, interval=50)
 
-# Rotation matrix around the y-axis
-rotation_matrix_y = lambda angle: np.array([
-    [math.cos(angle), 0, math.sin(angle)],
-    [0, 1, 0],
-    [-math.sin(angle), 0, math.cos(angle)]
-])
+plt.show()
 
-# Main loop
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
 
-    # Clear the screen
-    screen.fill(WHITE)
-    angle_y += math.radians(0.1)
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
-    # Rotate each point about the y-axis
-    rotated_points = []
-    for point3D in points3D:
-        # Apply rotation matrix
-        rotated_point = np.dot(rotation_matrix_y(angle_y), point3D)
-        rotated_points.append(rotated_point)
+def icosphere(radius, subdivisions=1):
+    # Define icosahedron vertices
+    phi = (1 + np.sqrt(5)) / 2
+    vertices = np.array([
+        [-1, phi, 0],
+        [1, phi, 0],
+        [-1, -phi, 0],
+        [1, -phi, 0],
+        [0, -1, phi],
+        [0, 1, phi],
+        [0, -1, -phi],
+        [0, 1, -phi],
+        [phi, 0, -1],
+        [phi, 0, 1],
+        [-phi, 0, -1],
+        [-phi, 0, 1]
+    ])
 
-    # Project and draw each rotated point
-    for point3D in rotated_points:
-        # Perform perspective projection
-        x = (point3D[0] - camera[0]) * projection_plane / (point3D[2] - camera[2]) + SCREEN_WIDTH / 2
-        y = (point3D[1] - camera[1]) * projection_plane / (point3D[2] - camera[2]) + SCREEN_HEIGHT / 2
-        
-        # Calculate the radius based on the distance
-        distance = math.sqrt((point3D[0] - camera[0]) ** 2 + (point3D[1] - camera[1]) ** 2 + (point3D[2] - camera[2]) ** 2)
-        radius = 10 / distance
-        
-        # Draw the projected point with adjusted radius
-        pygame.draw.circle(screen, BLACK, (int(x), int(y)), max(1, int(radius)))
+    # Normalize vertices
+    vertices /= np.linalg.norm(vertices, axis=1)[:, np.newaxis]
 
-    # Update the display
-    pygame.display.flip()
+    # Define icosahedron faces
+    faces = np.array([
+        [0, 11, 5],
+        [0, 5, 1],
+        [0, 1, 7],
+        [0, 7, 10],
+        [0, 10, 11],
+        [1, 5, 9],
+        [5, 11, 4],
+        [11, 10, 2],
+        [10, 7, 6],
+        [7, 1, 8],
+        [3, 9, 4],
+        [3, 4, 2],
+        [3, 2, 6],
+        [3, 6, 8],
+        [3, 8, 9],
+        [4, 9, 5],
+        [2, 4, 11],
+        [6, 2, 10],
+        [8, 6, 7],
+        [9, 8, 1]
+    ])
 
-# Quit Pygame
-pygame.quit()
-sys.exit()
+    # Subdivide faces
+    for _ in range(subdivisions):
+        new_faces = []
+        for face in faces:
+            v0, v1, v2 = vertices[face]
+            v01 = (v0 + v1) / 2
+            v12 = (v1 + v2) / 2
+            v20 = (v2 + v0) / 2
+
+            v01 /= np.linalg.norm(v01)
+            v12 /= np.linalg.norm(v12)
+            v20 /= np.linalg.norm(v20)
+
+            v_idx = len(vertices)
+            vertices = np.vstack([vertices, v01, v12, v20])
+
+            new_faces.append([face[0], v_idx - 2, v_idx])
+            new_faces.append([face[1], v_idx - 1, v_idx])
+            new_faces.append([face[2], v_idx, v_idx - 2])
+
+        faces = np.array(new_faces)
+
+    # Scale vertices
+    vertices *= radius
+
+    return vertices, faces
+
+# Generate icosphere vertices and faces
+vertices, faces = icosphere(radius=1, subdivisions=1)
+
+# Plotting
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Plot vertices
+ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2], color='b')
+
+# Plot faces
+for face in faces:
+    v0, v1, v2 = vertices[face]
+    ax.plot([v0[0], v1[0], v2[0], v0[0]], 
+            [v0[1], v1[1], v2[1], v0[1]], 
+            [v0[2], v1[2], v2[2], v0[2]], 'k-')
+
+# Set equal aspect ratio
+ax.set_box_aspect([1,1,1])
+
+plt.title('Icosphere')
+plt.show()
