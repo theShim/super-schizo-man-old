@@ -7,3 +7,4 @@
 -seasonal changes
 -temperature
 -reflections
+-first boss = igris

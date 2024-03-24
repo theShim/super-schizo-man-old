@@ -80,8 +80,10 @@ class Water_Spring(pygame.sprite.Sprite):
             pygame.draw.circle(screen, (255, 255, 255), self.pos - offset, self.radius)
 
 class Water(pygame.sprite.Sprite):
-    def __init__(self, pos, size, variant):
+    def __init__(self, game, pos, size, variant):
         super().__init__()
+        self.game = game
+
         self.pos = vec(pos) * TILE_SIZE
         self.variant = variant
         self.size = vec(size) * TILE_SIZE
@@ -91,6 +93,11 @@ class Water(pygame.sprite.Sprite):
         self.moving = False
         self.idle = pygame.Surface((self.size.x, self.size.y - TILE_SIZE//8), pygame.SRCALPHA)
         self.idle.fill(self.col)
+
+        for y in range(96):
+            alpha = int(64 + 96 - y)  # Adjust alpha based on depth
+            pygame.draw.line(self.idle, (0, 134, 191, alpha), (0, self.idle.get_height()-y), (self.idle.get_width(), self.idle.get_height()-y))
+
         self.idle.set_alpha(192)
         pygame.draw.line(self.idle, (255, 255, 255), (0,0), (self.size.x, 0))
         # self.image.set_alpha((65))
@@ -150,7 +157,12 @@ class Water(pygame.sprite.Sprite):
                 *(points2 := list(map(lambda p:p-vec(minmax[0], minmax[2]-TILE_SIZE//8), points))), 
                 vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8)]
             )
+
+            for y in range(96):
+                alpha = int(64 + 96 - y)  # Adjust alpha based on depth
+                pygame.draw.line(surf, (0, 134, 191, alpha), (0, self.idle.get_height()-y), (self.size.x, surf.get_height()-y))
             surf.set_alpha(192)
+
             pygame.draw.lines(surf, (255, 255, 255), False, points2)
             screen.blit(surf, self.pos - offset)
 
@@ -159,6 +171,22 @@ class Water(pygame.sprite.Sprite):
         else:
             springs = self.springs.sprites().copy()
             screen.blit(self.idle, self.pos-offset+vec(0, TILE_SIZE//8))
+
+        player = self.game.player
+        if ((player.hitbox.right > self.pos.x and player.hitbox.left < self.pos.x + self.size.x) and
+            (player.hitbox.bottom - self.pos.y < self.size.y) and (player.hitbox.top < self.pos.y)):
+            player_img = pygame.transform.flip(player.image, False, True)
+            player_img.set_alpha(128)
+
+            # if player.hitbox.s <= self.pos.y:
+            screen.blit(player_img, vec(player.rect.x, self.pos.y + abs(player.hitbox.bottom - self.pos.y + TILE_SIZE//8)) - offset)
+            # else:
+            #     y1 = self.pos.y - abs(player.hitbox.bottom - self.pos.y + TILE_SIZE//8)
+            #     y2 = self.pos.y + TILE_SIZE//8
+            #     buffer = max(0, y2 - y1)
+            #     print([0, player_img.get_height()-buffer, player_img.get_width(), buffer])
+            #     img = player_img.subsurface([0, max(0, player_img.get_height()-buffer), player_img.get_width(), buffer])
+            #     screen.blit(img, vec(player.rect.x, self.pos.y + TILE_SIZE//8) - offset)
 
     ##############################################################################################
 

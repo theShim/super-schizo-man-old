@@ -51,7 +51,7 @@ class Nature_Manager:
             width = max(xs) - min(xs) + 1
             height = max(ys) - min(ys) + 1
             variant = g[0][1]
-            self.water_tiles.append(Water([x, y], [width, height], variant))
+            self.water_tiles.append(Water(self.game, [x, y], [width, height], variant))
 
     def render_tiles(self, offset):
         self.grass_manager.t += 5

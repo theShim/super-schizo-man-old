@@ -49,7 +49,7 @@ class Grass_Manager:
             self.grass_id += 1
 
     def tiles_to_render(self, offset):
-        for x in range(int(offset.x // (self.tilesize)), int((offset.x + self.game.screen.get_width()) // self.tilesize) + 1):
+        for x in range(int(offset.x // (self.tilesize))-1, int((offset.x + self.game.screen.get_width()) // self.tilesize) + 1):
             for y in range(int(offset.y // (self.tilesize)), int((offset.y + self.game.screen.get_height()) // self.tilesize) + 1):
                 loc = f"{x};{y}"
                 if loc in self.grass_tiles:

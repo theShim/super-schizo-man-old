@@ -266,7 +266,7 @@ Landed: {self.player.landed}"""
 
 if __name__ == "__main__":
     g = Game()
-    asyncio.run(g.run())
+    asyncio.run(g.run())      
 
 
 if DEBUG:

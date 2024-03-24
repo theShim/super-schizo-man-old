@@ -53,12 +53,12 @@ class Player(pygame.sprite.Sprite):
         self.status = "idle"
         self.z = Z_LAYERS['player']
 
-        self.image = self.sprites[self.status].get_sprite() #current sprite
+        image = self.sprites[self.status].get_sprite() #current sprite
         self.spawn_pos = spawn_pos #depends on where the spawning tile is
-        self.rect = self.image.get_rect(topleft=spawn_pos) #rect for movement and stuff
-        self.size = self.image.get_size()
+        self.rect = image.get_rect(topleft=spawn_pos) #rect for movement and stuff
+        self.size = image.get_size()
         self.direction = 'left' #which way the player is facing
-        self.hitbox_size = vec(self.image.get_size()) #actual hitbox
+        self.hitbox_size = vec(image.get_size()) #actual hitbox
 
         self.vel = vec() #x and y velocity
         self.run_speed = 1 #scalar
@@ -80,6 +80,14 @@ class Player(pygame.sprite.Sprite):
     @property
     def hitbox(self):
         return pygame.Rect(self.rect.centerx - self.hitbox_size.x / 2, self.rect.y + 4, self.hitbox_size.x, self.hitbox_size.y - 4)
+    
+    @property
+    def image(self):
+        spr = self.sprites[self.status].get_sprite()
+        if self.direction == 'left':
+            spr = pygame.transform.flip(spr, True, False)
+            spr.set_colorkey((0, 0, 0))
+        return spr
         
         ###################################################################################### 
 
@@ -290,10 +298,7 @@ class Player(pygame.sprite.Sprite):
         self.draw(screen, offset)
 
     def draw(self, screen, offset):
-        spr = self.sprites[self.status].get_sprite() #get sprite and flip if needed
-        if self.direction == 'left':
-            spr = pygame.transform.flip(spr, True, False)
-            spr.set_colorkey((0, 0, 0))
+        spr = self.image #get sprite and flip if needed
 
         spr = self.blink(spr) #get the blinking sprite
         rect = spr.get_rect(center=self.hitbox.center - offset)
