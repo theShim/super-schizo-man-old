@@ -10,6 +10,7 @@ with contextlib.redirect_stdout(None):
     
 import sys
 import time
+import asyncio
 
 from scripts.config.SETTINGS import (DEBUG, WINDOW_TITLE, SIZE, WIDTH, HEIGHT, LOADED_SPRITE_NUMBER, 
                                      MAX_LOADED_SPRITES, FPS, CAMERA_FOLLOW_SPEED)
@@ -32,10 +33,7 @@ from scripts.world_loading.backgrounds import Forest_Background
 from scripts.world_loading.nature import Grass_Manager
 from scripts.world_loading.light_tiles import Torch
 
-
 from screen_recorder import ScreenRecorder
-
-import asyncio
 
 # from scripts.config.CORE_FUNCS import countLinesIn
 # countLinesIn(os.getcwd()) #counts number of lines of code in directory (just for progress counting)

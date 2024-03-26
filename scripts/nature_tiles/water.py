@@ -172,21 +172,24 @@ class Water(pygame.sprite.Sprite):
             springs = self.springs.sprites().copy()
             screen.blit(self.idle, self.pos-offset+vec(0, TILE_SIZE//8))
 
-        player = self.game.player
-        if ((player.hitbox.right > self.pos.x and player.hitbox.left < self.pos.x + self.size.x) and
-            (player.hitbox.bottom - self.pos.y < self.size.y) and (player.hitbox.top < self.pos.y)):
-            player_img = pygame.transform.flip(player.image, False, True)
-            player_img.set_alpha(128)
+        # player = self.game.player
+        # if ((player.hitbox.right > self.pos.x and player.hitbox.left < self.pos.x + self.size.x) and
+        #     (player.hitbox.bottom - self.pos.y < self.size.y) and (player.hitbox.top < self.pos.y)):
+        #     player_img = pygame.transform.flip(player.image, False, True)
+        #     player_img.set_alpha(128)
 
-            # if player.hitbox.s <= self.pos.y:
-            screen.blit(player_img, vec(player.rect.x, self.pos.y + abs(player.hitbox.bottom - self.pos.y + TILE_SIZE//8)) - offset)
-            # else:
-            #     y1 = self.pos.y - abs(player.hitbox.bottom - self.pos.y + TILE_SIZE//8)
-            #     y2 = self.pos.y + TILE_SIZE//8
-            #     buffer = max(0, y2 - y1)
-            #     print([0, player_img.get_height()-buffer, player_img.get_width(), buffer])
-            #     img = player_img.subsurface([0, max(0, player_img.get_height()-buffer), player_img.get_width(), buffer])
-            #     screen.blit(img, vec(player.rect.x, self.pos.y + TILE_SIZE//8) - offset)
+        #     # if player.hitbox.bottom <= self.pos.y:
+        #     screen.blit(player_img, vec(player.rect.x, self.pos.y + abs(player.hitbox.bottom - self.pos.y + TILE_SIZE//8)) - offset)
+        #     # elif 0 < player.hitbox.bottom <= (player.hitbox.bottom - player.image.get_height()):
+        #     #     pygame.draw.rect(screen, (255, 0, 0), [player.rect.x - offset.x, self.pos.y + TILE_SIZE//8 - offset.y, player.image.get_width(), (player.hitbox.bottom - player.image.get_height())])
+            
+        #     # else:
+        #     #     y1 = self.pos.y - abs(player.hitbox.bottom - self.pos.y + TILE_SIZE//8)
+        #     #     y2 = self.pos.y + TILE_SIZE//8
+        #     #     buffer = max(0, y2 - y1)
+        #     #     print([0, player_img.get_height()-buffer, player_img.get_width(), buffer])
+        #     #     img = player_img.subsurface([0, max(0, player_img.get_height()-buffer), player_img.get_width(), buffer])
+        #     #     screen.blit(img, vec(player.rect.x, self.pos.y + TILE_SIZE//8) - offset)
 
     ##############################################################################################
 

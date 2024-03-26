@@ -21,9 +21,12 @@ class Menu:
         self.player = player
         self.game = game
 
+        self.window = pygame.Surface(SIZE, pygame.SRCALPHA)
+
         self.dark = pygame.Surface(SIZE, pygame.SRCALPHA)
         self.dark.fill((0, 0, 0))
         self.dark.set_alpha(180)
+        self.dark_timer = Timer(FPS//2, 1)
 
         self.open = False
         self.loader = "profile"
@@ -33,8 +36,18 @@ class Menu:
         self.display = Player_Menu(self) #actual display
 
     def draw(self):
-        self.game.screen.blit(self.dark, (0, 0))
-        self.display.update(self.game.screen)
+        self.window.fill((0, 0, 0, 0))
+
+        if not self.dark_timer.finished:
+            self.dark_timer.update()
+            dark = self.dark.copy()
+            dark.set_alpha((self.dark_timer.t / self.dark_timer.end) * 180)
+            self.window.blit(dark, (0, 0))
+        else:
+            self.window.blit(self.dark, (0, 0))
+
+        self.display.update(self.window)
+        self.game.screen.blit(self.window, (0, 0))
 
         if self.open_cooldown.finished:
             for event in self.game.events:
@@ -43,4 +56,7 @@ class Menu:
                         self.open = False
                         break
         else:
+            if self.open_cooldown.t == 0:
+                self.dark_timer.reset()
+
             self.open_cooldown.update()
