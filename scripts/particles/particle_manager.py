@@ -15,6 +15,7 @@ from scripts.particles.movement import Run_Particle, Land_Particle
 from scripts.particles.fire import Fire_Particle
 from scripts.particles.rain import Rain_Particle, Rain_Splash
 from scripts.particles.rainbow import Rainbow_Particle
+from scripts.particles.snow import Snow_Particle
 
     ##############################################################################################
 
@@ -44,7 +45,8 @@ class Particle_Manager:
             'land'        : Land_Particle,
             'fire'        : Fire_Particle,
             'rain'        : Rain_Particle,
-            'rainbow'     : Rainbow_Particle
+            'rainbow'     : Rainbow_Particle,
+            'snow'        : Snow_Particle,
         }[particle_type]
 
         if group == 'foreground':
@@ -62,7 +64,6 @@ class Particle_Manager:
                     self.add_particle('foreground', 'float_light', pos=[((i+1)/n)*WIDTH + random.uniform(-50, 50), random.uniform(0, HEIGHT)])
 
             self.start = False
-            # REMEMBER TO ADD OFFSCREEN CULLING
 
         if ENVIRONMENT_SETTINGS["rain"]:
             # if random.randint(1, 2) == 1: 
@@ -73,3 +74,10 @@ class Particle_Manager:
                 if screen_pos.y > HEIGHT:
                     self.foreground_particles.remove(rain)
                 
+        elif ENVIRONMENT_SETTINGS["snow"]:
+            if random.randint(1, 3) == 1: 
+                self.add_particle('foreground', 'snow', pos=[random.uniform(0, WIDTH*1.2), -5])
+                for snow in set(filter(lambda spr: isinstance(spr, Snow_Particle), self.foreground_particles)):
+                    screen_pos = snow.pos
+                    if screen_pos.y > HEIGHT:
+                        self.foreground_particles.remove(snow)

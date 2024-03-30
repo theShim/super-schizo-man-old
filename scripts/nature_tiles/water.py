@@ -95,12 +95,11 @@ class Water(pygame.sprite.Sprite):
         self.idle.fill(self.col)
 
         for y in range(96):
-            alpha = int(64 + 96 - y)  # Adjust alpha based on depth
+            alpha = int(64 + 96 - y)  #adjust alpha based on depth
             pygame.draw.line(self.idle, (0, 134, 191, alpha), (0, self.idle.get_height()-y), (self.idle.get_width(), self.idle.get_height()-y))
 
         self.idle.set_alpha(192)
         pygame.draw.line(self.idle, (255, 255, 255), (0,0), (self.size.x, 0))
-        # self.image.set_alpha((65))
 
         self.springs = pygame.sprite.Group()
         self.spacing = TILE_SIZE/2
@@ -115,10 +114,8 @@ class Water(pygame.sprite.Sprite):
             springs = self.springs.sprites().copy()
             if i > 0:
                 springs[i - 1].vel += spread * (springs[i].pos.y - springs[i - 1].pos.y)
-            try:
+            if i < len(self.springs)-1:
                 springs[i + 1].vel += spread * (springs[i].pos.y - springs[i + 1].pos.y)
-            except IndexError:
-                pass
 
     def player_collision(self, player):
         if player.vel.y <= 0:

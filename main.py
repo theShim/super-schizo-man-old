@@ -13,7 +13,7 @@ import time
 import asyncio
 
 from scripts.config.SETTINGS import (DEBUG, WINDOW_TITLE, SIZE, WIDTH, HEIGHT, LOADED_SPRITE_NUMBER, 
-                                     MAX_LOADED_SPRITES, FPS, CAMERA_FOLLOW_SPEED)
+                                     MAX_LOADED_SPRITES, FPS, CAMERA_FOLLOW_SPEED, ENVIRONMENT_SETTINGS)
 from scripts.config.CORE_FUNCS import vec
 
 from scripts.entities.player import Player
@@ -86,6 +86,8 @@ class Game:
         self.screen_recorder = None
         self.record_label = self.font.render("REC", False, (255, 255, 255))
         self.record_label_pos = self.record_label.get_rect(topright=(WIDTH-10, 8))
+
+        self.weather = 0
 
  
         ######################################################################################
@@ -188,6 +190,21 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     self.running = False
+
+                elif event.key == pygame.K_j:
+                    self.weather += 1
+                    if self.weather == 3:
+                        self.weather = 0
+
+                    if self.weather == 0:
+                        ENVIRONMENT_SETTINGS["rain"] = False
+                        ENVIRONMENT_SETTINGS["snow"] = False
+                    elif self.weather == 1:
+                        ENVIRONMENT_SETTINGS["rain"] = True
+                        ENVIRONMENT_SETTINGS["snow"] = False
+                    elif self.weather == 2:
+                        ENVIRONMENT_SETTINGS["rain"] = False
+                        ENVIRONMENT_SETTINGS["snow"] = True
 
                 elif event.key == pygame.K_F7:
                     self.camera_flag = not self.camera_flag

@@ -1,12 +1,11 @@
 -radar graphs for skills/stats
 -skill tree in general
 -grabbable vines
--verlet bridges
+-verlet bridges (ropebridge)
 -day-night cycle on certain stages (background)
 -other weather conditions e.g. snow
 -seasonal changes
 -temperature
--reflections
+-!!!reflections (looked bad)!!!
 -first boss = igris (solo leveling)
 -superschizoman
--only update water on screen

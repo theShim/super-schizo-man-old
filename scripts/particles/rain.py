@@ -10,7 +10,6 @@ import numpy as np
 
 from scripts.config.CORE_FUNCS import vec
 from scripts.config.SETTINGS import Z_LAYERS, GRAV, ENVIRONMENT_SETTINGS, TILE_SIZE
-from scripts.world_loading.tilemap import PHYSICS_TILES
 
     ################################################################################################
 
@@ -48,7 +47,6 @@ class Rain_Particle(pygame.sprite.Sprite):
                 pos = [random.uniform((t.pos[0] * TILE_SIZE), (t.pos[0] * TILE_SIZE) + TILE_SIZE), (t.pos[1] * TILE_SIZE) + random.uniform(0, TILE_SIZE/2)]
                 for i in range(1, 3):
                     self.parent.add(Rain_Splash(self.parent, pos, random.uniform(1.5, 2.5)))
-        
         
     def update(self, screen, offset, tiles):
         self.move()

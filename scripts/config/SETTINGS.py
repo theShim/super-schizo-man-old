@@ -22,7 +22,8 @@ FRIC = 0.9
 GRAV = 0.4
 
 ENVIRONMENT_SETTINGS = {
-    "rain" : True,
+    "rain" : False,
+    "snow" : True,
     "wind" : -2
 }
 
