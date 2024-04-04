@@ -23,7 +23,7 @@ GRAV = 0.4
 
 ENVIRONMENT_SETTINGS = {
     "rain" : False,
-    "snow" : True,
+    "snow" : False,
     "wind" : -2
 }
 

@@ -50,7 +50,7 @@ class Rain_Particle(pygame.sprite.Sprite):
         
     def update(self, screen, offset, tiles):
         self.move()
-        if self.collision:
+        if self.collision and ENVIRONMENT_SETTINGS["rain"]:
             self.tile_collisions(list(tiles))
         self.draw(screen, offset)
 

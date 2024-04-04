@@ -1,164 +1,98 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+import pygame
+import time
 
-# Define the circle equation
-def circle_equation(x):
-    return np.sqrt(4 - x**2)
+class Move:
+    def __init__(self, name, sequence, cooldown=None):
+        self.name = name
+        self.sequence = sequence
+        self.cooldown = cooldown
+        self.last_execution_time = 0
+        self.is_executing = False
+        self.key_released = True
 
-# Rotation function
-def rotate_circle_around_x_axis(angle):
-    # Define the rotation matrix around x-axis
-    Rx = np.array([[1, 0, 0],
-                   [0, np.cos(angle), -np.sin(angle)],
-                   [0, np.sin(angle), np.cos(angle)]])
-    
-    # Generate points on the circle
-    x = np.linspace(-2, 2, 20)
-    y = circle_equation(x)
-    
-    # Rotate each point
-    rotated_points = np.dot(Rx, np.vstack([x, y, np.zeros_like(x)]))
-    
-    return rotated_points[0], rotated_points[1], rotated_points[2]
+    def check_sequence(self, keys_pressed):
+        if self.sequence and not self.is_executing and self.key_released:
+            sequence_copy = self.sequence[:]  # Create a copy of the sequence list
+            for key in self.sequence:
+                if keys_pressed[key]:
+                    sequence_copy.pop(0)  # Remove the first key from the copied sequence
+                    if not sequence_copy:
+                        if self.cooldown is not None:
+                            self.last_execution_time = time.time()
+                        self.is_executing = True
+                        self.key_released = False
+                        return True
+                else:
+                    return False
+            return False
 
-# Function to update plot for each frame of the animation
-def update_plot(frame):
-    ax.clear()
+    def reset_execution(self):
+        self.is_executing = False
 
-    ax.set_xlim(-2, 2)
-    ax.set_ylim(-2, 2)
-    ax.set_zlim(-2, 2)
-    
-    # Original circle
-    x_original = np.linspace(-2, 2, 100)
-    y_original = circle_equation(x_original)
-    ax.plot(x_original, y_original, np.zeros_like(x_original), label='Original Circle', color='b')
-    
-    # Rotated circle
-    angle = (frame / frames) * (2 * np.pi)
-    x_rotated, y_rotated, z_rotated = rotate_circle_around_x_axis(angle)
-    ax.plot(x_rotated, y_rotated, z_rotated, label='Rotated Circle', color='r')
+    def release_key(self):
+        self.key_released = True
 
-    angle = ((frame + (frames/2)) / frames) * (2 * np.pi)
-    x_rotated, y_rotated, z_rotated = rotate_circle_around_x_axis(angle)
-    ax.plot(x_rotated, y_rotated, z_rotated, label='Rotated Circle', color='r')
-    
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title(f'Rotation around X-axis by {angle:.2f} radians')
-    ax.legend()
+class MoveManager:
+    def __init__(self):
+        self.moves = {}
 
-# Create a figure and axes
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+    def add_move(self, move):
+        self.moves[move.name] = move
 
-# Number of frames for the animation
-frames = 360//4
+    def execute_move(self, keys_pressed):
+        for name, move in self.moves.items():
+            if move.check_sequence(keys_pressed):
+                print(f"Executing {move.name} move")
+                # Perform actions for the move
+                return True
+        return False
 
-# Animate the rotation
-ani = FuncAnimation(fig, update_plot, frames=frames, interval=50)
+    def reset_moves(self):
+        for name, move in self.moves.items():
+            move.reset_execution()
 
-plt.show()
+    def release_keys(self):
+        for name, move in self.moves.items():
+            move.release_key()
 
+# Example usage
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((400, 400))
+    clock = pygame.time.Clock()
 
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+    # Define move sets with sequences and cooldowns
+    punch_move = Move("Punch", [pygame.K_SPACE], cooldown=1.0)
+    combo_move = Move("Combo", [pygame.K_a, pygame.K_d])  # No cooldown for combo move
 
-def icosphere(radius, subdivisions=1):
-    # Define icosahedron vertices
-    phi = (1 + np.sqrt(5)) / 2
-    vertices = np.array([
-        [-1, phi, 0],
-        [1, phi, 0],
-        [-1, -phi, 0],
-        [1, -phi, 0],
-        [0, -1, phi],
-        [0, 1, phi],
-        [0, -1, -phi],
-        [0, 1, -phi],
-        [phi, 0, -1],
-        [phi, 0, 1],
-        [-phi, 0, -1],
-        [-phi, 0, 1]
-    ])
+    # Create move manager
+    move_manager = MoveManager()
+    move_manager.add_move(punch_move)
+    move_manager.add_move(combo_move)
 
-    # Normalize vertices
-    vertices /= np.linalg.norm(vertices, axis=1)[:, np.newaxis]
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYUP:
+                move_manager.release_keys()  # Release keys when they are released
 
-    # Define icosahedron faces
-    faces = np.array([
-        [0, 11, 5],
-        [0, 5, 1],
-        [0, 1, 7],
-        [0, 7, 10],
-        [0, 10, 11],
-        [1, 5, 9],
-        [5, 11, 4],
-        [11, 10, 2],
-        [10, 7, 6],
-        [7, 1, 8],
-        [3, 9, 4],
-        [3, 4, 2],
-        [3, 2, 6],
-        [3, 6, 8],
-        [3, 8, 9],
-        [4, 9, 5],
-        [2, 4, 11],
-        [6, 2, 10],
-        [8, 6, 7],
-        [9, 8, 1]
-    ])
+        keys_pressed = pygame.key.get_pressed()
+        if move_manager.execute_move(keys_pressed):
+            # If a move is executed, pause other actions
+            move_manager.reset_moves()  # Reset move execution flags
+            continue
 
-    # Subdivide faces
-    for _ in range(subdivisions):
-        new_faces = []
-        for face in faces:
-            v0, v1, v2 = vertices[face]
-            v01 = (v0 + v1) / 2
-            v12 = (v1 + v2) / 2
-            v20 = (v2 + v0) / 2
+        # Regular player movement and other actions
+        # Add your player movement logic here
 
-            v01 /= np.linalg.norm(v01)
-            v12 /= np.linalg.norm(v12)
-            v20 /= np.linalg.norm(v20)
+        screen.fill((255, 255, 255))
+        pygame.display.flip()
+        clock.tick(60)
 
-            v_idx = len(vertices)
-            vertices = np.vstack([vertices, v01, v12, v20])
+    pygame.quit()
 
-            new_faces.append([face[0], v_idx - 2, v_idx])
-            new_faces.append([face[1], v_idx - 1, v_idx])
-            new_faces.append([face[2], v_idx, v_idx - 2])
-
-        faces = np.array(new_faces)
-
-    # Scale vertices
-    vertices *= radius
-
-    return vertices, faces
-
-# Generate icosphere vertices and faces
-vertices, faces = icosphere(radius=1, subdivisions=1)
-
-# Plotting
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-# Plot vertices
-ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2], color='b')
-
-# Plot faces
-for face in faces:
-    v0, v1, v2 = vertices[face]
-    ax.plot([v0[0], v1[0], v2[0], v0[0]], 
-            [v0[1], v1[1], v2[1], v0[1]], 
-            [v0[2], v1[2], v2[2], v0[2]], 'k-')
-
-# Set equal aspect ratio
-ax.set_box_aspect([1,1,1])
-
-plt.title('Icosphere')
-plt.show()
+if __name__ == "__main__":
+    main()
+   

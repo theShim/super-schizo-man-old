@@ -9,8 +9,8 @@ import numpy as np
 import random
 import math
 
-from scripts.config.CORE_FUNCS import vec, lerp
-from scripts.config.SETTINGS import WIDTH, HEIGHT, Z_LAYERS, FRIC, GRAV, CONTROLS, DEBUG
+from scripts.config.CORE_FUNCS import vec, lerp, Timer
+from scripts.config.SETTINGS import WIDTH, HEIGHT, Z_LAYERS, FRIC, GRAV, CONTROLS, DEBUG, FPS
 from scripts.entities.sprite_animator import SpriteAnimator
 from scripts.entities.weapons import Sword
 from scripts.gui.menu import Menu
@@ -71,6 +71,8 @@ class Player(pygame.sprite.Sprite):
         self.blinker = 0
         self.blink_timer = 1
         self.blink_cooldown = 200
+
+        self.move_manager = Move_Manager(self)
 
         self.weapon = Sword(self) #implement a weapon handler at some point
 
@@ -151,7 +153,13 @@ class Player(pygame.sprite.Sprite):
 
         self.horizontal_move(keys, particle_manager)
         self.jump(keys)
+        self.special_moves(keys, particle_manager)
         self.apply_forces()
+
+        ######################################################################################
+
+    def special_moves(self, keys, particle_manager):
+        self.move_manager.update(keys, particle_manager)
 
         ######################################################################################
 
@@ -309,3 +317,69 @@ class Player(pygame.sprite.Sprite):
 
         if DEBUG: #hitbox
             pygame.draw.rect(screen, (200, 0, 0), [self.hitbox.x - offset.x, self.hitbox.y - offset.y, *self.hitbox.size], 1)
+
+
+
+
+
+class Move:
+    def __init__(self, player, name: str, sequence: list, cooldown=None):
+        self.player = player
+
+        self.name = name
+        self.sequence = sequence # can be one key
+        self.cooldown = cooldown
+            
+        ###################################################################################### 
+
+    def check_sequence(self, keys) -> bool:
+        seq = self.sequence[:]
+        for key in seq:
+            if keys[key]:
+                seq.pop(0)
+                if len(seq) == 0:
+                    return True
+            else:
+                return False
+        return False
+    
+    def execute(self, particle_manager):
+        if self.name == "dash":
+            self.dash(particle_manager)
+            
+        ###################################################################################### 
+
+    def dash(self, particle_manager):
+        self.player.acc.y = self.player.vel.y = 0
+        self.player.vel.x = self.player.run_speed * 20
+        self.player.vel.x *= -1 if self.player.direction == "left" else 1
+
+
+
+class Move_Manager:
+    def __init__(self, player):
+        self.player = player
+        self.moves = {}
+
+        for move in [
+            Move(self.player, "dash", [CONTROLS["dash"]], FPS),
+        ]:
+            self.add_move(move)
+            
+        ###################################################################################### 
+
+    def add_move(self, move: Move):
+        self.moves[move.name] = move
+
+    def execute_move(self, keys, particle_manager):
+        for move_name, move in self.moves.items():
+            if move.check_sequence(keys):
+                print("Executing:", move_name)
+                move.execute(particle_manager)
+                return True
+        return False
+            
+        ###################################################################################### 
+
+    def update(self, keys, particle_manager):
+        self.execute_move(keys, particle_manager)

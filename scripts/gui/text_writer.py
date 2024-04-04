@@ -15,7 +15,7 @@ from scripts.config.CORE_FUNCS import gaussian_blur, vec
     ##############################################################################################
 
 class Text_Box(pygame.sprite.Sprite):
-    def __init__(self, text, pos, font, box_size = None, border_colour = None, background_colour = None):
+    def __init__(self, text, pos, font, box_size = None, border_colour = None, background_colour = None, speed:float=0.4, typing_sounds_flag:bool = True):
         super().__init__()
         self.text = text
         self.font = font
@@ -27,13 +27,23 @@ class Text_Box(pygame.sprite.Sprite):
 
         self.t = 0
         self.prev = self.t
-        self.speed = 0.4
+        self.og_speed = speed
+        self.speed = self.og_speed
         self.finished = False
+        self.typing_sounds_flag = typing_sounds_flag
         self.clack = False      #typing sound
 
     def reset(self):
         self.t = 0
         self.finished = False
+
+    def end(self):
+        self.t = len(self.text)
+        self.finished = True
+    
+    def finish(self):
+        self.t = len(self.text)
+        self.finished = True
 
     def change_speed(self, speed):
         self.speed = speed
@@ -57,7 +67,7 @@ class Text_Box(pygame.sprite.Sprite):
         elif self.text[min(len(self.text)-1, int(self.t))] == ",":
             self.change_speed(0.1)
         else:
-            self.change_speed(0.4)
+            self.change_speed(self.og_speed)
 
     def render(self, screen, col=(255, 255, 255)):
         if self.box_size != None:

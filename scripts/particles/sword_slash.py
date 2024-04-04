@@ -7,6 +7,7 @@ with contextlib.redirect_stdout(None):
 
 import random
 import math
+import numpy as np
 
 from scripts.config.CORE_FUNCS import vec, lerp, bezierfy
 from scripts.config.SETTINGS import Z_LAYERS
@@ -20,28 +21,27 @@ class Slash_Wave(pygame.sprite.Sprite):
         self.z = Z_LAYERS["attacks"]
 
         self.angle = angle + math.radians(random.uniform(-10, 10))
-        self.pos = pos + vec(math.cos(self.angle), math.sin(self.angle)) * 30
+        self.colour = (255, 255, 255)
         self.alpha = 255
         self.speed = 1
         self.fill = 2
         self.fill_speed = 1
         self.gapfill_speed = random.uniform(1, 2)
-
-        self.colour = (255, 255, 255)
         
-        self.points = [
-            self.pos + vec(math.cos(self.angle - 30), math.sin(self.angle - 30)) * 30 - vec(math.cos(self.angle), math.sin(self.angle)) * 20 + vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(-10, 10),
-            self.pos + vec(math.cos(self.angle + 30), math.sin(self.angle + 30)) * 30 - vec(math.cos(self.angle), math.sin(self.angle)) * 20 + vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(-10, 10),
-            self.pos + vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(20, 40),
-            self.pos - vec(math.cos(self.angle), math.sin(self.angle)) * 4
-        ]
-        for p in self.points:
-            self.pos += vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(-5, 5)
+        start_pos = pos + vec(math.cos(self.angle), math.sin(self.angle)) * 30
+        self.points = np.array([
+            start_pos + vec(math.cos(self.angle - 30), math.sin(self.angle - 30)) * 30 - vec(math.cos(self.angle), math.sin(self.angle)) * 20 + vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(-10, 10),
+            start_pos + vec(math.cos(self.angle + 30), math.sin(self.angle + 30)) * 30 - vec(math.cos(self.angle), math.sin(self.angle)) * 20 + vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(-10, 10),
+            start_pos + vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(20, 40),
+            start_pos - vec(math.cos(self.angle), math.sin(self.angle)) * 4
+        ])
+        # for p in self.points:
+        self.points += vec(math.cos(self.angle), math.sin(self.angle)) * random.uniform(-5, 5)
 
 
     def move(self):
-        for p in self.points:
-            p += vec(math.cos(self.angle), math.sin(self.angle)) * self.speed
+        # for p in self.points:
+        self.points += vec(math.cos(self.angle), math.sin(self.angle)) * self.speed
         self.points[3] += vec(math.cos(self.angle), math.sin(self.angle)) * self.gapfill_speed
         self.points[random.randint(0, len(self.points)-1)] += vec(math.cos(self.angle), math.sin(self.angle)) * self.gapfill_speed / 2
 

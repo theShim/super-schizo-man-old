@@ -56,7 +56,7 @@ def ptOnCurve(b, t):
             q[i] = (1-t) * q[i][0] + t * q[i+1][0], (1-t) * q[i][1] + t * q[i+1][1]
     return round(q[0][0]), round(q[0][1])
 
-def bezierfy(points, samples):
+def bezierfy(points, samples): #no idea how this works just does, i think it's just recursive lerping though
     pts = [ptOnCurve(points, i/samples) for i in range(samples+1)]
     return pts
 

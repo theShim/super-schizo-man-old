@@ -12,10 +12,20 @@ import math
 from scripts.config.SETTINGS import WIDTH, HEIGHT, FPS
 from scripts.config.CORE_FUNCS import vec, Timer
 
+from scripts.gui.text_writer import Text_Box
 from scripts.gui.custom_fonts import Custom_Font
 from scripts.gui.star_waypoint_thing import Starry_Background
 
 from scripts.particles.lightning import Lightning
+
+    ##############################################################################################
+
+ITEM_DESCRIPTIONS = {
+    "grains" : {
+        "text" : "A key ingredient in yeast infections.",
+        "buffs": [], 
+    }
+}
 
     ##############################################################################################
 
@@ -306,6 +316,8 @@ class Player_Menu:
             self.clicked = False
             self.held = False
 
+            self.info_card_display = Player_Menu.Item_Info_Card(item)
+
             self.bolt = Lightning.GUI_Spinner([
                 (self.rect.topleft[0] + 24, self.rect.topleft[1] + 2), 
                 (self.rect.topright[0] - 11, self.rect.topright[1] + 2), 
@@ -318,8 +330,10 @@ class Player_Menu:
             self.move_timer.reset()
             self.clicked = False
 
-        def info_card(self):
-            pass
+        def info_card(self, screen, old):
+            if old:
+                self.info_card_display.reset()
+            self.info_card_display.update(screen)
 
         def update(self, screen, alpha, y_scroll=0):
             if abs(self.end_pos[0] - self.pos[0]) > 0:
@@ -340,10 +354,12 @@ class Player_Menu:
                 except IndexError: False
                 
             if ((collision_rect.collidepoint(mousePos) and mask_collide(mousePos_masked)) or self.clicked) and alpha == 255:
+                old = False
                 if mouse[0]:
                     for key in ["weapons", "armour", "consumables", "key"]:
                         for button in self.parent[key].sprites():
                             button.clicked = False
+                    old = True
                     self.clicked = True
                 screen.blit(self.clicked_img, [self.pos.x, self.pos.y - 2 + y_scroll])
                 
@@ -355,8 +371,9 @@ class Player_Menu:
                 screen.blit(self.name_surf_clicked_hidden, (self.pos.x+56+1, self.pos.y - 2 + y_scroll + 12+1))
                 screen.blit(self.name_surf_clicked, (self.pos.x+56, self.pos.y - 2 + y_scroll + 12))
 
-                self.bolt.update(screen, y_scroll)
-                self.info_card()
+                if self.clicked:
+                    self.bolt.update(screen, y_scroll)
+                    self.info_card(screen, old)
 
             else:
                 item_img = self.item.image.copy()
@@ -426,6 +443,56 @@ class Player_Menu:
                     dist = max(card.base.get_height() / 2 - abs(card.pos.y + self.y_scroll - (self.pos[1] + 225)), 0)
                     alpha = (dist / (card.base.get_height() / 2)) * 255
                 card.update(screen, alpha, self.y_scroll)
+
+    class Item_Info_Card(pygame.sprite.Sprite):
+        def __init__(self, item):
+            super().__init__()
+            self.item = item
+            self.pos = vec(WIDTH/2 + 30, 90)
+
+            self.image = pygame.image.load(f"assets/inventory_items/{item.name}.png").convert_alpha()
+            self.image.set_colorkey((0, 0, 0))
+            (42, 42)
+
+            self.line_start = vec(
+                self.pos.x + 60, 
+                self.pos.y + Custom_Font.FluffyBig.space_height + 10
+            )
+            self.line_end = vec(
+                self.pos.x + 60 + Custom_Font.FluffyBig.calc_surf_width(self.item.name.capitalize())//5,
+                self.pos.y + Custom_Font.FluffyBig.space_height + 10
+            )
+            self.line_end_target = vec(
+                self.pos.x + 60 + Custom_Font.FluffyBig.calc_surf_width(self.item.name.capitalize()) * 1.2, 
+                self.pos.y + Custom_Font.FluffyBig.space_height + 10
+            )
+
+            self.desc = Text_Box(
+                ITEM_DESCRIPTIONS[self.item.name.lower()]["text"], 
+                (self.pos.x+2, self.pos.y+60), 
+                Custom_Font.FluffySmall, 
+                speed=1,
+                typing_sounds_flag=False
+            )
+
+        def reset(self):
+            self.line_end = vec(
+                self.pos.x + 60 + Custom_Font.FluffyBig.calc_surf_width(self.item.name.capitalize())//5,
+                self.pos.y + Custom_Font.FluffyBig.space_height + 10
+            )
+            self.desc.reset()
+
+        def update(self, screen):
+            pygame.draw.rect(screen, (210, 210, 210), [self.pos.x-2, self.pos.y-2, 46, 46], 2)
+            screen.blit(self.image, self.image.get_rect(center=(self.pos.x+21, self.pos.y+21)))
+
+            Custom_Font.FluffyBig.render(screen, self.item.name.capitalize(), (210, 210, 210), (self.pos.x + 60, self.pos.y + 10))
+            pygame.draw.line(screen, (250, 250, 250), self.line_start, self.line_end, 3)
+            self.line_end = self.line_end.lerp(self.line_end_target, 0.3)
+
+            self.desc.update()
+            self.desc.render(screen, (200, 200, 200))
+            # Custom_Font.FluffySmall.render(screen, ITEM_DESCRIPTIONS[self.item.name.lower()]["text"], (200, 200, 200), (self.pos.x+2, self.pos.y+60))
 
     class Weapons(Item_Bottom_Button):
         def __init__(self, parent, pos, y_transition_offset=0):

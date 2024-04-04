@@ -83,5 +83,6 @@ class Font():
 class Custom_Font:
     @classmethod
     def init(cls):
+        cls.FluffyBig = Font('assets/fonts/fluffy.png', scale=1.5)
         cls.Fluffy = Font('assets/fonts/fluffy.png')
         cls.FluffySmall = Font('assets/fonts/fluffy.png', scale=0.75)
