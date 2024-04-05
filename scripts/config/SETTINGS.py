@@ -62,4 +62,13 @@ CONTROLS = {
 
     "pickup_item" : pygame.K_e,
 }
+
+"""
+CONTROLS: dict
+    A dictionary containing the key mappings for player controls.
+
+    - "dash": space
+    - "jump": w
+"""
+
 # reminder: enable "up key toggle" for jump option in settings later

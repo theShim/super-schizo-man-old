@@ -202,7 +202,7 @@ class Game:
                     elif self.weather == 1:
                         ENVIRONMENT_SETTINGS["rain"] = True
                         ENVIRONMENT_SETTINGS["snow"] = False
-                    elif self.weather == 2: 
+                    elif self.weather == 2:     
                         ENVIRONMENT_SETTINGS["rain"] = False
                         ENVIRONMENT_SETTINGS["snow"] = True
 

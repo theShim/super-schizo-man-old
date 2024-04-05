@@ -49,7 +49,7 @@ class Player(pygame.sprite.Sprite):
         self.game_entities = entities
 
         self.char_num = char_num
-        self.sprites = Player.SPRITES[char_num]
+        self.sprites: dict = Player.SPRITES[char_num]
         self.status = "idle"
         self.z = Z_LAYERS['player']
 
@@ -72,7 +72,7 @@ class Player(pygame.sprite.Sprite):
         self.blink_timer = 1
         self.blink_cooldown = 200
 
-        self.move_manager = Move_Manager(self)
+        self.move_manager = Move_Manager(self, game)
 
         self.weapon = Sword(self) #implement a weapon handler at some point
 
@@ -85,11 +85,15 @@ class Player(pygame.sprite.Sprite):
     
     @property
     def image(self):
-        spr = self.sprites[self.status].get_sprite()
+        spr = self.current_sprite.get_sprite()
         if self.direction == 'left':
             spr = pygame.transform.flip(spr, True, False)
             spr.set_colorkey((0, 0, 0))
         return spr
+
+    @property
+    def current_sprite(self) -> SpriteAnimator:
+        return self.sprites.get(self.status, self.sprites["idle"])
         
         ###################################################################################### 
 
@@ -237,11 +241,11 @@ class Player(pygame.sprite.Sprite):
 
     def change_status(self, status):
         if status != self.status:
-            self.sprites[self.status].reset_frame()
+            self.current_sprite.reset_frame()
             self.status = status
 
     def animate(self):
-        self.sprites[self.status].next(self.game.dt)
+        self.current_sprite.next(self.game.dt)
 
     def blink(self, spr):
         spr = spr.copy()
@@ -323,46 +327,85 @@ class Player(pygame.sprite.Sprite):
 
 
 class Move:
-    def __init__(self, player, name: str, sequence: list, cooldown=None):
-        self.player = player
+    def __init__(self, parent, name: str, sequence: list, duration=None, between_delay=FPS/4):
+        self.parent = parent
+        self.game = self.parent.game
+        self.player = self.parent.player
 
         self.name = name
-        self.sequence = sequence # can be one key
-        self.cooldown = cooldown
+        self.between_delay = int(between_delay)
+
+        self.sequence = sequence
+        self.key_map = {key : False for key in self.sequence}
+        self.stack = []
+
+        self.move_timer = Timer(duration, 1)
+        self.move_timer.switch(False)
             
         ###################################################################################### 
 
-    def check_sequence(self, keys) -> bool:
-        seq = self.sequence[:]
-        for key in seq:
-            if keys[key]:
-                seq.pop(0)
-                if len(seq) == 0:
+    def check_sequence(self, keys: pygame.key.ScancodeWrapper) -> bool:
+        if self.move_timer.run and not self.move_timer.finished:
+            self.move_timer.update()
+            return True
+        
+        current_key_map = {to_press : keys[to_press] for to_press in self.sequence}
+        if current_key_map != self.key_map:
+            new = [key for key in self.sequence if current_key_map[key] and current_key_map[key] != self.key_map[key]]
+            self.key_map = current_key_map.copy()
+
+            if new:
+                to_add = new[0]
+                if self.sequence[len(self.stack)] == to_add:
+                    self.stack.append(to_add)
+
+                if self.stack == self.sequence:
+                    self.move_timer.run = True
+                    self.move_timer.reset()
+                    self.stack = []
                     return True
-            else:
-                return False
+        
         return False
     
-    def execute(self, particle_manager):
-        if self.name == "dash":
-            self.dash(particle_manager)
+    def execute(self, keys, particle_manager):
+        if self.name.endswith("_dash"):
+            self.dash(keys, particle_manager, self.name)
+
+        else:
+            print(self.name)
             
         ###################################################################################### 
 
-    def dash(self, particle_manager):
+    def dash(self, keys, particle_manager, dash_dir):
+        self.player.acc.x = self.player.vel.x = 0
         self.player.acc.y = self.player.vel.y = 0
-        self.player.vel.x = self.player.run_speed * 20
-        self.player.vel.x *= -1 if self.player.direction == "left" else 1
 
+        if dash_dir == "l_dash":
+            self.player.vel.x = self.player.run_speed * -20
+        elif dash_dir == "r_dash":
+            self.player.vel.x = self.player.run_speed * 20
+
+        elif dash_dir == "u_dash":
+            self.player.vel.y = self.player.run_speed * -10
+        elif dash_dir == "d_dash":
+            self.player.vel.y = self.player.run_speed * 10
+
+        self.player.change_status("dash")
 
 
 class Move_Manager:
-    def __init__(self, player):
+    def __init__(self, player, game):
+        self.game = game
         self.player = player
         self.moves = {}
 
         for move in [
-            Move(self.player, "dash", [CONTROLS["dash"]], FPS),
+            Move(self, "l_dash",       [CONTROLS["left"],  CONTROLS["dash"]],          duration=4),
+            Move(self, "r_dash",       [CONTROLS["right"], CONTROLS["dash"]],          duration=4),
+            Move(self, "u_dash",       [CONTROLS["up"],    CONTROLS["dash"]],          duration=4),
+            Move(self, "d_dash",       [CONTROLS["down"],  CONTROLS["dash"]],          duration=4),
+
+            Move(self, "combo test",   [pygame.K_i, pygame.K_o, pygame.K_i],           duration=FPS)
         ]:
             self.add_move(move)
             
@@ -375,7 +418,7 @@ class Move_Manager:
         for move_name, move in self.moves.items():
             if move.check_sequence(keys):
                 print("Executing:", move_name)
-                move.execute(particle_manager)
+                move.execute(keys, particle_manager)
                 return True
         return False
             

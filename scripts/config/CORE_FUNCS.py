@@ -93,7 +93,7 @@ class QuitWindow(BaseException):
     ##############################################################################################
         
 class Timer:
-    def __init__(self, duration, speed):
+    def __init__(self, duration: float, speed: float):
         self.t = 0
         self.end = duration
         self.speed = speed
