@@ -184,10 +184,11 @@ class Opening_Stage(Stage):
 class Forest_Stage(Stage):
     def __init__(self, game):
         super().__init__(game)
+        self.name = "forest"
         self.stage_index = 1 #just general utility thing might be useful later on
         self.areas = [Forest_Area1(game)] #list of Areas
         self.tilemap.load("data/stage_data/test2.json") #custom for each stage
-        self.particle_manager = Particle_Manager("forest")
+        self.particle_manager = Particle_Manager(self)
 
 class Forest_Area1:
     def __init__(self, game):

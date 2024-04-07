@@ -88,7 +88,6 @@ class Game:
         self.record_label_pos = self.record_label.get_rect(topright=(WIDTH-10, 8))
 
         self.weather = 0
-
  
         ######################################################################################
 

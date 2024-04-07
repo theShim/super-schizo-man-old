@@ -16,6 +16,7 @@ from scripts.particles.fire import Fire_Particle
 from scripts.particles.rain import Rain_Particle, Rain_Splash
 from scripts.particles.rainbow import Rainbow_Particle
 from scripts.particles.snow import Snow_Particle
+from scripts.particles.dash_after_effects import Dash_After_Effect
 
     ##############################################################################################
 
@@ -29,6 +30,7 @@ class Particle_Manager:
         #     self.add_particle('foreground', 'float_light', pos=[random.uniform(0, WIDTH*2), random.uniform(-HEIGHT, HEIGHT)])
 
         self.start = True
+        self.sound_creating = {'rain'}
         self.to_cull = {'rain', 'float_light'}
 
     def reset(self):
@@ -39,7 +41,7 @@ class Particle_Manager:
         return self.foreground_particles.sprites() + self.background_particles.sprites()
     
     def add_particle(self, group: str, particle_type: str, **kwargs):
-        particle_type = {
+        particle = {
             'float_light' : Floating_Light,
             'run'         : Run_Particle,
             'land'        : Land_Particle,
@@ -47,19 +49,23 @@ class Particle_Manager:
             'rain'        : Rain_Particle,
             'rainbow'     : Rainbow_Particle,
             'snow'        : Snow_Particle,
+            "dash_effect" : Dash_After_Effect,
         }[particle_type]
 
+        if particle_type in self.sound_creating:
+            kwargs["music_player"] = self.stage.game.music_player
+
         if group == 'foreground':
-            particle = particle_type(self.foreground_particles, *kwargs.values())
+            particle = particle(self.foreground_particles, *kwargs.values())
             self.foreground_particles.add(particle)
         elif group == 'background':
-            particle = particle_type(self.background_particles, *kwargs.values())
+            particle = particle(self.background_particles, *kwargs.values())
             self.background_particles.add(particle)
     
     def update(self, offset):
         if self.start:
             #float lights
-            if self.stage == "forest":
+            if self.stage.name == "forest":
                 for i in range((n:=random.randint(10, 15))):
                     self.add_particle('foreground', 'float_light', pos=[((i+1)/n)*WIDTH + random.uniform(-50, 50), random.uniform(0, HEIGHT)])
 

@@ -174,7 +174,7 @@ class Player(pygame.sprite.Sprite):
             if self.hitbox.colliderect(rect):
                 
                 #if the player lands
-                if abs(self.hitbox.bottom - rect.top) < collision_tolerance + 5 and self.vel.y > 0:
+                if abs(self.hitbox.bottom - rect.top) < collision_tolerance + 10 and self.vel.y > 0:
                     if self.landed == False:
                         for i in range(max(2, int(self.vel.y/3))): #add landing particles
                             c = random.uniform(150, 200)
@@ -198,7 +198,7 @@ class Player(pygame.sprite.Sprite):
                     self.vel.y = 0
                 
                 #walls
-                if abs(self.hitbox.right - rect.left) < collision_tolerance and self.vel.x > 0:
+                if abs(self.hitbox.right - rect.left) < collision_tolerance + 20 and self.vel.x > 0:
                     self.rect.right = rect.left
                     self.vel.x = 0
                 if abs(self.hitbox.left - rect.right) < collision_tolerance + 20 and self.vel.x < 0:
@@ -327,15 +327,21 @@ class Player(pygame.sprite.Sprite):
 
 
 class Move:
-    def __init__(self, parent, name: str, sequence: list, duration=None, between_delay=FPS/4):
+    def __init__(self, parent, name: str, sequence: list, duration: float, simultaneous=False, between_delay=FPS/4):
         self.parent = parent
         self.game = self.parent.game
         self.player = self.parent.player
 
         self.name = name
-        self.between_delay = int(between_delay)
+        self._simultaneous = simultaneous
 
-        self.sequence = sequence
+        if not self._simultaneous:
+            self.between_delay = int(between_delay)
+            self.leeway = Timer(between_delay, 1)
+        else:
+            self.held = False
+
+        self.sequence = sequence 
         self.key_map = {key : False for key in self.sequence}
         self.stack = []
 
@@ -345,29 +351,48 @@ class Move:
         ###################################################################################### 
 
     def check_sequence(self, keys: pygame.key.ScancodeWrapper) -> bool:
-        if self.move_timer.run and not self.move_timer.finished:
-            self.move_timer.update()
-            return True
-        
-        current_key_map = {to_press : keys[to_press] for to_press in self.sequence}
-        if current_key_map != self.key_map:
-            new = [key for key in self.sequence if current_key_map[key] and current_key_map[key] != self.key_map[key]]
-            self.key_map = current_key_map.copy()
+        if self._simultaneous == False:
+            current_key_map = {to_press : keys[to_press] for to_press in self.sequence}
+            if current_key_map != self.key_map:
+                #new changes of key states this frame compared to the last, specifically pressing not releasing keys
+                new = [key for key in self.sequence if current_key_map[key] and current_key_map[key] != self.key_map[key]]
+                self.key_map = current_key_map.copy()
 
-            if new:
-                to_add = new[0]
-                if self.sequence[len(self.stack)] == to_add:
-                    self.stack.append(to_add)
+                if new:
+                    #if its the right move add it to the stack
+                    to_add = new[0]
+                    if self.sequence[len(self.stack)] == to_add:
+                        self.stack.append(to_add)
+                    else:
+                        self.stack = []
+                        return False
 
-                if self.stack == self.sequence:
-                    self.move_timer.run = True
-                    self.move_timer.reset()
-                    self.stack = []
-                    return True
+                    #if the stack is complete, and should now be ordered, then the move itself can be run.
+                    if self.stack == self.sequence:
+                        self.move_timer.run = True
+                        self.move_timer.reset()
+                        self.stack = []
+                        return True
+        else:
+            current_key_pressed = set([key for key in self.sequence if keys[key]])
+            if current_key_pressed == set(self.sequence) and not self.held:
+                self.move_timer.run = True
+                self.move_timer.reset()
+                self.held = True
+                return True
+            else:
+                self.held = False
         
+        #if no key is entered or the incorrect sequeunce is entered, nothing should happen
         return False
     
     def execute(self, keys, particle_manager):
+        #if the move has already been entered then keep updating it for its duration
+        if self.move_timer.run and not self.move_timer.finished:
+            self.move_timer.update()
+        elif self.move_timer.finished:
+            self.parent.triggered_move = None
+        
         if self.name.endswith("_dash"):
             self.dash(keys, particle_manager, self.name)
 
@@ -379,35 +404,68 @@ class Move:
     def dash(self, keys, particle_manager, dash_dir):
         self.player.acc.x = self.player.vel.x = 0
         self.player.acc.y = self.player.vel.y = 0
+        diag = math.sqrt(16**2 + 10**2) / 2
 
         if dash_dir == "l_dash":
-            self.player.vel.x = self.player.run_speed * -20
+            self.player.vel.x = self.player.run_speed * -16
+            self.player.change_status("run")
         elif dash_dir == "r_dash":
-            self.player.vel.x = self.player.run_speed * 20
+            self.player.vel.x = self.player.run_speed * 16
+            self.player.change_status("run")
 
         elif dash_dir == "u_dash":
             self.player.vel.y = self.player.run_speed * -10
+            self.player.change_status("jump")
         elif dash_dir == "d_dash":
             self.player.vel.y = self.player.run_speed * 10
+            self.player.change_status("fall")
 
-        self.player.change_status("dash")
+        elif dash_dir == "ul_dash":
+            self.player.vel.x = self.player.run_speed * -diag
+            self.player.vel.y = self.player.run_speed * -diag
+            self.player.change_status("jump")
+        elif dash_dir == "ur_dash":
+            self.player.vel.x = self.player.run_speed * diag
+            self.player.vel.y = self.player.run_speed * -diag
+            self.player.change_status("jump")
+
+        elif dash_dir == "dl_dash":
+            self.player.vel.x = self.player.run_speed * -diag
+            self.player.vel.y = self.player.run_speed * diag
+            self.player.change_status("fall")
+        elif dash_dir == "dr_dash":
+            self.player.vel.x = self.player.run_speed * diag
+            self.player.vel.y = self.player.run_speed * diag
+            self.player.change_status("fall")
+
+        if "l" in dash_dir:
+            pos = self.player.rect.topleft + self.player.vel
+        else:
+            pos = self.player.rect.topleft
+        particle_manager.add_particle("background", "dash_effect", pos=pos, spr=self.player.image.copy())
 
 
 class Move_Manager:
     def __init__(self, player, game):
         self.game = game
         self.player = player
-        self.moves = {}
 
+        self.moves: dict[str:Move] = {}
         for move in [
-            Move(self, "l_dash",       [CONTROLS["left"],  CONTROLS["dash"]],          duration=4),
-            Move(self, "r_dash",       [CONTROLS["right"], CONTROLS["dash"]],          duration=4),
-            Move(self, "u_dash",       [CONTROLS["up"],    CONTROLS["dash"]],          duration=4),
-            Move(self, "d_dash",       [CONTROLS["down"],  CONTROLS["dash"]],          duration=4),
+            Move(self,   "ul_dash",   [CONTROLS["up"],   CONTROLS["left"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "ur_dash",   [CONTROLS["up"],   CONTROLS["right"],  CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "dl_dash",   [CONTROLS["down"], CONTROLS["left"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "dr_dash",   [CONTROLS["down"], CONTROLS["right"],  CONTROLS["dash"]],   duration=20,   simultaneous=True),
 
-            Move(self, "combo test",   [pygame.K_i, pygame.K_o, pygame.K_i],           duration=FPS)
+            Move(self,   "l_dash",   [CONTROLS["left"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "r_dash",   [CONTROLS["right"],  CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "u_dash",   [CONTROLS["up"],     CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "d_dash",   [CONTROLS["down"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
+
+            Move(self, "combo test",   [pygame.K_i, pygame.K_o, pygame.K_i],       duration=FPS)
         ]:
             self.add_move(move)
+        self.triggered_move = None
             
         ###################################################################################### 
 
@@ -415,12 +473,14 @@ class Move_Manager:
         self.moves[move.name] = move
 
     def execute_move(self, keys, particle_manager):
+        if self.triggered_move:
+            self.triggered_move.execute(keys, particle_manager)
+            return 
+        
         for move_name, move in self.moves.items():
             if move.check_sequence(keys):
-                print("Executing:", move_name)
-                move.execute(keys, particle_manager)
-                return True
-        return False
+                self.triggered_move = move
+                break
             
         ###################################################################################### 
 

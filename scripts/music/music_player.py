@@ -4,10 +4,11 @@ with contextlib.redirect_stdout(None):
     from pygame.locals import *
 
 import os
-import cv2
 import numpy as np
 import random
 import math
+
+from scripts.music.music import SOUNDS
 
     ##############################################################################################
 
@@ -16,22 +17,19 @@ class Music_Player:
         pygame.mixer.set_num_channels(channel_num)
 
         #every sound file loaded
-        self.sounds = {
-            "bg_test0" : Sound("music/test.wav"),
-            "memory1" : Sound("music/memory_1.mp3"),
-            "typing" : Sound("music/typing.wav"),
-            "tutorial_1" : Sound("music/tutorial/tutorial_ambience1.mp3"),
-            "tutorial_2" : Sound("music/tutorial/tutorial_ambience2.mp3"),
-        }
+        self.sounds = SOUNDS
 
         #every sound channel to be used, gonna be more later on
         self.background = pygame.mixer.Channel(0)
         self.typing = pygame.mixer.Channel(1)
+        self.rain = pygame.mixer.Channel(2)
         self.channels = [
             self.background,
             self.typing,
+            self.rain,
         ]
         self.volumes = [ #needs to be the same order as self.channels
+            1.,
             1.,
             1.,
         ]
@@ -42,6 +40,8 @@ class Music_Player:
                 return self.background
             case "typing" | "type":
                 return self.typing
+            case "rain_splash" | "rain":
+                return self.rain
             case _:
                 return None
             
@@ -84,9 +84,3 @@ class Music_Player:
         
         self.get_channel(channel).set_volume(vol)
         self.volumes[self.channels.index(self.get_channel(channel))] = vol #updates volume data store
-
-#normal pygame sound object just with a name attribute
-class Sound(pygame.mixer.Sound):
-    def __init__(self, filename):
-        super().__init__(filename)
-        self.name = filename.split("/")[-1]

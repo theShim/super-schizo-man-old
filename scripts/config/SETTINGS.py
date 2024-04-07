@@ -33,6 +33,7 @@ TILE_SIZE = 24
 Z_LAYERS = {
     "background offgrid" : 4,
     "background particle" : 5,
+    "player_dash" : 5.5,
     "player" : 6,
     "partner" : 6.5,
     "items" : 7,
@@ -42,6 +43,23 @@ Z_LAYERS = {
     "foreground offgrid" : 11,
     "foreground particle" : 12
 }
+
+"""
+Z_LAYERS: dict
+    A dictionary containing the z values for the order of sprite blitting.
+
+    "background offgrid" : 4,
+    "background particle" : 5,
+    "player_dash" : 5.5,
+    "player" : 6,
+    "partner" : 6.5,
+    "items" : 7,
+    "midground offgrid" : 8,
+    "tiles" : 9,
+    "attacks": 10, 
+    "foreground offgrid" : 11,
+    "foreground particle" : 12
+"""
     ##############################################################################################
 
 CONTROLS = {
