@@ -374,6 +374,7 @@ class Move:
                         self.stack = []
                         return True
         else:
+            #for keys that need to be pressed at the same time
             current_key_pressed = set([key for key in self.sequence if keys[key]])
             if current_key_pressed == set(self.sequence) and not self.held:
                 self.move_timer.run = True
@@ -406,6 +407,7 @@ class Move:
         self.player.acc.y = self.player.vel.y = 0
         diag = math.sqrt(16**2 + 10**2) / 2
 
+        #dashing in the 8 cardinal directions
         if dash_dir == "l_dash":
             self.player.vel.x = self.player.run_speed * -16
             self.player.change_status("run")
@@ -438,10 +440,13 @@ class Move:
             self.player.vel.y = self.player.run_speed * diag
             self.player.change_status("fall")
 
+        #lil bug fix
         if "l" in dash_dir:
             pos = self.player.rect.topleft + self.player.vel
         else:
             pos = self.player.rect.topleft
+        
+        #adding the after effects of the dash as particles that fade out
         particle_manager.add_particle("background", "dash_effect", pos=pos, spr=self.player.image.copy())
 
 
