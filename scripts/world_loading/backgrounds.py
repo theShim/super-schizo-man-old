@@ -117,11 +117,11 @@ class Perlin_Background:
         self.og_offset += (target_offset - self.og_offset) * .1
 
         try:
-            surf = self.CACHE[(round(self.game.offset.x, 2), round(self.game.offset.y, 2))]
+            surf = self.CACHE[(round(self.game.offset.x, 1), round(self.game.offset.y, 1))]
         except:
             surf = pygame.surfarray.make_surface(self.add_colour(self.NOISE))
             surf = pygame.transform.scale(surf, pygame.math.Vector2(surf.get_size())*4)
-            self.CACHE[(round(self.game.offset.x, 2), round(self.game.offset.y, 2))] = surf
+            self.CACHE[(round(self.game.offset.x, 1), round(self.game.offset.y, 1))] = surf
         self.screen.blit(surf, (0, 0))
 
 

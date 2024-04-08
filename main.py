@@ -22,6 +22,7 @@ from scripts.entities.butterfly import Butterfly
 from scripts.gui.cursor import Cursor
 from scripts.gui.overlay import CRT_Overlay
 from scripts.gui.custom_fonts import Custom_Font
+from scripts.gui.minimap import Minimap
 
 from scripts.items.item import Item
 
@@ -123,7 +124,7 @@ class Game:
                                                Forest_Background,
                                                Player, Butterfly, Item,
                                                Grass_Manager,
-                                               Torch,]]
+                                               Torch, Minimap]]
 
         while self.running:
             for event in pygame.event.get():

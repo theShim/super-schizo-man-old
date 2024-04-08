@@ -204,7 +204,6 @@ class Tile(pygame.sprite.Sprite):
 
     @classmethod
     def cache_sprites(cls):
-        global LOADED_SPRITE_NUMBER
         Tile.SPRITES = {}
         BASE_TILE_PATH = 'assets/tiles/'
 
@@ -232,7 +231,7 @@ class Tile(pygame.sprite.Sprite):
 
     #dictionary object used for json saving
     @property
-    def dict(self):
+    def dict(self) -> dict:
         return {"type":self.type, "variant":self.variant, "pos":self.pos}
     
     #actually draw it onto the screen

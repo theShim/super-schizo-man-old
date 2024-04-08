@@ -327,19 +327,18 @@ class Player(pygame.sprite.Sprite):
 
 
 class Move:
-    def __init__(self, parent, name: str, sequence: list, duration: float, simultaneous=False, between_delay=FPS/4):
+    def __init__(self, parent, name: str, sequence: list, duration: float, delay: float, simultaneous=False, between_delay=FPS/4):
         self.parent = parent
         self.game = self.parent.game
         self.player = self.parent.player
 
         self.name = name
         self._simultaneous = simultaneous
+        self.delay = delay
 
         if not self._simultaneous:
             self.between_delay = int(between_delay)
             self.leeway = Timer(between_delay, 1)
-        else:
-            self.held = False
 
         self.sequence = sequence 
         self.key_map = {key : False for key in self.sequence}
@@ -376,13 +375,11 @@ class Move:
         else:
             #for keys that need to be pressed at the same time
             current_key_pressed = set([key for key in self.sequence if keys[key]])
-            if current_key_pressed == set(self.sequence) and not self.held:
+            if current_key_pressed == set(self.sequence) and not self.parent.held:
                 self.move_timer.run = True
                 self.move_timer.reset()
-                self.held = True
+                self.parent.held = self.delay
                 return True
-            else:
-                self.held = False
         
         #if no key is entered or the incorrect sequeunce is entered, nothing should happen
         return False
@@ -457,20 +454,21 @@ class Move_Manager:
 
         self.moves: dict[str:Move] = {}
         for move in [
-            Move(self,   "ul_dash",   [CONTROLS["up"],   CONTROLS["left"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
-            Move(self,   "ur_dash",   [CONTROLS["up"],   CONTROLS["right"],  CONTROLS["dash"]],   duration=20,   simultaneous=True),
-            Move(self,   "dl_dash",   [CONTROLS["down"], CONTROLS["left"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
-            Move(self,   "dr_dash",   [CONTROLS["down"], CONTROLS["right"],  CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,  "ul_dash",  [CONTROLS["up"],   CONTROLS["left"],  CONTROLS["dash"]],  delay=FPS, duration=20,  simultaneous=True),
+            Move(self,  "ur_dash",  [CONTROLS["up"],   CONTROLS["right"], CONTROLS["dash"]],  delay=FPS, duration=20,  simultaneous=True),
+            Move(self,  "dl_dash",  [CONTROLS["down"], CONTROLS["left"],  CONTROLS["dash"]],  delay=FPS, duration=20,  simultaneous=True),
+            Move(self,  "dr_dash",  [CONTROLS["down"], CONTROLS["right"], CONTROLS["dash"]],  delay=FPS, duration=20,  simultaneous=True),
 
-            Move(self,   "l_dash",   [CONTROLS["left"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
-            Move(self,   "r_dash",   [CONTROLS["right"],  CONTROLS["dash"]],   duration=20,   simultaneous=True),
-            Move(self,   "u_dash",   [CONTROLS["up"],     CONTROLS["dash"]],   duration=20,   simultaneous=True),
-            Move(self,   "d_dash",   [CONTROLS["down"],   CONTROLS["dash"]],   duration=20,   simultaneous=True),
+            Move(self,   "l_dash",   [CONTROLS["left"],   CONTROLS["dash"]],   delay=FPS,   duration=20,   simultaneous=True),
+            Move(self,   "r_dash",   [CONTROLS["right"],  CONTROLS["dash"]],   delay=FPS,   duration=20,   simultaneous=True),
+            Move(self,   "u_dash",   [CONTROLS["up"],     CONTROLS["dash"]],   delay=FPS,   duration=20,   simultaneous=True),
+            Move(self,   "d_dash",   [CONTROLS["down"],   CONTROLS["dash"]],   delay=FPS,   duration=20,   simultaneous=True),
 
-            Move(self, "combo test",   [pygame.K_i, pygame.K_o, pygame.K_i],       duration=FPS)
+            Move(self, "combo test",   [pygame.K_i, pygame.K_o, pygame.K_i],   delay=FPS,   duration=FPS)
         ]:
             self.add_move(move)
         self.triggered_move = None
+        self.held = 0
             
         ###################################################################################### 
 
@@ -481,6 +479,10 @@ class Move_Manager:
         if self.triggered_move:
             self.triggered_move.execute(keys, particle_manager)
             return 
+        
+        if self.held:
+            self.held -= 1
+            return
         
         for move_name, move in self.moves.items():
             if move.check_sequence(keys):

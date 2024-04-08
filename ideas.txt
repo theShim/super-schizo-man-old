@@ -9,3 +9,4 @@
 -!!!reflections (looked bad)!!!
 -first boss = igris (solo leveling)
 -superschizoman
+-semi-solids (only when player above = collision)

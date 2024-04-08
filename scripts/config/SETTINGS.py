@@ -5,7 +5,7 @@ import pygame
 DEBUG = not True
 WINDOW_TITLE = "Super Schizo Man"
 LOADED_SPRITE_NUMBER = 0
-MAX_LOADED_SPRITES = 183
+MAX_LOADED_SPRITES = 184
 
     ##############################################################################################
 
@@ -21,7 +21,7 @@ CAMERA_FOLLOW_SPEED = 12
 FRIC = 0.9
 GRAV = 0.4
 
-ENVIRONMENT_SETTINGS = {
+ENVIRONMENT_SETTINGS: dict[str, bool | int] = {
     "rain" : False,
     "snow" : False,
     "wind" : -2
@@ -30,7 +30,7 @@ ENVIRONMENT_SETTINGS = {
     ##############################################################################################
     
 TILE_SIZE = 24
-Z_LAYERS = {
+Z_LAYERS: dict[str , int] = {
     "background offgrid" : 4,
     "background particle" : 5,
     "player_dash" : 5.5,
@@ -41,11 +41,11 @@ Z_LAYERS = {
     "tiles" : 9,
     "attacks": 10, 
     "foreground offgrid" : 11,
-    "foreground particle" : 12
+    "foreground particle" : 12,
+    "in-game gui" : 14
 }
 
 """
-Z_LAYERS: dict
     A dictionary containing the z values for the order of sprite blitting.
 
     "background offgrid" : 4,
@@ -58,22 +58,24 @@ Z_LAYERS: dict
     "tiles" : 9,
     "attacks": 10, 
     "foreground offgrid" : 11,
-    "foreground particle" : 12
+    "foreground particle" : 12,
+    "in-game gui" : 14
 """
     ##############################################################################################
 
-CONTROLS = {
+CONTROLS: dict[str, pygame.key.ScancodeWrapper] = {
     "up"        : pygame.K_w,
     "down"      : pygame.K_s,
     "left"      : pygame.K_a,
     "right"     : pygame.K_d,
     "jump"      : pygame.K_SPACE,
 
-    "heavy"     : pygame.K_h, #might not use these + replace with mouse
+    "heavy"     : pygame.K_k, #might not use these + replace with mouse
     "light"     : pygame.K_j,
     "dash"      : pygame.K_l,
-    "switch_l"  : pygame.K_i,
-    "switch_r"  : pygame.K_o,
+    "switch_l"  : pygame.K_u,
+    "switch_r"  : pygame.K_i,
+    #other buttons could be used h, u, r, c, f, n, m
 
     "menu_open" : pygame.K_ESCAPE,
     "inv_open"  : pygame.K_TAB,
@@ -82,7 +84,6 @@ CONTROLS = {
 }
 
 """
-CONTROLS: dict
     A dictionary containing the key mappings for player controls.
 
     - "dash": space

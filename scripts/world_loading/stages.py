@@ -8,9 +8,11 @@ import random
 from scripts.entities.player import Player
 from scripts.entities.butterfly import Butterfly
 
+from scripts.gui.minimap import Minimap
+
 from scripts.items.item import Item
 
-from scripts.world_loading.tilemap import Tilemap
+from scripts.world_loading.tilemap import Tilemap, INVISIBLE_TILES
 from scripts.world_loading.backgrounds import *
 from scripts.world_loading.light_tiles import Torch
 
@@ -86,6 +88,42 @@ class Stage:
 
     def current_bg_music(self):
         return self.areas[self.area_index].bg_music
+    
+    
+    def find_tiles_outline(self):
+        outlines = []
+        visited = set()
+
+        for key in self.tilemap.tile_map:
+            tile = self.tilemap.tile_map[key]
+            x, y = tile.pos
+            if (x, y) not in visited:
+                outline = self.find_outline(visited, x, y)
+                outlines.append(outline)
+
+        return set().union(*outlines)
+    
+    def find_outline(self, visited: set, start_x, start_y):
+        outline_tiles = set()
+        stack = [(start_x, start_y)]
+
+        while stack:
+            x, y = stack.pop()
+            if (x, y) not in visited:
+                visited.add((x, y))
+                
+                if (tile:=self.tilemap.tile_map.get(f"{x};{y}")) and tile.type not in INVISIBLE_TILES:
+                    neighbours = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+
+                    valid_neighbours = [(nx, ny) for nx, ny in neighbours if (tile:=self.tilemap.tile_map.get(f"{nx};{ny}")) and tile.type not in INVISIBLE_TILES]
+                    if len(valid_neighbours) != 4:
+                        outline_tiles.add((x, y))
+
+                    unvisited_neighbours = [(nx, ny) for nx, ny in valid_neighbours if (nx, ny) not in visited]
+                    stack.extend(unvisited_neighbours)
+
+        return outline_tiles
+    
 
     def update(self, player):
         if not self.game.music_player.is_playing("bg"):
@@ -105,7 +143,8 @@ class Stage:
                     [t for t in self.tilemap.render_tiles(  self.game.offset)] +
                     [t for t in self.tilemap.nature_manager.render_tiles(self.game.offset)] +
                     self.particle_manager.sprites() +
-                    self.game.entities.sprites()
+                    self.game.entities.sprites() +
+                    [self.minimap]
                 ), 
                 key=lambda spr:spr.z
             ):
@@ -167,7 +206,7 @@ class Opening_Stage(Stage):
                     [t for t in self.tilemap.render_offgrid(self.game.offset)] +
                     [t for t in self.tilemap.render_tiles(  self.game.offset)] +
                     self.particle_manager.sprites() +
-                    self.game.entities.sprites()
+                    self.game.entities.sprites() 
                 ), 
                 key=lambda spr:spr.z
             ):
@@ -188,6 +227,7 @@ class Forest_Stage(Stage):
         self.stage_index = 1 #just general utility thing might be useful later on
         self.areas = [Forest_Area1(game)] #list of Areas
         self.tilemap.load("data/stage_data/test2.json") #custom for each stage
+        self.minimap = Minimap(game, self.find_tiles_outline())
         self.particle_manager = Particle_Manager(self)
 
 class Forest_Area1:
