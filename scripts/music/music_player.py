@@ -8,8 +8,6 @@ import numpy as np
 import random
 import math
 
-from scripts.music.music import SOUNDS
-
     ##############################################################################################
 
 class Music_Player:
@@ -17,6 +15,8 @@ class Music_Player:
         pygame.mixer.set_num_channels(channel_num)
 
         #every sound file loaded
+
+        from scripts.music.music import SOUNDS
         self.sounds = SOUNDS
 
         #every sound channel to be used, gonna be more later on

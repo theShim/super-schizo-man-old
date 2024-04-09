@@ -20,13 +20,15 @@ from scripts.entities.player import Player
 from scripts.entities.butterfly import Butterfly
 
 from scripts.gui.cursor import Cursor
-from scripts.gui.overlay import CRT_Overlay
 from scripts.gui.custom_fonts import Custom_Font
 from scripts.gui.minimap import Minimap
 
 from scripts.items.item import Item
 
 from scripts.music.music_player import Music_Player
+
+from scripts.screen_effects.manager import Effect_Manager
+from scripts.screen_effects.overlay import CRT_Overlay
     
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
 from scripts.world_loading.stages import Stage_Loader
@@ -80,6 +82,8 @@ class Game:
 
         self.stage_loader = Stage_Loader(self)
         self.player = Player(self, self.entities, 2, self.stage_loader.player_spawn_pos)
+
+        self.effect_manager = Effect_Manager(self)
 
         self.cursor = Cursor()
 
@@ -240,11 +244,11 @@ class Game:
             
             self.stage_loader.render(self.player)
 
+            self.effect_manager.update()
+
             if self.player.menu.open:
                 self.player.menu.draw()
             self.cursor.update(self.screen)
-
-            # self.overlay.update()
 
             #FPS
             if DEBUG:

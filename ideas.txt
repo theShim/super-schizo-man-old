@@ -8,5 +8,6 @@
 -temperature
 -!!!reflections (looked bad)!!!
 -first boss = igris (solo leveling)
+-another boss = entirely monochromatic devoid
 -superschizoman
 -semi-solids (only when player above = collision)

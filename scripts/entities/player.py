@@ -446,6 +446,8 @@ class Move:
         #adding the after effects of the dash as particles that fade out
         particle_manager.add_particle("background", "dash_effect", pos=pos, spr=self.player.image.copy())
 
+        self.game.effect_manager.effects["screen shake"].start(int(FPS*0.25))
+
 
 class Move_Manager:
     def __init__(self, player, game):

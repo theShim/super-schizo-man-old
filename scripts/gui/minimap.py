@@ -39,6 +39,11 @@ class Minimap(pygame.sprite.Sprite):
             if tuple(tile.pos) in self.tiles:
                 map_pos = (vec(tile.pos) - vec(offset) / TILE_SIZE)
                 map_.set_at((math.floor(map_pos.x), math.floor(map_pos.y)), (92, 95, 112))
+
+        player_pos = (vec(self.game.player.hitbox.topleft) - vec(offset)) / TILE_SIZE
+        player_pos = (math.floor(player_pos.x), math.floor(player_pos.y))
+        map_.set_at(player_pos, (189, 17, 17))
+        map_.set_at((player_pos[0], player_pos[1]+1), (189, 17, 17))
         map_ = pygame.transform.scale(map_, self.map_size)
 
         screen.blit(map_, map_.get_rect(topright=self.border_rect.topright))
