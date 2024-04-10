@@ -34,7 +34,7 @@ from scripts.world_loading.tilemap import Tile, Offgrid_Tile
 from scripts.world_loading.stages import Stage_Loader
 from scripts.world_loading.backgrounds import Forest_Background
 from scripts.world_loading.nature import Grass_Manager
-from scripts.world_loading.light_tiles import Torch
+from scripts.world_loading.custom_offgrid import Torch
 
 from screen_recorder import ScreenRecorder
 

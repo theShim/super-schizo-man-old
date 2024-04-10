@@ -47,3 +47,21 @@ class Torch(pygame.sprite.Sprite):
             for i in range(self.flame_intensity * 10):
                 particle_manager.add_particle("foreground", "fire", pos=(self.pos + vec(random.uniform(-5, 5) + 12, random.uniform(-5, 5) - 2)), radius=random.uniform(1, 3))
             self.start = False
+
+class Bridge(pygame.sprite.Sprite):
+    def __init__(self, pos, variant):
+        super().__init__()
+        self.type = "bridge"
+        self.variant = variant
+        self.z = Z_LAYERS["foreground offgrid"]
+
+        self.pos = pos
+        self.end_pos = None
+
+    @property
+    def dict(self):
+        return {'type':self.type, "pos":self.pos, "end_pos":self.end_pos, "variant":self.variant}
+
+    def update(self, screen, offset):
+        #temporary showing joints
+        pygame.draw.line(screen, (201, 201, 201), vec(self.pos) - offset + vec(5, 5), vec(self.end_pos) - offset + vec(5, 5), 1)

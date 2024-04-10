@@ -9,9 +9,9 @@ import random
 from tkinter.filedialog import asksaveasfile, askopenfilename
 
 from scripts.config.SETTINGS import TILE_SIZE, WIDTH, HEIGHT, Z_LAYERS, LOADED_SPRITE_NUMBER
-from scripts.config.CORE_FUNCS import euclidean_distance
+from scripts.config.CORE_FUNCS import euclidean_distance, vec
 from scripts.world_loading.nature import Nature_Manager
-from scripts.world_loading.light_tiles import Torch
+from scripts.world_loading.custom_offgrid import Torch, Bridge
 
     ##############################################################################################
 
@@ -131,6 +131,10 @@ class Tilemap:
         for tile in data['offgrid']:
             if tile["type"] in NATURE_TILES and self.editor_flag == False:
                 self.nature_manager.add_tile(tile["type"], tile["pos"], tile["variant"])
+            elif tile["type"] == "bridge":
+                to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
+                to_add.end_pos = tile["end_pos"]
+                self.offgrid_tiles.append(to_add)
             else:
                 to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
                 self.offgrid_tiles.append(to_add)
@@ -197,6 +201,9 @@ class Tilemap:
                 offset.y - TILE_SIZE < tile.pos[1] < offset.y + HEIGHT):
                 # tile.draw(screen, offset)
                 yield tile
+            elif tile.type == "bridge" and (offset.x - TILE_SIZE < tile.end_pos[0] < offset.x + WIDTH and
+                                            offset.y - TILE_SIZE < tile.end_pos[1] < offset.y + HEIGHT):
+                yield tile
 
     ##############################################################################################
 
@@ -224,8 +231,8 @@ class Tile(pygame.sprite.Sprite):
 
     def __init__(self, type, pos, variant=1):
         super().__init__()
-        self.type = type #tile type e.g. grass
-        self.variant = variant #tile variant e.g. grass_8
+        self.type = type #tile type e.g. grass, the folder
+        self.variant = variant #tile variant e.g. grass_8, the asset itself
         self.pos = pos
         self.z = Z_LAYERS["tiles"]
 
@@ -276,6 +283,8 @@ class Offgrid_Tile(pygame.sprite.Sprite):
         match type:
             case "torch":
                 return Torch(pos, variant)
+            case "bridge":
+                return Bridge(pos, variant)
             case _:
                 return Offgrid_Tile(type, pos, variant)
 
@@ -296,10 +305,14 @@ class Offgrid_Tile(pygame.sprite.Sprite):
 
     @property
     def dict(self):
+        # if self.type == "bridge":
+        #     return {'type':self.type, "pos":self.pos, "end_pos":self.end_pos, "variant":self.variant}
+        # else:
         return {'type':self.type, "pos":self.pos, "variant":self.variant}
     
     def update(self, screen, offset):
         img = Offgrid_Tile.SPRITES[self.type][self.variant]
         screen.blit(img, self.pos - offset)
+
 
     ##############################################################################################

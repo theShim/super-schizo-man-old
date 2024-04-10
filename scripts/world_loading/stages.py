@@ -14,7 +14,7 @@ from scripts.items.item import Item
 
 from scripts.world_loading.tilemap import Tilemap, INVISIBLE_TILES
 from scripts.world_loading.backgrounds import *
-from scripts.world_loading.light_tiles import Torch
+from scripts.world_loading.custom_offgrid import Torch
 
 from scripts.particles.floating_lights import Floating_Light
 from scripts.particles.particle_manager import Particle_Manager
@@ -226,7 +226,7 @@ class Forest_Stage(Stage):
         self.name = "forest"
         self.stage_index = 1 #just general utility thing might be useful later on
         self.areas = [Forest_Area1(game)] #list of Areas
-        self.tilemap.load("data/stage_data/test2.json") #custom for each stage
+        self.tilemap.load("data/stage_data/test.json") #custom for each stage
         self.minimap = Minimap(game, self.find_tiles_outline())
         self.particle_manager = Particle_Manager(self)
 

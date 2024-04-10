@@ -113,10 +113,8 @@ class Editor:
         self.tile_variant = 0
 
         self.offgrid_assets = {
-            "boxes" : load_offgrid('boxes'),
-            "grass" : load_offgrid('grass'),
-            "torch" : load_offgrid('torch'),
-            "swaying_vine" : load_offgrid("swaying_vine")
+            f : load_offgrid(f)
+            for f in os.listdir("assets/offgrid_tiles/")
         }
         self.offgrid_list = list(self.offgrid_assets)
         self.offgrid_group = 0
@@ -139,6 +137,10 @@ class Editor:
         self.tilemap = Tilemap(self, editor_flag=True)
         self.bg = Editor_Background()
         self.particles = pygame.sprite.Group()
+
+        #other
+        self.bridge = None
+        self.bridge_flag = False
 
         ######################################################################################
 
@@ -232,13 +234,25 @@ class Editor:
                 mousePos = [mousePos[0] - current_img.get_width()//2, mousePos[1] - current_img.get_height()//2]
                 pos = vec(mousePos) + self.offset
                 if pos not in [t.pos for t in self.tilemap.offgrid_tiles]:
+                        
                     tile = Offgrid_Tile(
                         self.offgrid_list[self.offgrid_group],
                         [pos[0], pos[1]],
                         self.offgrid_variant,
                     )
                     tile.z = Z_LAYERS["foreground offgrid"]
-                    self.tilemap.offgrid_tiles.append(tile)
+
+                    if self.offgrid_list[self.offgrid_group] == "bridge":
+                        if self.bridge_flag == False:
+                            self.bridge = tile
+                            self.tilemap.offgrid_tiles.append(tile)
+                            self.bridge_flag = not self.bridge_flag
+                        else:
+                            self.bridge.end_pos = [pos[0], pos[1]]
+                            self.bridge_flag = not self.bridge_flag
+                    else:
+                        self.tilemap.offgrid_tiles.append(tile)
+                        
                 self.held = True
 
 
