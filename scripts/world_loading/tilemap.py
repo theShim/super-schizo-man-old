@@ -132,8 +132,7 @@ class Tilemap:
             if tile["type"] in NATURE_TILES and self.editor_flag == False:
                 self.nature_manager.add_tile(tile["type"], tile["pos"], tile["variant"])
             elif tile["type"] == "bridge":
-                to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
-                to_add.end_pos = tile["end_pos"]
+                to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag, end_pos=tile["end_pos"])
                 self.offgrid_tiles.append(to_add)
             else:
                 to_add = Offgrid_Tile.get_offgrid_tile(tile['type'], tile['pos'], tile['variant'], self.editor_flag)
@@ -274,7 +273,7 @@ class Offgrid_Tile(pygame.sprite.Sprite):
 
     #just wanted a fancy match statement rather than if
     @staticmethod
-    def get_offgrid_tile(type, pos, variant, editor_flag = False):
+    def get_offgrid_tile(type, pos, variant, editor_flag = False, **kwargs):
         if editor_flag:
             tile = Offgrid_Tile(type, pos, variant)
             tile.z = Z_LAYERS["foreground offgrid"]
@@ -284,7 +283,7 @@ class Offgrid_Tile(pygame.sprite.Sprite):
             case "torch":
                 return Torch(pos, variant)
             case "bridge":
-                return Bridge(pos, variant)
+                return Bridge(pos, variant, *kwargs.values())
             case _:
                 return Offgrid_Tile(type, pos, variant)
 

@@ -68,7 +68,7 @@ class Swaying_Vine(pygame.sprite.Sprite):
         temp = self.points.copy()
 
         delta = (self.points - self.old_points)
-        delta *= FRIC
+        delta[:, 0] *= FRIC
         delta[:, 1] += 9.81/2
         delta[:, 0] += (math.sin(self.wind_clock + self.wind_offset + random.random() / 6))
         immovable_mask = np.zeros_like(self.points, dtype=bool)

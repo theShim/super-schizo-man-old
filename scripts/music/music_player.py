@@ -15,7 +15,6 @@ class Music_Player:
         pygame.mixer.set_num_channels(channel_num)
 
         #every sound file loaded
-
         from scripts.music.music import SOUNDS
         self.sounds = SOUNDS
 
@@ -28,8 +27,8 @@ class Music_Player:
             self.typing,
             self.rain,
         ]
-        self.volumes = [ #needs to be the same order as self.channels
-            1.,
+        self.volumes: list[float] = [ #needs to be the same order as self.channels
+            0.,
             1.,
             1.,
         ]

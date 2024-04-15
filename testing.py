@@ -1,48 +1,54 @@
-import pygame
-import random
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime, timedelta
 
-# Initialize Pygame
-pygame.init()
+# Data points
+times = ['7:50', '15:21']
+y_values = [39.4, 38.5]
 
-# Set the dimensions of the window
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Heatwave Simulation")
+# Convert times to datetime objects
+x_values = []
+for time in times:
+    hours, minutes = map(int, time.split(':'))
+    x_values.append(datetime(year=2024, month=1, day=1, hour=hours, minute=minutes))
 
-# Create a background surface
-background = pygame.Surface((WIDTH, HEIGHT))
-background.fill((255, 255, 255))  # White background
+# Plot the points
+plt.scatter(x_values, y_values, label='Data Points')
 
-# Create heatwave effect layers
-heatwave_layers = []
-for _ in range(3):
-    layer = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)  # Transparent surface
-    heatwave_layers.append(layer)
+# Calculate line of best fit
+x_values_numeric = [(x - x_values[0]).total_seconds() / 3600 for x in x_values]  # Convert to numeric values (hours)
+m, b = np.polyfit(x_values_numeric, y_values, 1)
 
-# Main loop
-running = True
-while running:
-    # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+# Find the x-value when y = 0
+x_at_y0 = -b / m
+if x_at_y0 >= 0:
+    x_at_y0_time = x_values[0] + timedelta(hours=x_at_y0)
+    plt.plot([x_values[0], x_at_y0_time], [y_values[0], 0], color='red', label='Line of Best Fit')
+    plt.scatter(x_at_y0_time, 0, color='green', label='Interpolated Point (y = 0)')
 
-    # Update heatwave effect
-    for layer in heatwave_layers:
-        # Randomly change transparency and color of heatwave layers
-        alpha = random.randint(20, 255)  # Random transparency
-        color = (random.randint(200, 255), random.randint(150, 200), random.randint(50, 100), alpha)  # Random color with transparency
-        layer.fill(color)
+# Plot the line of best fit up to the point where y = 37
+x_at_37_numeric = (37 - b) / m
+x_at_37_time = x_values[0] + timedelta(hours=x_at_37_numeric)
+x_values_for_fit = np.linspace(x_values_numeric[0], x_at_37_numeric, 100)
+y_values_for_fit = m * x_values_for_fit + b
+plt.plot([x_values[0], x_at_37_time], [y_values[0], 37], color='red', linestyle='dashed')
 
-    # Clear the screen
-    screen.blit(background, (0, 0))
+# Plot the point where the line passes through y = 37
+plt.scatter(x_at_37_time, 37, color='green')
 
-    # Render and blit heatwave effect layers
-    for layer in heatwave_layers:
-        screen.blit(layer, (0, 0))
+# Add labels and legend
+plt.xlabel('Time (24-hour format)')
+plt.ylabel('Arbitrary Units')
+plt.title('Graph with Line of Best Fit')
+plt.legend()
 
-    # Update the display
-    pygame.display.flip()
+# Show plot
+plt.grid(True)
+plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%d'))  # Set format for x-axis
+plt.show()
 
-# Quit Pygame
-pygame.quit()
+# Print the interpolated times
+if x_at_y0 >= 0:
+    print("The time where y = 0 is approximately:", x_at_y0_time.strftime('%d'))
+print("The time where y = 37 is approximately:", x_at_37_time.strftime('%d'))
