@@ -9,7 +9,7 @@ MAX_LOADED_SPRITES = 185
 
     ##############################################################################################
 
-SIZE = (WIDTH, HEIGHT) = 1280//2, 800//2
+SIZE = (WIDTH, HEIGHT) = 640, 400
 SCREEN_CENTER = (WIDTH/2, HEIGHT/2)
 
 FPS = 45

@@ -184,9 +184,14 @@ class Tilemap:
 
         ######################################################################################
 
-    def render_tiles(self, offset):
-        for x in range(int(offset.x // (self.tile_size)), int((offset.x + self.game.screen.get_width()) // self.tile_size) + 1):
-            for y in range(int(offset.y // (self.tile_size)), int((offset.y + self.game.screen.get_height()) // self.tile_size) + 1):
+    def render_tiles(self, offset, buffer=[0, 0]):
+        start_x = int(offset.x // (self.tile_size) - buffer[0])
+        end_x = int((offset.x + self.game.screen.get_width()) // self.tile_size  + buffer[0]) + 1
+        start_y = int(offset.y // (self.tile_size) - buffer[1])
+        end_y = int((offset.y + self.game.screen.get_height()) // self.tile_size + buffer[1]) + 1
+
+        for x in range(start_x, end_x):
+            for y in range(start_y, end_y):
                 loc = f"{x};{y}"
                 if loc in self.tile_map:
                     tile: Tile = self.tile_map[loc]
@@ -198,8 +203,8 @@ class Tilemap:
         for tile in self.offgrid_tiles:
             if (offset.x - TILE_SIZE < tile.pos[0] < offset.x + WIDTH and
                 offset.y - TILE_SIZE < tile.pos[1] < offset.y + HEIGHT):
-                # tile.draw(screen, offset)
                 yield tile
+
             elif tile.type == "bridge" and (offset.x - TILE_SIZE < tile.end_pos[0] < offset.x + WIDTH and
                                             offset.y - TILE_SIZE < tile.end_pos[1] < offset.y + HEIGHT):
                 yield tile
