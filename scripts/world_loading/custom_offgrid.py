@@ -69,6 +69,8 @@ class Bridge(pygame.sprite.Sprite):
             length = math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2) - 5
             self.lengths.append(length)
 
+        self.touched = False
+
     @property
     def dict(self):
         return {'type':self.type, "pos":self.pos, "end_pos":self.end_pos, "variant":self.variant}
@@ -77,7 +79,7 @@ class Bridge(pygame.sprite.Sprite):
         temp = self.points.copy()
 
         delta = (self.points - self.old_points)
-        delta[:, 1] += GRAV / 4 + random.random() / 25
+        delta[:, 1] += GRAV / 4# + random.random() / 25
         immovable_mask = np.zeros_like(self.points, dtype=bool)
         immovable_mask[self.pinned] = True
         delta[immovable_mask] = 0
@@ -105,6 +107,24 @@ class Bridge(pygame.sprite.Sprite):
             elif joint[0] in self.pinned and joint[1] not in self.pinned:
                 self.points[joint[1]] -= 2 * update
 
+    def player_collisions(self, joint, player):
+        p1 = vec(self.points[joint[0]].tolist())
+        p2 = vec(self.points[joint[1]].tolist())
+        rect: pygame.Rect = player.hitbox
+
+        if pygame.Rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y).colliderect(rect):
+            player.rect.bottom = p2.y - 3
+            player.vel.y = 0 #reset y velocity
+            player.jumps = 2 #reset jumps
+            player.landed = True
+            self.touching = True
+            self.points[joint[0]] += 1 if self.points[joint[0]] not in self.points[self.pinned] else 0 
+            self.points[joint[1]] += 1 if self.points[joint[1]] not in self.points[self.pinned] else 0  
+            return True
+        
+        self.touching = False
+        return False
+
     def draw_segment(self, screen, offset, joint):
         a = vec(self.points[joint[0]].tolist())
         b = vec(self.points[joint[1]].tolist())
@@ -123,20 +143,32 @@ class Bridge(pygame.sprite.Sprite):
             p2 + vec(cos(angle+90), sin(angle+90)) * 5 - offset,
             p2 + vec(cos(angle-90), sin(angle-90)) * 5 - offset,
         ]
+        pygame.draw.polygon(screen, (64, 25, 24), points)
 
-        pygame.draw.polygon(screen, (154, 57, 28), points)
-        pygame.draw.polygon(screen, (125, 38, 12), points, 1)
+        points = [
+            p1 + vec(cos(angle-90), sin(angle-90)) * 5 - offset,
+            p1 + vec(cos(angle-90), sin(angle-90)) * 3 - offset,
+            p2 + vec(cos(angle-90), sin(angle-90)) * 3 - offset,
+            p2 + vec(cos(angle-90), sin(angle-90)) * 5 - offset,
+        ]
+        pygame.draw.polygon(screen, (143, 101, 83), points)
 
     def update(self, screen, offset):
         self.move()
         self.constrain()
 
-        for j in self.joints:
+        for i, j in enumerate(self.joints):
             p1 = self.points[j[0]].tolist()
             p2 = self.points[j[1]].tolist()
-            pygame.draw.line(screen, (154, 57, 28), vec(p1) - offset, vec(p2) - offset, 1)
+            pygame.draw.line(screen, (95, 58, 48), vec(p1) - offset - vec(0, 2), vec(p2) - offset - vec(0, 2), 1)
+            pygame.draw.line(screen, (95, 58, 48), vec(p1) - offset + vec(0, 2), vec(p2) - offset + vec(0, 2), 1)
 
             self.draw_segment(screen, offset, j)
+
+            if i%2 == 1:
+                pygame.draw.line(screen, (28, 9, 11), vec(p1) - offset, vec(p1) - offset - vec(0, 30), 3)
+
+            pygame.draw.line(screen, (107, 61, 41), vec(p1) - offset - vec(0, 30), vec(p2) - offset - vec(0, 30), 2)
 
         #temporarily showing joints
         # for p in self.points:

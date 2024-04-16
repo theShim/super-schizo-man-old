@@ -209,11 +209,19 @@ class Player(pygame.sprite.Sprite):
             self.landed = False
 
         #if they're on the floor, reset y velocity
-        if self.landed:
-            self.vel.y = 0
+        # if self.landed:
+        #     self.vel.y = 0
 
     def offgrid_collisions(self): #mostly handled on tile end
-        return
+        for tile in self.game.stage_loader.tilemap.render_offgrid(self.game.offset):
+            if tile.type == "bridge":
+                # if tile.touched:
+                #     if self.status in ['fall', "jump"]:
+                #         self.change_status('idle')
+
+                for j in tile.joints:
+                    if tile.player_collisions(j, self): 
+                        return
         
         ###################################################################################### 
                 
