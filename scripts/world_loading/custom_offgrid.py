@@ -125,9 +125,9 @@ class Bridge(pygame.sprite.Sprite):
         self.touching = False
         return False
 
-    def draw_segment(self, screen, offset, joint):
-        a = vec(self.points[joint[0]].tolist())
-        b = vec(self.points[joint[1]].tolist())
+    def draw_segment(self, screen, offset, a, b):
+        a = vec(a)
+        b = vec(b)
         p1 = a.lerp(b, 0.1)
         p2 = b.lerp(a, 0.1)
 
@@ -163,12 +163,25 @@ class Bridge(pygame.sprite.Sprite):
             pygame.draw.line(screen, (95, 58, 48), vec(p1) - offset - vec(0, 2), vec(p2) - offset - vec(0, 2), 1)
             pygame.draw.line(screen, (95, 58, 48), vec(p1) - offset + vec(0, 2), vec(p2) - offset + vec(0, 2), 1)
 
-            self.draw_segment(screen, offset, j)
-
             if i%2 == 1:
-                pygame.draw.line(screen, (28, 9, 11), vec(p1) - offset, vec(p1) - offset - vec(0, 30), 3)
+                p = vec(p1)
+                pygame.draw.line(screen, (28, 9, 11), p - offset, p - offset - vec(0, 30), 3)
+                pygame.draw.line(screen, (28, 9, 11), p - offset - vec(3, 25),  p - offset - vec(2, 30), 3)
+                pygame.draw.line(screen, (28, 9, 11), p - offset - vec(-3, 25), p - offset - vec(-2, 30), 3)
+
+            self.draw_segment(screen, offset, p1, p2)
 
             pygame.draw.line(screen, (107, 61, 41), vec(p1) - offset - vec(0, 30), vec(p2) - offset - vec(0, 30), 2)
+
+        # p = self.points[0].tolist()
+        # self.draw_segment(screen, offset, vec(p) - vec(10, 0), vec(p) + vec(10, 0))
+        # # pygame.draw.line(screen, (95, 58, 48), vec(p) - offset - vec(10, 2), vec(p) - offset - vec(10, 2), 1)
+        # # pygame.draw.line(screen, (95, 58, 48), vec(p) - offset + vec(10, 2), vec(p) - offset + vec(10, 2), 1)
+
+        # p = self.points[-1].tolist()
+        # self.draw_segment(screen, offset, vec(p) - vec(10, 0), vec(p) + vec(10, 0))
+        # # pygame.draw.line(screen, (95, 58, 48), vec(p) - offset - vec(10, 2), vec(p) - offset - vec(10, 2), 1)
+        # # pygame.draw.line(screen, (95, 58, 48), vec(p) - offset + vec(10, 2), vec(p) - offset + vec(10, 2), 1)
 
         #temporarily showing joints
         # for p in self.points:

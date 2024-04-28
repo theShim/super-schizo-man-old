@@ -37,15 +37,16 @@ COLLIDEABLE_OFFGRID = {'grass'}
 #auto tiling group and settings associating every neighbour tile
 AUTO_TILE_TYPES = {'grass', 'stone'}
 AUTO_TILE_MAP = {
-    tuple(sorted([(1, 0), (0, 1)])): 0,
-    tuple(sorted([(1, 0), (0, 1), (-1, 0)])): 1,
-    tuple(sorted([(-1, 0), (0, 1)])): 2, 
-    tuple(sorted([(-1, 0), (0, -1), (0, 1)])): 3,
-    tuple(sorted([(-1, 0), (0, -1)])): 4,
-    tuple(sorted([(-1, 0), (0, -1), (1, 0)])): 5,
-    tuple(sorted([(1, 0), (0, -1)])): 6,
-    tuple(sorted([(1, 0), (0, -1), (0, 1)])): 7,
-    tuple(sorted([(1, 0), (-1, 0), (0, 1), (0, -1)])): 8,
+    tuple(sorted([(1, 0), (0, 1)])): 0,                   #top-left
+    tuple(sorted([(1, 0), (0, 1), (-1, 0)])): 1,          #top
+    tuple(sorted([(-1, 0), (0, 1)])): 2,                  #top-right
+    tuple(sorted([(-1, 0), (0, -1), (0, 1)])): 3,         #right
+    tuple(sorted([(-1, 0), (0, -1)])): 4,                 #bottom-right
+    tuple(sorted([(-1, 0), (0, -1), (1, 0)])): 5,         #bottom
+    tuple(sorted([(1, 0), (0, -1)])): 6,                  #bottom-left
+    tuple(sorted([(1, 0), (0, -1), (0, 1)])): 7,          #left
+    tuple(sorted([(1, 0), (-1, 0), (0, 1), (0, -1)])): 8, #middle
+    # tuple(sorted([(0, -1)])): 9,                          #lonesome top
 }
 
     ##############################################################################################

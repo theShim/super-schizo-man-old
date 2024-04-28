@@ -32,6 +32,8 @@ class Music_Player:
             1.,
             1.,
         ]
+        for channel, v in zip(["bg", "type", "rain"], self.volumes):
+            self.set_vol(v, channel)
 
     def get_channel(self, channel_name):
         match channel_name:

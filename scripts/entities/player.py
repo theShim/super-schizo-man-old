@@ -27,8 +27,8 @@ class Player(pygame.sprite.Sprite):
             eye_colours = {'1' : [23, 24, 23], '2' : [23, 24, 23]}
             face_colours = {'1' : [233, 237, 233], '2' : [233, 237, 233]}
             Player.SPRITES[int(char_num)] = {
-                'eye_colour' : eye_colours[char_num], 
-                'face_colour' : face_colours[char_num]
+                'eye_colour' : eye_colours.get(char_num, [0, 0, 0]), 
+                'face_colour' : face_colours.get(char_num, [0, 0, 0])
             }
 
             for anim in os.listdir(path):

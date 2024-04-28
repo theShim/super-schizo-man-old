@@ -6,7 +6,7 @@ import random
 from scipy.spatial import Delaunay
 import math
 
-from scripts.config.SETTINGS import WIDTH, HEIGHT
+from scripts.config.SETTINGS import WIDTH, HEIGHT, SIZE
 from scripts.config.CORE_FUNCS import vec
 
     ##############################################################################################
@@ -213,3 +213,69 @@ class Black_Screen_Background:
 
     def update(self):
         self.screen.fill((0, 0, 0))
+
+class Sky_Background:
+
+    @classmethod
+    def cache_sprites(cls):
+        cls.SPRITES = []
+        cls.CACHED_BACKGROUNDS = {}
+        bg = [pygame.image.load(f'assets/worlds/Sky/bg-{i}.png').convert_alpha() for i in range(5)]
+        bg = [pygame.transform.scale(s, vec(s.get_size()) * 0.8) for s in bg]
+        cls.SPRITES += bg
+
+        clouds = [pygame.image.load(f'assets/worlds/Sky/cloud-{i}.png').convert_alpha() for i in range(4)]
+        clouds = [pygame.transform.scale(c, vec(c.get_size()) * 0.5) for c in clouds]
+        [c.set_colorkey((0, 0, 0)) for c in clouds]
+        cls.SPRITES += clouds
+        
+        #parallax scrolled sky backgrounds
+        for offsetx in range(-WIDTH//2, int(WIDTH*1.5), 8):
+            cls.cache(offsetx)
+            yield
+
+    @classmethod
+    def cache(cls, offsetx):
+        bg = pygame.Surface((WIDTH*2, HEIGHT*2))
+        bg.fill((144, 202, 183))
+
+        speed = 0
+        x = 0
+        for spr in Sky_Background.SPRITES[:5]:
+            bg.blit(spr, (int(offsetx - WIDTH) * (x*speed) - 100, -spr.get_height()/2.5))
+            speed -= 0.005
+            x += 1
+            
+        Sky_Background.CACHED_BACKGROUNDS[offsetx] = bg
+
+    def __init__(self, game):
+        self.screen = pygame.display.get_surface()
+        self.game = game
+
+        self.clouds = []
+        for i in range(10):
+            if i % 3 == 0: continue
+            z = random.uniform(5, 8)
+            x = random.uniform(0, WIDTH)
+            y = (((i/10)*HEIGHT + random.uniform(-1, 1) * 20))
+            self.clouds += [{"z":int(z), "pos":[x, y], "speed":(z-4)/2}]
+        self.clouds = sorted(self.clouds, key=lambda c: c["z"]) #allows blitting from back to front for depth
+
+    def update(self):
+        #try find it in cache otherwise just make a new parallaxed sprite
+        #maybe add it to cache asw but i cba
+        try:
+            spr = self.CACHED_BACKGROUNDS[8 * int(self.game.offset.x/8)]
+            self.screen.blit(spr, (0, min(-10, -self.game.offset.y//20 - 50)))   
+        except:
+            self.cache(8 * int(self.game.offset.x/8))
+
+            spr = self.CACHED_BACKGROUNDS[8 * int(self.game.offset.x/8)]
+            self.screen.blit(spr, (0, min(-10, -self.game.offset.y//20 - 50)))  
+
+        for cloud in self.clouds:
+            self.screen.blit((spr:=self.SPRITES[int(cloud["z"])]), cloud["pos"])
+            cloud["pos"][0] -= cloud["speed"]
+            
+            if cloud["pos"][0] + spr.get_width() < 0:
+                cloud["pos"][0] = WIDTH

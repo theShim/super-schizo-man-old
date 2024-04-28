@@ -32,7 +32,7 @@ from scripts.screen_effects.overlay import CRT_Overlay
     
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
 from scripts.world_loading.stages import Stage_Loader
-from scripts.world_loading.backgrounds import Forest_Background
+from scripts.world_loading.backgrounds import Forest_Background, Sky_Background
 from scripts.world_loading.nature import Grass_Manager
 from scripts.world_loading.custom_offgrid import Torch
 
@@ -125,7 +125,7 @@ class Game:
 
         #every object to cache sprites of at the beginning of the game, tiles, offgrid_tiles and backgrounds mostly
         objects = [t.cache_sprites() for t in [Tile, Offgrid_Tile, 
-                                               Forest_Background,
+                                               Forest_Background, Sky_Background,
                                                Player, Butterfly, Item,
                                                Grass_Manager,
                                                Torch, Minimap]]
