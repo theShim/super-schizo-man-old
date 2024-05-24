@@ -126,8 +126,8 @@ class Stage:
     
 
     def update(self, player):
-        if not self.game.music_player.is_playing("bg"):
-            self.game.music_player.play(self.current_bg_music(), "bg", loop=True)
+        # if not self.game.music_player.is_playing("bg"):
+        #     self.game.music_player.play(self.current_bg_music(), "bg", loop=True)
 
         self.game.calculate_offset()
         self.areas[self.area_index].bg.update()
@@ -165,6 +165,11 @@ class Stage:
 
         [item.player_collisions(self.screen, self.game.offset) for item in items]
         items.empty()
+
+        # s = pygame.Surface(SIZE)
+        # s.fill((0, 0, 0))
+        # s.set_alpha(200)
+        # self.screen.blit(s, (0, 0))
 
 class Area:
     def __init__(self):
@@ -233,6 +238,6 @@ class Forest_Stage(Stage):
 class Forest_Area1:
     def __init__(self, game):
         # self.bg = Forest_Background(game)
-        # self.bg = Perlin_Background(game)
-        self.bg = Sky_Background(game)
+        self.bg = Perlin_Background(game)
+        # self.bg = Sky_Background(game)
         self.bg_music = "tutorial_1"

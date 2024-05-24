@@ -4,7 +4,7 @@ with contextlib.redirect_stdout(None):
     from pygame.locals import *
 
 import os
-import cv2
+# import cv2
 import numpy as np
 import random
 import math
@@ -320,7 +320,7 @@ class Player(pygame.sprite.Sprite):
     def draw(self, screen, offset):
         spr = self.image #get sprite and flip if needed
 
-        spr = self.blink(spr) #get the blinking sprite
+        # spr = self.blink(spr) #get the blinking sprite
         rect = spr.get_rect(center=self.hitbox.center - offset)
         screen.blit(spr, rect)
 

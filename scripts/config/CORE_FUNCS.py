@@ -2,7 +2,6 @@ import pygame
 import math
 import random
 import json
-import io 
 from PIL import Image, ImageFilter
 
     ##############################################################################################

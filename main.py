@@ -28,7 +28,6 @@ from scripts.items.item import Item
 from scripts.music.music_player import Music_Player
 
 from scripts.screen_effects.manager import Effect_Manager
-from scripts.screen_effects.overlay import CRT_Overlay
     
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
 from scripts.world_loading.stages import Stage_Loader
@@ -279,7 +278,8 @@ Landed: {self.player.landed}"""
                 self.screen_recorder.capture_frame(self.screen)
 
             pygame.display.update()
-            self.clock.tick(FPS)
+            await asyncio.sleep(0)
+            self.clock.tick(FPS)    
 
     ##############################################################################################
 

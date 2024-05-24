@@ -157,6 +157,17 @@ class Bridge(pygame.sprite.Sprite):
         self.move()
         self.constrain()
 
+        pygame.draw.rect(
+            screen, 
+            (135, 97, 62),
+            [self.pos[0] - offset.x, self.pos[1]-35 - offset.y, 5, 35]
+        )
+        pygame.draw.rect(
+            screen, 
+            (135, 97, 62),
+            [self.end_pos[0] - offset.x - 5, self.end_pos[1]-35 - offset.y, 5, 35]
+        )
+
         for i, j in enumerate(self.joints):
             p1 = self.points[j[0]].tolist()
             p2 = self.points[j[1]].tolist()
@@ -165,11 +176,14 @@ class Bridge(pygame.sprite.Sprite):
 
             if i%2 == 1:
                 p = vec(p1)
-                pygame.draw.line(screen, (28, 9, 11), p - offset, p - offset - vec(0, 30), 3)
-                pygame.draw.line(screen, (28, 9, 11), p - offset - vec(3, 25),  p - offset - vec(2, 30), 3)
-                pygame.draw.line(screen, (28, 9, 11), p - offset - vec(-3, 25), p - offset - vec(-2, 30), 3)
+                pygame.draw.line(screen, (172, 125, 81), (p.lerp(vec(p2), 0.5)) - offset, p - offset - vec(0, 30), 3)
+                pygame.draw.line(screen, (172, 125, 81), (p.lerp(vec(self.points[self.joints[i-1][0]].tolist()), 0.5)) - offset, p - offset - vec(0, 30), 3)
 
-            self.draw_segment(screen, offset, p1, p2)
+            #planks
+            if i == len(self.joints)-1:
+                self.draw_segment(screen, offset, p1, p2)
+            if i:
+                self.draw_segment(screen, offset, vec(self.points[self.joints[i-1][0]].tolist()), p1)
 
             pygame.draw.line(screen, (107, 61, 41), vec(p1) - offset - vec(0, 30), vec(p2) - offset - vec(0, 30), 2)
 

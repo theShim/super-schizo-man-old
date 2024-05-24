@@ -18,11 +18,11 @@ class Sound(pygame.mixer.Sound):
 
 SOUNDS = {
     "bg_test0" : Sound("music/test.wav"),
-    "memory1" : Sound("music/memory_1.mp3"),
+    # "memory1" : Sound("music/memory_1.mp3"),
     "typing" : Sound("music/typing.wav"),
-    "tutorial_1" : Sound("music/tutorial/tutorial_ambience1.mp3"),
-    "tutorial_2" : Sound("music/tutorial/tutorial_ambience2.mp3"),
-    "rain_splash" : Sound("music/binbag.ogg")
+    # "tutorial_1" : Sound("music/tutorial/tutorial_ambience1.mp3"),
+    # "tutorial_2" : Sound("music/tutorial/tutorial_ambience2.mp3"),
+    # "rain_splash" : Sound("music/binbag.ogg")
 }
 """
     - "bg_test0"

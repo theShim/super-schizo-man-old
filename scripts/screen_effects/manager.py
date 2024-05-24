@@ -8,6 +8,7 @@ import random
 from scripts.config.CORE_FUNCS import Timer
 
 from scripts.screen_effects.screen_shake import Screen_Shake
+from scripts.screen_effects.overlay import CRT_Overlay
 
     ##############################################################################################
 
@@ -16,8 +17,11 @@ class Effect_Manager:
         self.game = game
 
         self.effects = {
-            "screen shake" : Screen_Shake(self)
+            "screen shake" : Screen_Shake(self),
+            "crt overlay" : CRT_Overlay(game),
         }
+
+        self.effects["crt overlay"].on = True
 
     def update(self):
         for key in self.effects:

@@ -14,6 +14,7 @@ class CRT_Overlay:
     def __init__(self, game):
         self.screen = pygame.display.get_surface()
         self.game = game
+        self.on = False
 
         self.surf = pygame.Surface(SIZE, pygame.SRCALPHA)
         self.surf.fill((0, 0, 0, 0))

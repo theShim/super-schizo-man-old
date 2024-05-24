@@ -10,7 +10,7 @@ import random
 import math
 
 from scripts.config.SETTINGS import WIDTH, HEIGHT, FPS
-from scripts.config.CORE_FUNCS import vec, Timer
+from scripts.config.CORE_FUNCS import vec, Timer, lerp
 
 from scripts.gui.text_writer import Text_Box
 from scripts.gui.custom_fonts import Custom_Font
@@ -404,6 +404,7 @@ class Player_Menu:
 
             self.pos = pos
             self.y_scroll = 0
+            self.true_y_scroll = 0
             self.scroll_speed = 5
             self.item_cards = {key: pygame.sprite.Group() for key in ["weapons", "armour", "consumables", "key"]}
             self.added_items = set()
@@ -424,6 +425,7 @@ class Player_Menu:
             self.y_scroll += mousewhl_events[0].y * self.scroll_speed
             if self.y_scroll > 0:
                 self.y_scroll = 0
+            # self.true_y_scroll = lerp
 
         def update(self, screen, to_check):
             if self.last_check != to_check:
