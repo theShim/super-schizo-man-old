@@ -24,6 +24,7 @@ GRAV = 0.4
 ENVIRONMENT_SETTINGS: dict[str, bool | int] = {
     "rain" : False,
     "snow" : False,
+    "cherry_blossom" : False,
     "wind" : -2
 }
 

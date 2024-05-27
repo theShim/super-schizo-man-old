@@ -6,6 +6,7 @@ with contextlib.redirect_stdout(None):
 
 import random
 import math
+import numpy as np
 
 from scripts.config.CORE_FUNCS import vec
 from scripts.config.SETTINGS import Z_LAYERS, HEIGHT, WIDTH
@@ -23,15 +24,12 @@ class Floating_Light(pygame.sprite.Sprite):
         vertical = pygame.Surface((1, size), pygame.SRCALPHA)
         vertical.fill((100, 100, 100))
         
-        for i in range(size*2):
-            horizontal.set_alpha((i/(size*2)) * 200)
-            surf.blit(horizontal, (size*2, i+size//2))
-            surf.blit(horizontal, (size*2, surf.get_height()-((i+1)+size//2)))
-            vertical.set_alpha((i/(size+1)) * 255)
-            surf.blit(vertical, (i+size//2, size*2))
-            surf.blit(vertical, (surf.get_height()-((i+1)+size//2), size*2))
-        pygame.draw.rect(surf, (200, 200, 200), [size*2, size*2, size, size])
-        surf.set_alpha(200)
+        for i in range(int(size*2.5), 0, -1):
+            light_surface = pygame.Surface((size*5, size*5), pygame.SRCALPHA)
+            pygame.draw.circle(light_surface, (16, 16, 16), (size*2.5, size*2.5), i/2)
+            light_surface.set_alpha(200)
+            surf.blit(light_surface, light_surface.get_rect(center=(size*2.5, size*2.5)), special_flags=pygame.BLEND_RGB_ADD)
+        surf.set_alpha(150)
 
         lights[size] = surf
 
@@ -76,4 +74,4 @@ class Floating_Light(pygame.sprite.Sprite):
                 s.set_alpha((i/dist)*60)
                 screen.blit(s, (x+offset_dist.x/(0.5*(i+1)), self.pos.y+offset_dist.y/(0.5*(i+1))))
 
-        screen.blit(self.surf, (x, self.pos.y))
+        screen.blit(self.surf, (x, self.pos.y), special_flags=pygame.BLEND_RGBA_ADD)

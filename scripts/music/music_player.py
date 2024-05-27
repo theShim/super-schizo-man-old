@@ -56,9 +56,10 @@ class Music_Player:
     def play(self, sound, channel, loop=False):  
         if sound == "":
             return
-        sound = self.sounds[sound]
+        sound_ = self.sounds.get(sound, None)
+        if sound_ == None: return print(Exception(f"{sound} not found."))
         channel = self.get_channel(channel)
-        channel.play(sound, loops=-1 if loop else 0)
+        channel.play(sound_, loops=-1 if loop else 0)
 
     #queue a song to play after the current one in a specified channel
     def queue_sound(self, sound, channel):  

@@ -196,18 +196,25 @@ class Game:
 
                 elif event.key == pygame.K_j:
                     self.weather += 1
-                    if self.weather == 3:
+                    if self.weather == 4:
                         self.weather = 0
 
                     if self.weather == 0:
                         ENVIRONMENT_SETTINGS["rain"] = False
                         ENVIRONMENT_SETTINGS["snow"] = False
+                        ENVIRONMENT_SETTINGS["cherry_blossom"] = False
                     elif self.weather == 1:
                         ENVIRONMENT_SETTINGS["rain"] = True
                         ENVIRONMENT_SETTINGS["snow"] = False
+                        ENVIRONMENT_SETTINGS["cherry_blossom"] = False
                     elif self.weather == 2:     
                         ENVIRONMENT_SETTINGS["rain"] = False
                         ENVIRONMENT_SETTINGS["snow"] = True
+                        ENVIRONMENT_SETTINGS["cherry_blossom"] = False
+                    elif self.weather == 3:     
+                        ENVIRONMENT_SETTINGS["rain"] = False
+                        ENVIRONMENT_SETTINGS["snow"] = False
+                        ENVIRONMENT_SETTINGS["cherry_blossom"] = True
 
                 elif event.key == pygame.K_F7:
                     self.camera_flag = not self.camera_flag

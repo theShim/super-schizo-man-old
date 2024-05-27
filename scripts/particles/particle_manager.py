@@ -16,6 +16,7 @@ from scripts.particles.fire import Fire_Particle
 from scripts.particles.rain import Rain_Particle, Rain_Splash
 from scripts.particles.rainbow import Rainbow_Particle
 from scripts.particles.snow import Snow_Particle
+from scripts.particles.cherry_blossom import Cherry_Blossom
 from scripts.particles.dash_after_effects import Dash_After_Effect
 
     ##############################################################################################
@@ -49,6 +50,7 @@ class Particle_Manager:
             'rain'        : Rain_Particle,
             'rainbow'     : Rainbow_Particle,
             'snow'        : Snow_Particle,
+            "cherry_blossom" : Cherry_Blossom,
             "dash_effect" : Dash_After_Effect,
         }[particle_type]
 
@@ -84,6 +86,14 @@ class Particle_Manager:
             if random.randint(1, 3) == 1: 
                 self.add_particle('foreground', 'snow', pos=[random.uniform(0, WIDTH*1.2), -5])
                 for snow in set(filter(lambda spr: isinstance(spr, Snow_Particle), self.foreground_particles)):
+                    screen_pos = snow.pos
+                    if screen_pos.y > HEIGHT:
+                        self.foreground_particles.remove(snow)
+                
+        elif ENVIRONMENT_SETTINGS["cherry_blossom"]:
+            if random.randint(1, 50) == 1: 
+                self.add_particle('foreground', 'cherry_blossom', pos=[random.uniform(0, WIDTH*1.2), -5])
+                for snow in set(filter(lambda spr: isinstance(spr, Cherry_Blossom), self.foreground_particles)):
                     screen_pos = snow.pos
                     if screen_pos.y > HEIGHT:
                         self.foreground_particles.remove(snow)
