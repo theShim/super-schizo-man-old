@@ -40,9 +40,7 @@ class Cherry_Blossom(pygame.sprite.Sprite):
         self.pos.y += self.speed[1]
         x = self.pos.x + math.sin(self.angle) * 10
         self.angle += 0.05
-
-        if self.pos.y - self.surf.get_height()/2 > HEIGHT:
-            self.pos.y = -self.surf.get_height()
+        
         if self.pos.x + self.surf.get_width() < -self.surf.get_width():
             self.pos.x = WIDTH-1
         elif self.pos.x > WIDTH + self.surf.get_width():

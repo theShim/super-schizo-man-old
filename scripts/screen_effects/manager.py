@@ -21,7 +21,7 @@ class Effect_Manager:
             "crt overlay" : CRT_Overlay(game),
         }
 
-        self.effects["crt overlay"].on = True
+        # self.effects["crt overlay"].on = True
 
     def update(self):
         for key in self.effects:

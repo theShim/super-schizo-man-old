@@ -7,6 +7,8 @@ with contextlib.redirect_stdout(None):
     import pygame
     from pygame.locals import *
     pygame.Rect = pygame.FRect #supports decimals x and y values
+
+os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'
     
 import sys
 import time
@@ -41,14 +43,18 @@ from screen_recorder import ScreenRecorder
 # countLinesIn(os.getcwd()) #counts number of lines of code in directory (just for progress counting)
 
     ##############################################################################################
-
+    
 if DEBUG:
-    #code profiling for performance optimisations
+    # code profiling for performance optimisations
     import pstats
     import cProfile
     import io
     
     PROFILER = cProfile.Profile()
+
+    # from line_profiler import LineProfiler
+    # PROFILER = LineProfiler()
+    # PL_WRAPPER = PROFILER(Game.run)
 
     ##############################################################################################
 
@@ -270,9 +276,12 @@ Landed: {self.player.landed}"""
                     label = self.font.render(debug_info, False, (255, 255, 255))
                     self.screen.blit(label, (0, 0))
 
-                    music_info = f"BG Music Playing: {self.music_player.background.get_sound().name} | Vol : {self.music_player.volumes[0] * 100}%"
-                    music_label = self.font.render(music_info, False, (255, 255, 255))
-                    self.screen.blit(music_label, (0, HEIGHT-music_label.get_height()))
+                    try:
+                        music_info = f"BG Music Playing: {self.music_player.background.get_sound().name} | Vol : {self.music_player.volumes[0] * 100}%"
+                        music_label = self.font.render(music_info, False, (255, 255, 255))
+                        self.screen.blit(music_label, (0, HEIGHT-music_label.get_height()))
+                    except AttributeError:
+                        pass
                     
 
                     #rects around the player
@@ -286,9 +295,14 @@ Landed: {self.player.landed}"""
 
             pygame.display.update()
             await asyncio.sleep(0)
-            self.clock.tick(FPS)    
+            self.clock.tick(0)    
 
     ##############################################################################################
+
+# if DEBUG:
+#     from line_profiler import LineProfiler
+#     PROFILER = LineProfiler()
+#     PL_WRAPPER = PROFILER(Game.run)
 
 if __name__ == "__main__":
     g = Game()
@@ -296,6 +310,8 @@ if __name__ == "__main__":
 
 
 if DEBUG:
+    # PROFILER.print_stats()
+
     PROFILER.disable()
     PROFILER.dump_stats("scripts/config/profiler.stats")
     pstats.Stats("scripts/config/profiler.stats", stream=(s:=io.StringIO())).sort_stats((sortby:=pstats.SortKey.CUMULATIVE)).print_stats()

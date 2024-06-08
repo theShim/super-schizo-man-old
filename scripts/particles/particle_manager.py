@@ -67,9 +67,9 @@ class Particle_Manager:
     def update(self, offset):
         if self.start:
             #float lights
-            if self.stage.name == "forest":
-                for i in range((n:=random.randint(10, 15))):
-                    self.add_particle('foreground', 'float_light', pos=[((i+1)/n)*WIDTH + random.uniform(-50, 50), random.uniform(0, HEIGHT)])
+            # if self.stage.name == "forest":
+            #     for i in range((n:=random.randint(10, 15))):
+            #         self.add_particle('foreground', 'float_light', pos=[((i+1)/n)*WIDTH + random.uniform(-50, 50), random.uniform(0, HEIGHT)])
 
             self.start = False
 

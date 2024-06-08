@@ -15,7 +15,7 @@ class Screen_Shake:
         self.manager = manager
 
         self.timer = 0
-        self.intensity = 1
+        self.intensity = 4
 
     @property
     def on(self):
@@ -29,4 +29,4 @@ class Screen_Shake:
         if self.timer <= 0: return
 
         self.timer -= 1
-        self.game.offset += vec(random.uniform(-5*self.intensity, 5*self.intensity), random.uniform(-5*self.intensity, 5*self.intensity))
+        self.game.offset += vec(random.uniform(-1*self.intensity, 1*self.intensity), random.uniform(-1*self.intensity, 1*self.intensity))

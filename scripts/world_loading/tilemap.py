@@ -248,6 +248,7 @@ class Tile(pygame.sprite.Sprite):
     
     #actually draw it onto the screen
     def update(self, screen, offset):
+        return
         # print(self.pos, "*")
         img = Tile.SPRITES[self.type][self.variant]
         screen.blit(img, [
