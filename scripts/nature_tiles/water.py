@@ -58,13 +58,14 @@ class Water_Spring(pygame.sprite.Sprite):
             return 
         
         dh = self.target_height - self.pos.y
-        if abs(dh) < 0.01:
+        self.vel += self.tension * dh - self.vel * self.dampening
+        self.pos.y += self.vel
+        
+        dh = self.target_height - self.pos.y
+        if abs(dh) < 0.05:
             self.pos.y = self.target_height
         else:
             flag[0] = True
-        
-        self.vel += self.tension * dh - self.vel * self.dampening
-        self.pos.y += self.vel
 
     def update(self, screen, offset, flag:list[bool]):
         self.mouse_collide(offset)
@@ -72,12 +73,11 @@ class Water_Spring(pygame.sprite.Sprite):
         # self.draw(screen, offset)
 
     def draw(self, screen, offset):
-            
-            start, end = int(min(self.pos.y, self.target_height)), int(max(self.pos.y, self.target_height))
-            for y in range(start, end, 20):
-                pygame.draw.circle(screen, (255, 255, 255), vec(self.pos.x, y) - offset, self.radius/8)
+        start, end = int(min(self.pos.y, self.target_height)), int(max(self.pos.y, self.target_height))
+        for y in range(start, end, 20):
+            pygame.draw.circle(screen, (255, 255, 255), vec(self.pos.x, y) - offset, self.radius/8)
 
-            pygame.draw.circle(screen, (255, 255, 255), self.pos - offset, self.radius)
+        pygame.draw.circle(screen, (255, 255, 255), self.pos - offset, self.radius)
 
 class Water(pygame.sprite.Sprite):
     def __init__(self, game, pos, size, variant):
@@ -89,14 +89,14 @@ class Water(pygame.sprite.Sprite):
         self.size = vec(size) * TILE_SIZE
         self.z = Z_LAYERS["midground offgrid"]
         
-        self.col = [(0, 134, 191, 64), ][variant]
+        self.col = [(0, 104, 191, 64), ][variant]
         self.moving = False
         self.idle = pygame.Surface((self.size.x, self.size.y - TILE_SIZE//8), pygame.SRCALPHA)
         self.idle.fill(self.col)
 
         for y in range(96):
             alpha = int(64 + 96 - y)  #adjust alpha based on depth
-            pygame.draw.line(self.idle, (0, 134, 191, alpha), (0, self.idle.get_height()-y), (self.idle.get_width(), self.idle.get_height()-y))
+            pygame.draw.line(self.idle, (0, 104, 191, alpha), (0, self.idle.get_height()-y), (self.idle.get_width(), self.idle.get_height()-y))
 
         self.idle.set_alpha(192)
         pygame.draw.line(self.idle, (255, 255, 255), (0,0), (self.size.x, 0))
@@ -104,18 +104,16 @@ class Water(pygame.sprite.Sprite):
         self.springs = pygame.sprite.Group()
         self.spacing = TILE_SIZE/2
         for i in range(int(self.pos.x), int(self.pos.x + self.size.x)+int(self.spacing), int(self.spacing)):
-            self.springs.add(Water_Spring(vec(i, self.pos.y + TILE_SIZE//8), self.pos.y + TILE_SIZE//8))
+            self.springs.add(Water_Spring(vec(i, self.pos.y), self.pos.y))
         self.springs.sprites()[0].pinned = True
         self.springs.sprites()[-1].pinned = True
 
     def spread_wave(self):
         spread = 0.02
-        for i in range(len(self.springs)):
+        for i in range(1, len(self.springs) - 1):
             springs = self.springs.sprites().copy()
-            if i > 0:
-                springs[i - 1].vel += spread * (springs[i].pos.y - springs[i - 1].pos.y)
-            if i < len(self.springs)-1:
-                springs[i + 1].vel += spread * (springs[i].pos.y - springs[i + 1].pos.y)
+            springs[i - 1].vel += spread * (springs[i].pos.y - springs[i - 1].pos.y)
+            springs[i + 1].vel += spread * (springs[i].pos.y - springs[i + 1].pos.y)
 
     def player_collision(self, player):
         if player.vel.y <= 0:
@@ -150,24 +148,26 @@ class Water(pygame.sprite.Sprite):
             pygame.draw.polygon(
                 surf,
                 self.col,
-                [vec(self.pos[0]-minmax[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8), 
-                *(points2 := list(map(lambda p:p-vec(minmax[0], minmax[2]-TILE_SIZE//8), points))), 
-                vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1]+TILE_SIZE//8)]
+                [
+                    vec(self.pos[0]-minmax[0], self.pos[1]-minmax[2]+self.size[1]), 
+                    *(points2 := list(map(lambda p:p-vec(minmax[0], minmax[2]), points))), 
+                    vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1])
+                ]
             )
 
             for y in range(96):
-                alpha = int(64 + 96 - y)  # Adjust alpha based on depth
-                pygame.draw.line(surf, (0, 134, 191, alpha), (0, self.idle.get_height()-y), (self.size.x, surf.get_height()-y))
+                alpha = min(255, int(64 + 96 - y))  #adjust alpha based on depth
+                pygame.draw.line(surf, (0, 104, 191, alpha), (0, surf.get_height()-y), (self.size.x, surf.get_height()-y))
             surf.set_alpha(192)
 
             pygame.draw.lines(surf, (255, 255, 255), False, points2)
-            screen.blit(surf, self.pos - offset)
+            screen.blit(surf, self.pos - offset + vec(0, TILE_SIZE//8))
 
             # for i in range(1, len(points)):
             #     pygame.draw.lines(screen, (255, 255, 255), points[i-1] - offset + vec(0, TILE_SIZE//8), points[i] - offset + vec(0, TILE_SIZE//8))
         else:
             springs = self.springs.sprites().copy()
-            screen.blit(self.idle, self.pos-offset+vec(0, TILE_SIZE//8))
+            screen.blit(self.idle, self.pos - offset + vec(0, TILE_SIZE//8))
 
         # player = self.game.player
         # if ((player.hitbox.right > self.pos.x and player.hitbox.left < self.pos.x + self.size.x) and

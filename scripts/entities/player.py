@@ -61,7 +61,8 @@ class Player(pygame.sprite.Sprite):
         self.hitbox_size = vec(image.get_size()) #actual hitbox
 
         self.vel = vec() #x and y velocity
-        self.run_speed = 1 #scalar
+        self.run_speed = 40 #scalar
+        self.jump_vel = 12
         self.jumps = 2 #total number of jumps left
         self.jumpHeld = False #ensures player only jumps once
         self.landed = False #checks if the player is currently on the floor
@@ -123,18 +124,18 @@ class Player(pygame.sprite.Sprite):
     def jump(self, keys):
         if keys[CONTROLS["jump"]] or keys[CONTROLS['up']]:
             if self.jumps > 0 and self.jumpHeld == False:
-                self.vel.y = -10
+                self.vel.y = -self.jump_vel
                 self.jumps -= 1
                 self.jumpHeld = True
         else:
             if self.vel.y < 0:
-                self.vel.y = lerp(0, self.vel.y, 0.1) #allows for short hops and high jumps by interpolation
+                self.vel.y = lerp(0, self.vel.y , 0.1) #allows for short hops and high jumps by interpolation
             self.jumpHeld = False
 
         #change the current animation depending on if the player is moving up or down
         if self.vel.y > 0:
             self.change_status('fall')
-        if self.vel.y < 0:
+        elif self.vel.y < 0:
             self.change_status('jump')
 
     #accelerating and moving the player

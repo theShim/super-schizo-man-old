@@ -141,7 +141,7 @@ class Stage:
                     [player] + 
                     [t for t in self.tilemap.render_offgrid(self.game.offset)] +
                     [t for t in self.tilemap.render_tiles(  self.game.offset)] +
-                    [t for t in self.tilemap.nature_manager.render_tiles(self.game.offset)] +
+                    # [t for t in self.tilemap.nature_manager.render_tiles(self.game.offset)] +
                     self.particle_manager.sprites() +
                     self.game.entities.sprites() +
                     [self.minimap]

@@ -39,6 +39,7 @@ class Particle_Manager:
         self.background_particles.empty()
 
     def sprites(self):
+        print(len(self.foreground_particles.sprites() + self.background_particles.sprites()))
         return self.foreground_particles.sprites() + self.background_particles.sprites()
     
     def add_particle(self, group: str, particle_type: str, **kwargs):

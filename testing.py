@@ -1,34 +1,70 @@
-import numpy as np
 import pygame
+import sys
 
-# Initialize pygame
+# Initialize Pygame
 pygame.init()
 
-# Define the size of the image
-width, height = 100, 100  # Size of the circle image
+# Set up the display
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Delta Time Example")
 
-# Create a numpy array for the image
-image = np.zeros((height, width), dtype=np.uint8)
+# Set up colors
+black = (0, 0, 0)
+white = (255, 255, 255)
 
-# Get the center coordinates
-center_x, center_y = width // 2, height // 2
+# Set up a simple moving object
+x, y = width // 2, height // 2
+speed = 200  # pixels per second
 
-# Define the maximum radius
-max_radius = min(center_x, center_y)
+# Initialize the clock
+clock = pygame.time.Clock()
 
-# Fill the image with a radial gradient
-for y in range(height):
-    for x in range(width):
-        # Calculate the distance from the center
-        distance = np.sqrt((x - center_x) ** 2 + (y - center_y) ** 2)
-        # Calculate the intensity based on the distance
-        intensity = max(0, 255 - int((distance / max_radius) * 255))
-        intensity = min(255, int((distance / max_radius) * 255))
-        # Assign the intensity to the pixel
-        image[y, x] = intensity
+# Get the initial time
+last_time = pygame.time.get_ticks()
+FPS = 60
 
-# Create a Pygame surface from the numpy array
-light_surface = pygame.surfarray.make_surface(np.repeat(image[:, :, np.newaxis], 3, axis=2))
+# Main game loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                FPS += 10
+            if event.key == pygame.K_DOWN:
+                FPS -= 10
+                
 
-# Save the surface as an image file
-pygame.image.save(light_surface, 'circle.png')
+    # Get the current time and calculate delta time
+    current_time = pygame.time.get_ticks()
+    delta_time = (current_time - last_time) / 1000.0  # Convert milliseconds to seconds
+    last_time = current_time
+
+    # Update the position of the object
+    x += speed * delta_time
+
+    # Keep the object within the screen bounds
+    if x > width:
+        x = 0
+    elif x < 0:
+        x = width
+
+    # Clear the screen
+    screen.fill(black)
+
+    # Draw the object
+    pygame.draw.circle(screen, white, (int(x), y), 20)
+    pygame.display.set_caption(str(FPS  ))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Cap the frame rate to 10 FPS
+    clock.tick(FPS)  # You can adjust the frame rate here to test different frame rates
+
+# Quit Pygame
+pygame.quit()
+sys.exit()

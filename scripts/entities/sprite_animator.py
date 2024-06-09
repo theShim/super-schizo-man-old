@@ -20,7 +20,7 @@ class SpriteAnimator:
 
     #updating the animation
     def next(self, dt=0):
-        self.frame_index += self.animation_speed * dt
+        self.frame_index += self.animation_speed * dt * 60
 
     #accessing the current sprite
     def get_sprite(self):

@@ -239,12 +239,12 @@ class Game:
             PROFILER.enable()
             timer = 0
 
-        last_time = time.perf_counter()
+        last_time = pygame.time.get_ticks()
         while self.running:  
             #deltatime
-            self.dt = time.perf_counter() - last_time
-            self.dt *= FPS
-            last_time = time.perf_counter()
+            self.dt = (current_time := pygame.time.get_ticks()) - last_time
+            self.dt /= 1000
+            last_time = current_time
 
             self.handle_events()
             # self.calculate_offset()

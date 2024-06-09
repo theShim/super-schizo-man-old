@@ -12,14 +12,14 @@ MAX_LOADED_SPRITES = 346
 SIZE = (WIDTH, HEIGHT) = 640, 400
 SCREEN_CENTER = (WIDTH/2, HEIGHT/2)
 
-FPS = 45
+FPS = 60
 CAMERA_FOLLOW_SPEED = 12
 
     ##############################################################################################
 
 #   PHYSICS
 FRIC = 0.9
-GRAV = 0.4
+GRAV = 40
 
 ENVIRONMENT_SETTINGS: dict[str, bool | int] = {
     "rain" : False,
