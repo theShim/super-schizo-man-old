@@ -1,70 +1,35 @@
 import pygame
+import ctypes
 import sys
 
 # Initialize Pygame
 pygame.init()
 
-# Set up the display
-width, height = 800, 600
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Delta Time Example")
+# Create a Pygame window
+screen = pygame.display.set_mode((640, 480))
+pygame.display.set_caption("Pygame Window")
 
-# Set up colors
-black = (0, 0, 0)
-white = (255, 255, 255)
+# Get the window handle (HWND)
+hwnd = pygame.display.get_wm_info()['window']
+print(f"HWND of the current Pygame window: {hwnd}")
 
-# Set up a simple moving object
-x, y = width // 2, height // 2
-speed = 200  # pixels per second
+# Example: Using ctypes to interact with Windows API to move the window
+# MoveWindow(HWND, x, y, width, height, repaint)
+MoveWindow = ctypes.windll.user32.MoveWindow
+MoveWindow.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool]
+MoveWindow.restype = ctypes.c_bool
 
-# Initialize the clock
-clock = pygame.time.Clock()
+# Move the window to (100, 100) with size 800x600
+MoveWindow(hwnd, 100, 100, 800, 600, True)
 
-# Get the initial time
-last_time = pygame.time.get_ticks()
-FPS = 60
-
-# Main game loop
+# Run a simple Pygame event loop
 running = True
 while running:
-    # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                FPS += 10
-            if event.key == pygame.K_DOWN:
-                FPS -= 10
-                
 
-    # Get the current time and calculate delta time
-    current_time = pygame.time.get_ticks()
-    delta_time = (current_time - last_time) / 1000.0  # Convert milliseconds to seconds
-    last_time = current_time
-
-    # Update the position of the object
-    x += speed * delta_time
-
-    # Keep the object within the screen bounds
-    if x > width:
-        x = 0
-    elif x < 0:
-        x = width
-
-    # Clear the screen
-    screen.fill(black)
-
-    # Draw the object
-    pygame.draw.circle(screen, white, (int(x), y), 20)
-    pygame.display.set_caption(str(FPS  ))
-
-    # Update the display
-    pygame.display.flip()
-
-    # Cap the frame rate to 10 FPS
-    clock.tick(FPS)  # You can adjust the frame rate here to test different frame rates
-
-# Quit Pygame
 pygame.quit()
 sys.exit()
+
+pip install winrt

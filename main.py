@@ -242,9 +242,9 @@ class Game:
         last_time = pygame.time.get_ticks()
         while self.running:  
             #deltatime
-            self.dt = (current_time := pygame.time.get_ticks()) - last_time
-            self.dt /= 1000
-            last_time = current_time
+            dt = (current_time := pygame.time.get_ticks()) - last_time
+            dt /= 1000
+            last_time = current_time    
 
             self.handle_events()
             # self.calculate_offset()
@@ -267,7 +267,7 @@ class Game:
                 # timer += 1
                 if timer % 1 == 0:
                     debug_info = (
-f"""FPS: {int(self.clock.get_fps())}
+f"""FPS: {int(1 / dt) if dt != 0 else 60}
 Pos: {[int(self.player.rect.x), int(self.player.rect.y)*-1]}
 Vel: {list(map(lambda x: round(x, 1), self.player.vel))}
 Jumps: {self.player.jumps}
@@ -295,7 +295,7 @@ Landed: {self.player.landed}"""
 
             pygame.display.update()
             await asyncio.sleep(0)
-            self.clock.tick(0)    
+            self.dt = self.clock.tick(FPS) / 1000
 
     ##############################################################################################
 

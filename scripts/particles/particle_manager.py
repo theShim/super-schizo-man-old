@@ -22,7 +22,8 @@ from scripts.particles.dash_after_effects import Dash_After_Effect
     ##############################################################################################
 
 class Particle_Manager:
-    def __init__(self, stage):
+    def __init__(self, game, stage):
+        self.game = game
         self.stage = stage
 
         self.foreground_particles = pygame.sprite.Group()
@@ -39,8 +40,8 @@ class Particle_Manager:
         self.background_particles.empty()
 
     def sprites(self):
-        print(len(self.foreground_particles.sprites() + self.background_particles.sprites()))
-        return self.foreground_particles.sprites() + self.background_particles.sprites()
+        particles = list(filter(lambda spr: pygame.Rect(0, 0, WIDTH, HEIGHT).collidepoint(spr.pos - self.game.offset), (self.foreground_particles.sprites() + self.background_particles.sprites())))
+        return particles
     
     def add_particle(self, group: str, particle_type: str, **kwargs):
         particle = {

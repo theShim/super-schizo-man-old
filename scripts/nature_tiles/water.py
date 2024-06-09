@@ -149,9 +149,9 @@ class Water(pygame.sprite.Sprite):
                 surf,
                 self.col,
                 [
-                    vec(self.pos[0]-minmax[0], self.pos[1]-minmax[2]+self.size[1]), 
+                    vec(self.pos[0]-minmax[0], self.pos[1]-minmax[2]+self.size[1]-TILE_SIZE//8), 
                     *(points2 := list(map(lambda p:p-vec(minmax[0], minmax[2]), points))), 
-                    vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1])
+                    vec(self.pos[0]-minmax[0]+self.size[0], self.pos[1]-minmax[2]+self.size[1]-TILE_SIZE//8)
                 ]
             )
 

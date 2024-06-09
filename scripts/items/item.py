@@ -78,7 +78,7 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
         self.pos = pos
 
-        self.vel = vec(random.uniform(0, 10) * 3, 0)
+        self.vel = vec(random.uniform(0, 10) * 20, 0)
         self.acc = vec(0, GRAV)
         self.landed = False
         self.angle = 0
@@ -100,7 +100,7 @@ class Item(pygame.sprite.Sprite):
 
     def move(self):
          # gravity + slight left or right movement
-        self.vel += self.acc
+        self.vel += self.acc * self.game.dt
         self.vel.x *= FRIC
         self.pos += self.vel
         self.rect.topleft = self.pos

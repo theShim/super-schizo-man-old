@@ -62,7 +62,7 @@ class Player(pygame.sprite.Sprite):
 
         self.vel = vec() #x and y velocity
         self.run_speed = 40 #scalar
-        self.jump_vel = 12
+        self.jump_vel = 10
         self.jumps = 2 #total number of jumps left
         self.jumpHeld = False #ensures player only jumps once
         self.landed = False #checks if the player is currently on the floor
@@ -109,10 +109,10 @@ class Player(pygame.sprite.Sprite):
             self.direction = 'right'
 
         #if the player is on the floor and changes directions, add some run particles
-        if self.landed:
-            if self.direction != old:
-                for i in range(random.randint(1, 3)):
-                    particle_manager.add_particle("background", "run", pos=self.hitbox.midbottom, facing=self.direction)
+        # if self.landed:
+        #     if self.direction != old:
+        #         for i in range(random.randint(1, 3)):
+        #             particle_manager.add_particle("background", "run", pos=self.hitbox.midbottom, facing=self.direction)
 
         #change the current animation depending on if the player is moving/holding the buttons
         if not (keys[CONTROLS['left']] or keys[CONTROLS['right']]):
@@ -141,7 +141,7 @@ class Player(pygame.sprite.Sprite):
     #accelerating and moving the player
     def apply_forces(self):
         self.vel.x += self.acc.x * self.run_speed * self.game.dt #horizontal acceleration
-        self.vel.y += self.acc.y * self.game.dt #vertical acceleration (gravity)
+        self.vel.y += self.acc.y * self.game.dt #vertical acceleration (gravity and jumping)
 
         self.vel.x *= FRIC #applying friction
         if -0.5 < self.vel.x < 0.5: #bounds to prevent sliding bug
@@ -149,7 +149,7 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.topleft += self.vel# * self.game.dt #actually applying the velocity
 
-        if self.rect.bottom > HEIGHT*3: #failsafe if they fall into the void
+        if self.rect.bottom > HEIGHT*3: #failsafe if they fall into the void, prolly tie this into the stage later
             self.rect.topleft = self.spawn_pos
             self.vel.y = 0
 
@@ -176,16 +176,16 @@ class Player(pygame.sprite.Sprite):
                 
                 #if the player lands
                 if abs(self.hitbox.bottom - rect.top) < collision_tolerance + 10 and self.vel.y > 0:
-                    if self.landed == False:
-                        for i in range(max(2, int(self.vel.y/3))): #add landing particles
-                            c = random.uniform(150, 200)
-                            particle_manager.add_particle(
-                                "background", 
-                                "land", 
-                                pos=self.hitbox.midbottom, 
-                                scale=min(7, int(self.vel.y/2)), 
-                                colour=(c, c, c)
-                            )
+                    # if self.landed == False:
+                    #     # for i in range(max(2, int(self.vel.y/3))): #add landing particles
+                    #     #     c = random.uniform(150, 200)
+                    #     #     particle_manager.add_particle(
+                    #     #         "background", 
+                    #     #         "land", 
+                    #     #         pos=self.hitbox.midbottom, 
+                    #     #         scale=min(7, int(self.vel.y/2)), 
+                    #     #         colour=(c, c, c)
+                    #     #     )
 
                     self.rect.bottom = rect.top + 1
                     self.vel.y = 0 #reset y velocity

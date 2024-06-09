@@ -231,7 +231,7 @@ class Sky_Background:
         
         #parallax scrolled sky backgrounds
         for offsetx in range(-WIDTH//2, int(WIDTH*1.5), 8):
-            cls.cache(offsetx)
+            # cls.cache(offsetx)
             yield
 
     @classmethod

@@ -81,7 +81,7 @@ class Stage:
         self.game = game
 
         self.tilemap = Tilemap(game)
-        self.particle_manager = Particle_Manager("")
+        self.particle_manager = Particle_Manager(game, "")
 
         self.areas = []
         self.area_index = 0
@@ -141,7 +141,7 @@ class Stage:
                     [player] + 
                     [t for t in self.tilemap.render_offgrid(self.game.offset)] +
                     [t for t in self.tilemap.render_tiles(  self.game.offset)] +
-                    # [t for t in self.tilemap.nature_manager.render_tiles(self.game.offset)] +
+                    [t for t in self.tilemap.nature_manager.render_tiles(self.game.offset)] +
                     self.particle_manager.sprites() +
                     self.game.entities.sprites() +
                     [self.minimap]
@@ -195,7 +195,7 @@ class Opening_Stage(Stage):
         ]
         self.areas[2].bg = self.areas[1].bg
         self.area_index = 0
-        self.particle_manager = Particle_Manager("opening")
+        self.particle_manager = Particle_Manager(game, "opening")
 
     def update(self, *args):
         if not self.game.music_player.is_playing("bg"):
@@ -233,12 +233,12 @@ class Forest_Stage(Stage):
         self.areas = [Forest_Area1(game)] #list of Areas
         self.tilemap.load("data/stage_data/test.json") #custom for each stage
         self.minimap = Minimap(game, self.find_tiles_outline())
-        self.particle_manager = Particle_Manager(self)
+        self.particle_manager = Particle_Manager(game, self)
 
 class Forest_Area1:
     def __init__(self, game):
         # self.bg = Forest_Background(game)
         # self.bg = Perlin_Background(game)
-        # self.bg = Sky_Background(game)
-        self.bg = Black_Screen_Background(game)
+        self.bg = Sky_Background(game)
+        # self.bg = Black_Screen_Background(game)
         self.bg_music = "tutorial_1"

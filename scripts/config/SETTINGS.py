@@ -19,7 +19,7 @@ CAMERA_FOLLOW_SPEED = 12
 
 #   PHYSICS
 FRIC = 0.9
-GRAV = 40
+GRAV = 20
 
 ENVIRONMENT_SETTINGS: dict[str, bool | int] = {
     "rain" : False,
