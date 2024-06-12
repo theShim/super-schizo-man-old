@@ -57,7 +57,7 @@ class Music_Player:
         if sound == "":
             return
         sound_ = self.sounds.get(sound, None)
-        if sound_ == None: return print(Exception(f"{sound} not found."))
+        if sound_ == None: return #print(Exception(f"{sound} not found."))
         channel = self.get_channel(channel)
         channel.play(sound_, loops=-1 if loop else 0)
 

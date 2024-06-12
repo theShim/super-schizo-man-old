@@ -411,21 +411,21 @@ class Move:
     def dash(self, keys, particle_manager, dash_dir):
         self.player.acc.x = self.player.vel.x = 0
         self.player.acc.y = self.player.vel.y = 0
-        diag = math.sqrt(16**2 + 10**2) / 2
+        diag = math.sqrt((16/40)**2 + (10/40)**2) / 2
 
         #dashing in the 8 cardinal directions
         if dash_dir == "l_dash":
-            self.player.vel.x = self.player.run_speed * -16
+            self.player.vel.x = self.player.run_speed * -(16/40)
             self.player.change_status("run")
         elif dash_dir == "r_dash":
-            self.player.vel.x = self.player.run_speed * 16
+            self.player.vel.x = self.player.run_speed * (16/40)
             self.player.change_status("run")
 
         elif dash_dir == "u_dash":
-            self.player.vel.y = self.player.run_speed * -10
+            self.player.vel.y = self.player.run_speed * -(10/40)
             self.player.change_status("jump")
         elif dash_dir == "d_dash":
-            self.player.vel.y = self.player.run_speed * 10
+            self.player.vel.y = self.player.run_speed * (10/40)
             self.player.change_status("fall")
 
         elif dash_dir == "ul_dash":

@@ -134,6 +134,9 @@ class Stage:
         self.particle_manager.update(self.game.offset)
         self.render(player)
 
+        if pygame.key.get_just_pressed()[pygame.K_m]:
+            self.areas[self.area_index].cycle_bg()
+
     def render(self, player):
         items = pygame.sprite.Group()
         for spr in sorted(
@@ -242,3 +245,14 @@ class Forest_Area1:
         self.bg = Sky_Background(game)
         # self.bg = Black_Screen_Background(game)
         self.bg_music = "tutorial_1"
+
+        self.bgs = [Perlin_Background(game), Sky_Background(game), ]
+
+        self.i = 0
+
+    def cycle_bg(self):
+        self.bg = self.bgs[self.i]
+        
+        self.i += 1
+        if self.i == len(self.bgs):
+            self.i = 0

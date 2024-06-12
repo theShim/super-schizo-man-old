@@ -2,7 +2,7 @@ import pygame
 
     ##############################################################################################
 
-DEBUG = True
+DEBUG = not True
 WINDOW_TITLE = "Super Schizo Man"
 LOADED_SPRITE_NUMBER = 0
 MAX_LOADED_SPRITES = 346
@@ -76,10 +76,12 @@ CONTROLS: dict[str, pygame.key.ScancodeWrapper] = {
     "dash"      : pygame.K_l,
     "switch_l"  : pygame.K_u,
     "switch_r"  : pygame.K_i,
-    #other buttons could be used h, u, r, c, f, n, m
+    #other buttons could be used: h, u, r, c, f, n, m
 
     "menu_open" : pygame.K_ESCAPE,
     "inv_open"  : pygame.K_TAB,
+    "switch_weather" : pygame.K_j,
+    "swith_background" : pygame.K_m,
 
     "pickup_item" : pygame.K_e,
 }

@@ -33,14 +33,14 @@ class Snow_Particle(pygame.sprite.Sprite):
 
         self.pos = vec(pos)
         self.delta_x = random.uniform(0.01, 1.8) * ENVIRONMENT_SETTINGS["wind"]
-        self.fall_speed = random.uniform(5, 10) * 1
+        self.fall_speed = random.uniform(5, 10) * 0.5
 
         self.angle = 0
         self.angle_rot = random.uniform(0.2, 0.75) * random.choice([-1, 1])
 
     def move(self):
         self.pos.x += self.delta_x
-        self.pos.y += GRAV * self.fall_speed
+        self.pos.y += 0.9 * self.fall_speed
         
     def update(self, screen, offset):
         self.angle += self.angle_rot

@@ -21,7 +21,7 @@ class Rain_Particle(pygame.sprite.Sprite):
         self.music_player = music_player
 
         self.length = random.randint(4, 8)
-        self.fall_speed = random.uniform(5, 10) * 4
+        self.fall_speed = random.uniform(5, 10) * 2.5
         
         self.top_x = random.uniform(0.2, 2)
         self.bottom_x = self.top_x + random.uniform(0.4, 2) / 100
@@ -34,8 +34,8 @@ class Rain_Particle(pygame.sprite.Sprite):
         self.collision = random.randint(1, 100) == 1
 
     def move(self):
-        self.pos.y += GRAV * self.fall_speed
-        self.end_pos.y += GRAV * self.fall_speed
+        self.pos.y += 0.9 * self.fall_speed
+        self.end_pos.y += 0.9 * self.fall_speed
 
         self.pos.x += self.top_x
         self.end_pos.x += self.bottom_x

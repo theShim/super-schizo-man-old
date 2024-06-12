@@ -206,7 +206,7 @@ class Tilemap:
                 offset.y - TILE_SIZE < tile.pos[1] < offset.y + HEIGHT):
                 yield tile
 
-            elif tile.type == "bridge" and (offset.x - TILE_SIZE < tile.end_pos[0] < offset.x + WIDTH and
+            elif tile.type == "bridge" and not self.editor_flag and (offset.x - TILE_SIZE < tile.end_pos[0] < offset.x + WIDTH and
                                             offset.y - TILE_SIZE < tile.end_pos[1] < offset.y + HEIGHT):
                 yield tile
 

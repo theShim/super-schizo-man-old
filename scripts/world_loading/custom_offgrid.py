@@ -79,7 +79,7 @@ class Bridge(pygame.sprite.Sprite):
         temp = self.points.copy()
 
         delta = (self.points - self.old_points)
-        delta[:, 1] += GRAV / 4# + random.random() / 25
+        delta[:, 1] += 0.9 / 4# + random.random() / 25
         immovable_mask = np.zeros_like(self.points, dtype=bool)
         immovable_mask[self.pinned] = True
         delta[immovable_mask] = 0

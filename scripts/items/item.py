@@ -78,7 +78,7 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
         self.pos = pos
 
-        self.vel = vec(random.uniform(0, 10) * 20, 0)
+        self.vel = vec(random.uniform(0, 10) * 5, 0)
         self.acc = vec(0, GRAV)
         self.landed = False
         self.angle = 0
