@@ -171,7 +171,7 @@ class Player(pygame.sprite.Sprite):
     #checks collisions from all 4 sides of the player with tiles
     def tile_collisions(self, particle_manager):
         collision_tolerance = 10
-        for rect in self.game.stage_loader.tilemap.physics_rects_around(self.hitbox.center):
+        for rect in self.game.state_loader.tilemap.physics_rects_around(self.hitbox.center):
             if self.hitbox.colliderect(rect):
                 
                 #if the player lands
@@ -214,7 +214,7 @@ class Player(pygame.sprite.Sprite):
         #     self.vel.y = 0
 
     def offgrid_collisions(self): #mostly handled on tile end
-        for tile in self.game.stage_loader.tilemap.render_offgrid(self.game.offset):
+        for tile in self.game.state_loader.tilemap.render_offgrid(self.game.offset):
             if tile.type == "bridge":
                 # if tile.touched:
                 #     if self.status in ['fall', "jump"]:

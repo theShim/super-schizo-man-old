@@ -107,7 +107,7 @@ class Item(pygame.sprite.Sprite):
 
     def tile_collisions(self):
         collision_tolerance = TILE_SIZE / 1.5
-        for rect in self.game.stage_loader.tilemap.physics_rects_around(self.rect.center):
+        for rect in self.game.state_loader.tilemap.physics_rects_around(self.rect.center):
             if self.rect.colliderect(rect):
 
                 if abs(self.rect.bottom - rect.top) < collision_tolerance:

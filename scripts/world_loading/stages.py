@@ -234,7 +234,7 @@ class Forest_Stage(Stage):
         self.name = "forest"
         self.stage_index = 1 #just general utility thing might be useful later on
         self.areas = [Forest_Area1(game)] #list of Areas
-        self.tilemap.load("data/stage_data/test.json") #custom for each stage
+        self.tilemap.load("data/stage_data/1-Grass/area_1.json") #custom for each stage
         self.minimap = Minimap(game, self.find_tiles_outline())
         self.particle_manager = Particle_Manager(game, self)
 
@@ -256,3 +256,7 @@ class Forest_Area1:
         self.i += 1
         if self.i == len(self.bgs):
             self.i = 0
+
+    ##############################################################################################
+
+# class Intro_Area

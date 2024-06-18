@@ -255,10 +255,10 @@ class Sky_Background:
         self.clouds = []
         for i in range(10):
             if i % 3 == 0: continue
-            z = random.uniform(5, 8)
+            z = random.uniform(1, 4)
             x = random.uniform(0, WIDTH)
             y = (((i/10)*HEIGHT + random.uniform(-1, 1) * 20))
-            self.clouds += [{"z":int(z), "pos":[x, y], "speed":(z-4)/2}]
+            self.clouds += [{"z":int(z+4), "pos":[x, y], "speed":z/8}]
         self.clouds = sorted(self.clouds, key=lambda c: c["z"]) #allows blitting from back to front for depth
 
     def update(self):

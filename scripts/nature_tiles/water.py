@@ -87,6 +87,7 @@ class Water(pygame.sprite.Sprite):
         self.pos = vec(pos) * TILE_SIZE
         self.variant = variant
         self.size = vec(size) * TILE_SIZE
+        self.rect = pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
         self.z = Z_LAYERS["midground offgrid"]
         
         self.col = [(0, 104, 191, 64), ][variant]
@@ -123,6 +124,9 @@ class Water(pygame.sprite.Sprite):
             if spring.pinned: continue
             if player.hitbox.collidepoint(spring.pos):
                 spring.pos.y += min(10, 1.2 ** player.vel.y)
+
+        if self.rect.colliderect(player.hitbox):
+            player.vel.y *= 0.75
 
     def update(self, screen, offset):
         self.spread_wave()

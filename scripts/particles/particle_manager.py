@@ -96,6 +96,6 @@ class Particle_Manager:
             if random.randint(1, 50) == 1: 
                 self.add_particle('foreground', 'cherry_blossom', pos=[random.uniform(0, WIDTH*1.2), -5])
                 for snow in set(filter(lambda spr: isinstance(spr, Cherry_Blossom), self.foreground_particles)):
-                    screen_pos = snow.pos
-                    if screen_pos.y > HEIGHT:
+                    screen_pos = snow.rect.topleft
+                    if screen_pos[1] > HEIGHT:
                         self.foreground_particles.remove(snow)

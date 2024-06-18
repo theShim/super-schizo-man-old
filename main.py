@@ -32,12 +32,15 @@ from scripts.music.music_player import Music_Player
 from scripts.screen_effects.manager import Effect_Manager
     
 from scripts.world_loading.tilemap import Tile, Offgrid_Tile
-from scripts.world_loading.stages import Stage_Loader
+# from scripts.world_loading.stages import Stage_Loader
+from scripts.world_loading.state_machine import State_Loader
 from scripts.world_loading.backgrounds import Forest_Background, Sky_Background
 from scripts.world_loading.nature import Grass_Manager
 from scripts.world_loading.custom_offgrid import Torch
 
 from screen_recorder import ScreenRecorder
+
+pygame.Rect = pygame.FRect
 
 # from scripts.config.CORE_FUNCS import countLinesIn
 # countLinesIn(os.getcwd()) #counts number of lines of code in directory (just for progress counting)
@@ -85,8 +88,9 @@ class Game:
 
         self.music_player = Music_Player(channel_num=20)        
 
-        self.stage_loader = Stage_Loader(self)
-        self.player = Player(self, self.entities, 2, self.stage_loader.player_spawn_pos)
+        # self.stage_loader = Stage_Loader(self)
+        self.state_loader = State_Loader(self, start="grass_1-1")
+        self.player = Player(self, self.entities, 2, self.state_loader.player_spawn_pos)
 
         self.effect_manager = Effect_Manager(self)
 
@@ -247,14 +251,15 @@ class Game:
             last_time = current_time    
 
             self.handle_events()
-            # self.calculate_offset()
+            self.calculate_offset()
             # self.screen.fill((30, 30, 30))
 
             if not self.win_in_focus:
                 self.clock.tick(FPS)
                 continue
             
-            self.stage_loader.render(self.player)
+            self.state_loader.update()
+            # self.stage_loader.render(self.player)
 
             self.effect_manager.update()
 
